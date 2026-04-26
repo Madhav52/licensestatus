@@ -125,6 +125,11 @@ def upsert_licenses(records: list[dict]) -> int:
     today = date.today().strftime("%Y-%m-%d")
     for r in records:
         r.setdefault("last_updated", today)
+        r.setdefault("district",     "")      # ← safe default, PDF has no district
+        r.setdefault("category",     "")
+        r.setdefault("office",       "")
+        r.setdefault("print_date",   "")
+        r.setdefault("name",         "UNKNOWN")
 
     with get_conn() as conn:
         conn.executemany(sql, records)
