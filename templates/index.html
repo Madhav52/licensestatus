@@ -8,26 +8,30 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:         #040D1A;
-      --surface:    #071426;
-      --card:       #0C1E35;
-      --border:     rgba(255,255,255,0.07);
-      --border-glow:rgba(220,20,60,0.4);
-      --text:       #E8F0FE;
-      --muted:      #6B7FA3;
-      --accent:     #DC143C;
-      --accent2:    #FF4D6D;
-      --success:    #00C896;
-      --warning:    #FFB830;
-      --error:      #FF3B5C;
-      --gold:       #F0B429;
-      --radius:     14px;
-      --font:       'Sora', sans-serif;
-      --mono:       'JetBrains Mono', monospace;
+      --bg:          #030B16;
+      --surface:     #060F1E;
+      --card:        #0A1828;
+      --card2:       #0D1F33;
+      --border:      rgba(255,255,255,0.06);
+      --border-glow: rgba(220,20,60,0.35);
+      --text:        #EBF2FF;
+      --text-soft:   #C4D3EE;
+      --muted:       #5A6E91;
+      --accent:      #DC143C;
+      --accent2:     #FF4D6D;
+      --accent-dim:  rgba(220,20,60,0.08);
+      --success:     #00D4A0;
+      --success-dim: rgba(0,212,160,0.08);
+      --warning:     #FFB830;
+      --error:       #FF3B5C;
+      --gold:        #F0C040;
+      --radius:      16px;
+      --radius-sm:   10px;
+      --font:        'Sora', sans-serif;
+      --mono:        'JetBrains Mono', monospace;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -41,27 +45,41 @@
       overflow-x: hidden;
     }
 
-    /* ── BACKGROUND RADIAL ── */
-    body::before {
-      content: '';
+    /* ── MESH BACKGROUND ── */
+    .bg-mesh {
       position: fixed;
       inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(220,20,60,0.12) 0%, transparent 70%),
-        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(0,200,150,0.05) 0%, transparent 60%);
-      pointer-events: none;
       z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
     }
-
-    /* ── NOISE TEXTURE ── */
-    body::after {
+    .bg-mesh::before {
       content: '';
+      position: absolute;
+      width: 900px; height: 900px;
+      top: -300px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(220,20,60,0.13) 0%, transparent 65%);
+      animation: driftA 18s ease-in-out infinite alternate;
+    }
+    .bg-mesh::after {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      bottom: -100px; right: -100px;
+      background: radial-gradient(circle, rgba(0,200,150,0.07) 0%, transparent 60%);
+      animation: driftB 22s ease-in-out infinite alternate;
+    }
+    .bg-grid {
       position: fixed;
       inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
       z-index: 0;
-      opacity: 0.4;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 30%, transparent 100%);
     }
 
     /* ── HEADER ── */
@@ -69,8 +87,8 @@
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 900px;
-      padding: 28px 24px 0;
+      max-width: 960px;
+      padding: 28px 32px 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -82,56 +100,107 @@
       gap: 14px;
     }
 
-    .nepal-emblem {
-      width: 44px;
-      height: 44px;
+    .emblem-ring {
+      position: relative;
+      width: 46px; height: 46px;
       flex-shrink: 0;
+    }
+    .emblem-ring svg.ring {
+      position: absolute; inset: 0;
+      animation: spinRing 20s linear infinite;
+    }
+    .emblem-inner {
+      position: absolute; inset: 6px;
+      background: rgba(220,20,60,0.1);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
     }
 
     .logo-text h1 {
       font-size: 13px;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       color: var(--text);
       text-transform: uppercase;
     }
-
     .logo-text p {
-      font-size: 11px;
+      font-size: 10.5px;
       color: var(--muted);
       letter-spacing: 0.04em;
-      margin-top: 1px;
+      margin-top: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 5px 12px;
+      border: 1px solid rgba(0,212,160,0.2);
+      border-radius: 100px;
+      color: var(--success);
+      background: rgba(0,212,160,0.05);
+      letter-spacing: 0.06em;
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
     }
 
     .header-badge {
       font-family: var(--mono);
-      font-size: 10px;
-      padding: 5px 10px;
+      font-size: 9.5px;
+      padding: 5px 11px;
       border: 1px solid var(--border);
       border-radius: 100px;
       color: var(--muted);
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
+      background: rgba(255,255,255,0.02);
     }
 
-    /* ── MAIN CONTENT ── */
+    /* ── DIVIDER ── */
+    .header-divider {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 960px;
+      padding: 0 32px;
+      margin-top: 24px;
+    }
+    .header-divider hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 30%, rgba(220,20,60,0.2) 50%, rgba(255,255,255,0.06) 70%, transparent);
+    }
+
+    /* ── MAIN ── */
     main {
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 680px;
+      max-width: 700px;
       padding: 0 24px;
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 75vh;
+      padding-top: 64px;
     }
 
     /* ── HERO ── */
     .hero {
       text-align: center;
-      margin-bottom: 48px;
+      margin-bottom: 52px;
       animation: fadeUp 0.7s ease both;
     }
 
@@ -140,17 +209,16 @@
       align-items: center;
       gap: 8px;
       font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.12em;
+      font-size: 10.5px;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--accent2);
-      margin-bottom: 20px;
-      padding: 6px 14px;
-      border: 1px solid rgba(220,20,60,0.25);
+      margin-bottom: 24px;
+      padding: 7px 16px;
+      border: 1px solid rgba(220,20,60,0.2);
       border-radius: 100px;
-      background: rgba(220,20,60,0.06);
+      background: rgba(220,20,60,0.05);
     }
-
     .hero-eyebrow::before {
       content: '';
       width: 6px; height: 6px;
@@ -160,32 +228,79 @@
     }
 
     .hero h2 {
-      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-size: clamp(2.2rem, 6vw, 3.6rem);
       font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-      margin-bottom: 16px;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      margin-bottom: 18px;
     }
-
     .hero h2 em {
       font-style: normal;
-      background: linear-gradient(135deg, #DC143C, #FF6B8A);
+      background: linear-gradient(135deg, #DC143C 0%, #FF6B8A 60%, #FF9EAF 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .hero p {
       font-size: 15px;
       color: var(--muted);
-      line-height: 1.7;
-      max-width: 420px;
+      line-height: 1.75;
+      max-width: 440px;
       margin: 0 auto;
+      font-weight: 400;
     }
+
+    /* ── STATS STRIP (moved above search) ── */
+    .stats-strip {
+      width: 100%;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      color: var(--muted);
+      transition: border-color 0.2s;
+    }
+    .stat-pill:hover { border-color: rgba(255,255,255,0.12); }
+    .stat-pill strong { color: var(--text-soft); font-weight: 600; }
+    .stat-icon { opacity: 0.6; }
 
     /* ── SEARCH BOX ── */
     .search-wrapper {
       width: 100%;
-      animation: fadeUp 0.7s 0.1s ease both;
+      animation: fadeUp 0.7s 0.15s ease both;
+    }
+
+    .search-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-label::before {
+      content: '';
+      width: 3px; height: 14px;
+      background: var(--accent);
+      border-radius: 2px;
+      display: inline-block;
     }
 
     .search-box {
@@ -194,23 +309,24 @@
       display: flex;
       align-items: center;
       background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: 18px;
-      padding: 6px 6px 6px 20px;
-      transition: border-color 0.25s, box-shadow 0.25s;
-      box-shadow: 0 4px 40px rgba(0,0,0,0.3);
+      border: 1.5px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 7px 7px 7px 22px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
     }
-
     .search-box:focus-within {
-      border-color: rgba(220,20,60,0.5);
-      box-shadow: 0 0 0 4px rgba(220,20,60,0.08), 0 4px 40px rgba(0,0,0,0.3);
+      border-color: rgba(220,20,60,0.45);
+      box-shadow: 0 0 0 4px rgba(220,20,60,0.07), 0 8px 40px rgba(0,0,0,0.35);
     }
 
     .search-icon {
       color: var(--muted);
       flex-shrink: 0;
-      margin-right: 12px;
+      margin-right: 14px;
+      transition: color 0.2s;
     }
+    .search-box:focus-within .search-icon { color: var(--accent2); }
 
     #license-input {
       flex: 1;
@@ -219,53 +335,135 @@
       outline: none;
       color: var(--text);
       font-family: var(--mono);
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 500;
-      letter-spacing: 0.05em;
-      padding: 10px 0;
+      letter-spacing: 0.06em;
+      padding: 11px 0;
       caret-color: var(--accent);
     }
-
     #license-input::placeholder {
       color: var(--muted);
       font-family: var(--font);
-      font-size: 15px;
+      font-size: 14.5px;
       letter-spacing: 0;
       font-weight: 400;
+      opacity: 0.7;
     }
 
     .search-btn {
       flex-shrink: 0;
-      background: var(--accent);
+      background: linear-gradient(135deg, #DC143C, #B01030);
       color: white;
       border: none;
-      border-radius: 12px;
-      padding: 14px 28px;
+      border-radius: 14px;
+      padding: 14px 30px;
       font-family: var(--font);
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      letter-spacing: 0.02em;
+      transition: all 0.2s;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(220,20,60,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
     }
-
-    .search-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+    .search-btn:hover {
+      background: linear-gradient(135deg, #FF4D6D, #DC143C);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(220,20,60,0.4);
+    }
     .search-btn:active { transform: translateY(0); }
+    .search-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    .search-hint {
-      margin-top: 12px;
-      text-align: center;
+    .search-hints {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .search-hint-left {
       font-size: 12px;
       color: var(--muted);
     }
-
-    .search-hint kbd {
+    .search-hint-left kbd {
       font-family: var(--mono);
-      background: var(--card);
+      background: var(--card2);
       border: 1px solid var(--border);
       border-radius: 5px;
-      padding: 2px 7px;
+      padding: 2px 8px;
       font-size: 11px;
+      color: var(--text-soft);
+    }
+    .format-tags {
+      display: flex;
+      gap: 6px;
+    }
+    .format-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 9px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      background: var(--surface);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── HOW IT WORKS STRIP ── */
+    .how-strip {
+      width: 100%;
+      margin-top: 36px;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+    .how-strip-inner {
+      display: flex;
+      gap: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .how-step {
+      flex: 1;
+      padding: 18px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      position: relative;
+    }
+    .how-step + .how-step::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 16px; bottom: 16px;
+      width: 1px;
+      background: var(--border);
+    }
+    .how-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid rgba(220,20,60,0.2);
+      color: var(--accent2);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .how-text h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-soft);
+      margin-bottom: 3px;
+    }
+    .how-text p {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
     }
 
     /* ── RESULT AREA ── */
@@ -283,22 +481,18 @@
       padding: 28px;
       display: none;
     }
-
     .skeleton-card.active { display: block; }
-
     .skel {
-      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 75%);
       background-size: 400% 100%;
       border-radius: 8px;
       animation: shimmer 1.4s infinite;
     }
-
-    .skel-title  { height: 20px; width: 55%; margin-bottom: 20px; }
-    .skel-row    { height: 14px; margin-bottom: 12px; }
-    .skel-row:nth-child(2) { width: 80%; }
-    .skel-row:nth-child(3) { width: 65%; }
-    .skel-row:nth-child(4) { width: 75%; }
-    .skel-row:nth-child(5) { width: 50%; }
+    .skel-header { height: 36px; border-radius: 100px; width: 140px; margin-bottom: 24px; }
+    .skel-title  { height: 22px; width: 55%; margin-bottom: 8px; }
+    .skel-sub    { height: 14px; width: 35%; margin-bottom: 28px; }
+    .skel-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .skel-cell   { height: 72px; border-radius: 10px; }
 
     /* ── RESULT CARD ── */
     .result-card {
@@ -307,100 +501,164 @@
       border-radius: var(--radius);
       overflow: hidden;
       display: none;
+    }
+    .result-card.active {
+      display: block;
       animation: fadeUp 0.4s ease both;
     }
 
-    .result-card.active { display: block; }
-
     .card-header {
-      padding: 20px 28px;
+      padding: 22px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      pointer-events: none;
+    }
+    .card-header.found {
+      background: linear-gradient(135deg, rgba(0,212,160,0.07) 0%, rgba(0,150,100,0.04) 100%);
+      border-bottom: 1px solid rgba(0,212,160,0.12);
+    }
+    .card-header.notfound {
+      background: linear-gradient(135deg, rgba(255,59,92,0.07) 0%, rgba(180,0,40,0.04) 100%);
+      border-bottom: 1px solid rgba(255,59,92,0.12);
     }
 
-    .card-header.found   { background: rgba(0,200,150,0.06); border-bottom-color: rgba(0,200,150,0.15); }
-    .card-header.notfound { background: rgba(255,59,92,0.06); border-bottom-color: rgba(255,59,92,0.15); }
+    .header-left { display: flex; flex-direction: column; gap: 6px; }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 16px;
+      padding: 8px 18px;
       border-radius: 100px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-
     .status-badge.printed {
-      background: rgba(0,200,150,0.12);
+      background: rgba(0,212,160,0.1);
       color: var(--success);
-      border: 1px solid rgba(0,200,150,0.3);
+      border: 1px solid rgba(0,212,160,0.25);
     }
-
     .status-badge.not-found {
-      background: rgba(255,59,92,0.12);
+      background: rgba(255,59,92,0.1);
       color: var(--error);
-      border: 1px solid rgba(255,59,92,0.3);
+      border: 1px solid rgba(255,59,92,0.25);
     }
-
     .status-badge::before {
       content: '';
-      width: 8px; height: 8px;
+      width: 7px; height: 7px;
       border-radius: 50%;
     }
-
-    .status-badge.printed::before   { background: var(--success); }
+    .status-badge.printed::before   { background: var(--success); box-shadow: 0 0 6px var(--success); }
     .status-badge.not-found::before { background: var(--error); animation: pulse 1.5s infinite; }
 
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
     .card-timestamp {
       font-family: var(--mono);
       font-size: 11px;
       color: var(--muted);
     }
-
-    .card-body {
-      padding: 28px;
+    .query-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
     }
 
-    .license-name {
+    /* card accent bar */
+    .card-accent-bar {
+      height: 3px;
+      background: linear-gradient(90deg, var(--success), transparent);
+      opacity: 0.6;
+    }
+    .card-accent-bar.error { background: linear-gradient(90deg, var(--error), transparent); }
+
+    .card-body { padding: 28px; }
+
+    .holder-section {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      gap: 16px;
+    }
+
+    .holder-avatar {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(220,20,60,0.15), rgba(220,20,60,0.05));
+      border: 1px solid rgba(220,20,60,0.2);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
       font-size: 22px;
+    }
+
+    .holder-info { flex: 1; }
+    .license-name {
+      font-size: 21px;
       font-weight: 700;
       letter-spacing: -0.02em;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
-
     .license-number {
       font-family: var(--mono);
       font-size: 13px;
       color: var(--muted);
-      margin-bottom: 24px;
     }
 
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 12px;
     }
 
     .info-item {
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      padding: 15px 16px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .info-item:hover { border-color: rgba(255,255,255,0.1); }
+    .info-item::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.04), transparent);
     }
 
     .info-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 6px;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+    .info-label-icon { font-size: 11px; opacity: 0.7; }
 
     .info-value {
       font-size: 15px;
@@ -410,218 +668,324 @@
 
     .info-item.category .info-value {
       font-family: var(--mono);
-      font-size: 18px;
+      font-size: 20px;
       color: var(--gold);
+      text-shadow: 0 0 20px rgba(240,192,64,0.3);
+    }
+    .info-item.category {
+      background: rgba(240,192,64,0.04);
+      border-color: rgba(240,192,64,0.15);
+    }
+
+    .info-item.print-status-item .info-value {
+      color: var(--success);
+    }
+    .info-item.print-status-item {
+      background: rgba(0,212,160,0.04);
+      border-color: rgba(0,212,160,0.12);
     }
 
     .card-footer {
-      padding: 14px 28px;
+      padding: 15px 28px;
       border-top: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       background: rgba(255,255,255,0.01);
     }
-
     .official-source {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       font-size: 11px;
       color: var(--muted);
     }
-
     .source-dot {
       width: 6px; height: 6px;
       border-radius: 50%;
       background: var(--success);
+      box-shadow: 0 0 6px var(--success);
     }
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      font-size: 13px;
+    }
+    .icon-btn:hover { border-color: rgba(255,255,255,0.15); color: var(--text); background: rgba(255,255,255,0.04); }
 
     /* ── NOT FOUND CARD ── */
     .not-found-card {
       background: var(--card);
-      border: 1.5px solid rgba(255,59,92,0.2);
+      border: 1.5px solid rgba(255,59,92,0.15);
       border-radius: var(--radius);
-      padding: 40px 28px;
-      text-align: center;
+      overflow: hidden;
       display: none;
     }
+    .not-found-card.active {
+      display: block;
+      animation: fadeUp 0.4s ease both;
+    }
 
-    .not-found-card.active { display: block; animation: fadeUp 0.4s ease both; }
+    .not-found-inner {
+      padding: 48px 28px;
+      text-align: center;
+    }
 
     .not-found-icon {
-      width: 56px; height: 56px;
-      margin: 0 auto 16px;
-      background: rgba(255,59,92,0.1);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 64px; height: 64px;
+      margin: 0 auto 20px;
+      background: rgba(255,59,92,0.08);
+      border: 1px solid rgba(255,59,92,0.2);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
     }
 
     .not-found-card h3 {
       font-size: 20px;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .not-found-card p {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 360px;
+      margin: 0 auto 28px;
     }
 
-    .not-found-card p {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
+    .not-found-tips {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
       max-width: 360px;
-      margin: 0 auto 20px;
+      margin: 0 auto 28px;
+      text-align: left;
+    }
+    .tip-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .tip-icon { color: var(--warning); font-size: 13px; flex-shrink: 0; }
+
+    .not-found-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
     }
 
     .try-again-btn {
       background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px 22px;
-      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      color: var(--text-soft);
+      padding: 11px 24px;
+      border-radius: 12px;
       font-family: var(--font);
       font-size: 13px;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-    }
-
-    .try-again-btn:hover { border-color: var(--muted); background: rgba(255,255,255,0.03); }
-
-    /* ── STATS STRIP ── */
-    .stats-strip {
-      width: 100%;
-      max-width: 680px;
-      padding: 0 24px;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      animation: fadeUp 0.7s 0.2s ease both;
-      z-index: 10;
-      position: relative;
-    }
-
-    .stat-pill {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 8px 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .stat-pill strong {
-      color: var(--text);
       font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
     }
+    .try-again-btn:hover { border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.03); }
+
+    .dotm-link-btn {
+      background: rgba(220,20,60,0.08);
+      border: 1.5px solid rgba(220,20,60,0.2);
+      color: var(--accent2);
+      padding: 11px 24px;
+      border-radius: 12px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .dotm-link-btn:hover { background: rgba(220,20,60,0.13); }
 
     /* ── FOOTER ── */
     footer {
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 900px;
-      padding: 24px;
+      max-width: 960px;
+      padding: 24px 32px;
+      margin-top: 48px;
+    }
+    .footer-inner {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 24px;
+      justify-content: space-between;
+      gap: 16px;
+      padding-top: 24px;
       border-top: 1px solid var(--border);
-      margin-top: auto;
+      flex-wrap: wrap;
     }
-
     footer p {
       font-size: 11px;
       color: var(--muted);
-      text-align: center;
       line-height: 1.7;
     }
-
     footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+    footer a:hover { color: var(--text-soft); }
 
-    /* ── ERROR TOAST ── */
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+    .footer-links a {
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text-soft); }
+
+    /* ── TOAST ── */
     #toast {
       position: fixed;
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: var(--card);
+      background: var(--card2);
       border: 1px solid rgba(255,59,92,0.3);
       color: var(--text);
-      padding: 12px 20px;
-      border-radius: 12px;
+      padding: 12px 22px;
+      border-radius: 14px;
       font-size: 13px;
       z-index: 1000;
       transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
       white-space: nowrap;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-
     #toast.show { transform: translateX(-50%) translateY(0); }
 
     /* ── KEYFRAMES ── */
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes shimmer {
       0%   { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
-
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.3; }
     }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 600px) {
-      header { padding: 20px 16px 0; }
-      main { padding: 0 16px; }
-      .hero h2 { font-size: 1.9rem; }
-      .info-grid { grid-template-columns: 1fr; }
-      .search-btn { padding: 14px 18px; font-size: 13px; }
-      .stats-strip { flex-wrap: wrap; justify-content: center; }
-      .card-footer { flex-direction: column; gap: 8px; text-align: center; }
+    @keyframes spinRing {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    @keyframes driftA {
+      from { transform: translateX(-50%) scale(1); }
+      to   { transform: translateX(-50%) scale(1.15) translateY(30px); }
+    }
+    @keyframes driftB {
+      from { transform: scale(1) rotate(0deg); }
+      to   { transform: scale(1.2) rotate(15deg); }
     }
 
-    /* Dark mode already — optional light mode hook */
-    @media (prefers-color-scheme: light) {
-      /* Intentionally keeping dark — official government night mode standard */
+    /* ── RESPONSIVE ── */
+    @media (max-width: 620px) {
+      header { padding: 20px 20px 0; }
+      .header-divider { padding: 0 20px; }
+      main { padding: 0 16px; padding-top: 48px; }
+      .hero h2 { font-size: 2rem; }
+      .info-grid { grid-template-columns: 1fr; }
+      .search-btn { padding: 14px 18px; font-size: 13px; }
+      .how-step { padding: 14px 12px; }
+      .how-text h4 { font-size: 11px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .card-footer { flex-direction: column; gap: 10px; align-items: flex-start; }
+      .holder-section { flex-direction: column; }
+      .header-right { gap: 6px; }
+      .live-indicator span { display: none; }
+      .not-found-actions { flex-direction: column; align-items: center; }
     }
   </style>
 </head>
 <body>
 
+  <!-- BACKGROUND -->
+  <div class="bg-mesh"></div>
+  <div class="bg-grid"></div>
+
   <!-- HEADER -->
   <header>
     <div class="logo-group">
-      <!-- Nepal Government Emblem SVG -->
-      <svg class="nepal-emblem" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="22" cy="22" r="21" stroke="rgba(220,20,60,0.4)" stroke-width="1.5" fill="rgba(220,20,60,0.07)"/>
-        <text x="22" y="28" text-anchor="middle" font-size="18" fill="#DC143C">🇳🇵</text>
-      </svg>
+      <div class="emblem-ring">
+        <svg class="ring" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="23" cy="23" r="21.5" stroke="rgba(220,20,60,0.25)" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="emblem-inner">🇳🇵</div>
+      </div>
       <div class="logo-text">
         <h1>DOTM Nepal</h1>
         <p>Department of Transport Management</p>
       </div>
     </div>
-    <div class="header-badge">OFFICIAL PORTAL</div>
+    <div class="header-right">
+      <div class="live-indicator">
+        <div class="live-dot"></div>
+        <span>SYSTEM LIVE</span>
+      </div>
+      <div class="header-badge">OFFICIAL PORTAL</div>
+    </div>
   </header>
+
+  <div class="header-divider"><hr></div>
 
   <!-- MAIN -->
   <main>
+    <!-- HERO -->
     <div class="hero">
       <div class="hero-eyebrow">Live License Status</div>
       <h2>Check Your License<br><em>Print Status</em></h2>
-      <p>Instantly verify if your driving license has been printed by entering your license number below.</p>
+      <p>Instantly verify if your driving license has been printed by entering your license number below. Data sourced directly from official DOTM records.</p>
     </div>
 
+    <!-- STATS STRIP -->
+    <div class="stats-strip" id="statsStrip">
+      <div class="stat-pill">
+        <svg class="stat-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <strong id="totalRecords">—</strong>&nbsp;Records Indexed
+      </div>
+      <div class="stat-pill">
+        <svg class="stat-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00D4A0" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Synced:&nbsp;<strong id="lastSync">—</strong>
+      </div>
+      <div class="stat-pill">
+        <svg class="stat-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F0C040" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Response:&nbsp;<strong>&lt;100ms</strong>
+      </div>
+    </div>
+
+    <!-- SEARCH WRAPPER -->
     <div class="search-wrapper">
+      <div class="search-label">Enter Your License Number</div>
       <div class="search-box" id="searchBox">
         <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -629,56 +993,104 @@
         <input
           type="text"
           id="license-input"
-          placeholder="Enter license number e.g. 07-01-00012345"
+          placeholder="e.g. 07-01-00012345"
           autocomplete="off"
           autocorrect="off"
           spellcheck="false"
           autofocus
         />
         <button class="search-btn" id="searchBtn" onclick="checkLicense()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           Check Status
         </button>
       </div>
-      <div class="search-hint">
-        Press <kbd>Enter</kbd> to search &nbsp;·&nbsp; Format: <kbd>07-01-XXXXXXXX</kbd>
+      <div class="search-hints">
+        <div class="search-hint-left">Press <kbd>Enter</kbd> to search</div>
+        <div class="format-tags">
+          <span class="format-tag">07-01-XXXXXXXX</span>
+          <span class="format-tag">07-02-XXXXXXXX</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="how-strip">
+      <div class="how-strip-inner">
+        <div class="how-step">
+          <div class="how-num">1</div>
+          <div class="how-text">
+            <h4>Enter License No.</h4>
+            <p>Type your license number in the field above</p>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">2</div>
+          <div class="how-text">
+            <h4>Instant Lookup</h4>
+            <p>We query DOTM PDF records in real time</p>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">3</div>
+          <div class="how-text">
+            <h4>View Status</h4>
+            <p>See if your license is printed & ready</p>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- RESULT AREA -->
     <div id="result-area">
+
       <!-- Skeleton -->
       <div class="skeleton-card" id="skeletonCard">
+        <div class="skel skel-header"></div>
         <div class="skel skel-title"></div>
-        <div class="skel skel-row"></div>
-        <div class="skel skel-row"></div>
-        <div class="skel skel-row"></div>
-        <div class="skel skel-row"></div>
+        <div class="skel skel-sub"></div>
+        <div class="skel-grid">
+          <div class="skel skel-cell"></div>
+          <div class="skel skel-cell"></div>
+          <div class="skel skel-cell"></div>
+          <div class="skel skel-cell"></div>
+        </div>
       </div>
 
       <!-- Success Card -->
       <div class="result-card" id="resultCard">
+        <div class="card-accent-bar" id="accentBar"></div>
         <div class="card-header found" id="cardHeader">
-          <span class="status-badge printed" id="statusBadge">✓ &nbsp;PRINTED</span>
-          <span class="card-timestamp" id="cardTimestamp">—</span>
+          <div class="header-left">
+            <span class="status-badge printed" id="statusBadge">✓ &nbsp;PRINTED</span>
+          </div>
+          <div class="card-meta">
+            <span class="query-badge" id="queryBadge">—</span>
+            <span class="card-timestamp" id="cardTimestamp">—</span>
+          </div>
         </div>
         <div class="card-body">
-          <div class="license-name" id="holderName">—</div>
-          <div class="license-number" id="licenseNo">—</div>
+          <div class="holder-section">
+            <div>
+              <div class="license-name" id="holderName">—</div>
+              <div class="license-number" id="licenseNo">—</div>
+            </div>
+            <div class="holder-avatar">🪪</div>
+          </div>
           <div class="info-grid">
             <div class="info-item category">
-              <div class="info-label">Category</div>
+              <div class="info-label"><span class="info-label-icon">🏷</span> Category</div>
               <div class="info-value" id="licCategory">—</div>
             </div>
             <div class="info-item">
-              <div class="info-label">Office</div>
+              <div class="info-label"><span class="info-label-icon">🏢</span> Issuing Office</div>
               <div class="info-value" id="officeName">—</div>
             </div>
-            <div class="info-item">
-              <div class="info-label">Print Date</div>
+            <div class="info-item print-status-item">
+              <div class="info-label"><span class="info-label-icon">📅</span> Print Date</div>
               <div class="info-value" id="printDate">—</div>
             </div>
             <div class="info-item">
-              <div class="info-label">District</div>
+              <div class="info-label"><span class="info-label-icon">📍</span> District</div>
               <div class="info-value" id="district">—</div>
             </div>
           </div>
@@ -686,53 +1098,69 @@
         <div class="card-footer">
           <div class="official-source">
             <div class="source-dot"></div>
-            Data sourced from official DOTM / Yatayat PDF records
+            Sourced from official DOTM / Yatayat PDF records
           </div>
-          <span style="font-size:11px;color:var(--muted)" id="lastUpdated">—</span>
+          <div class="footer-actions">
+            <span style="font-size:11px;color:var(--muted)" id="lastUpdated">—</span>
+            <button class="icon-btn" title="Copy result" onclick="copyResult()">⎘</button>
+          </div>
         </div>
       </div>
 
       <!-- Not Found Card -->
       <div class="not-found-card" id="notFoundCard">
-        <div class="not-found-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF3B5C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
+        <div class="card-accent-bar error"></div>
+        <div class="not-found-inner">
+          <div class="not-found-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF3B5C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <h3>License Not Found</h3>
+          <p>No records match the entered license number. Here are a few things to check:</p>
+          <div class="not-found-tips">
+            <div class="tip-row">
+              <span class="tip-icon">⚠</span>
+              The license may not have been printed yet — check again in a few days
+            </div>
+            <div class="tip-row">
+              <span class="tip-icon">⚠</span>
+              Ensure the format is correct: <strong style="color:var(--text-soft);font-family:var(--mono);font-size:11px;margin-left:4px;">07-01-XXXXXXXX</strong>
+            </div>
+            <div class="tip-row">
+              <span class="tip-icon">⚠</span>
+              Double-check the district code (07-01, 07-02, etc.)
+            </div>
+          </div>
+          <div class="not-found-actions">
+            <button class="try-again-btn" onclick="resetSearch()">Try Another Number</button>
+            <a href="https://www.dotm.gov.np" target="_blank" rel="noopener" class="dotm-link-btn">Visit DOTM Portal ↗</a>
+          </div>
         </div>
-        <h3>License Not Found</h3>
-        <p>No records found for the entered license number. The license may not have been printed yet, or the number may be incorrect.</p>
-        <button class="try-again-btn" onclick="resetSearch()">Try Another Number</button>
       </div>
+
     </div>
   </main>
 
-  <!-- STATS STRIP -->
-  <div class="stats-strip" id="statsStrip">
-    <div class="stat-pill">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      <strong id="totalRecords">—</strong> Records Indexed
-    </div>
-    <div class="stat-pill">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00C896" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Updated: <strong id="lastSync">—</strong>
-    </div>
-    <div class="stat-pill">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F0B429" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      Response: <strong>&lt;100ms</strong>
-    </div>
-  </div>
-
   <!-- FOOTER -->
   <footer>
-    <p>
-      This is an unofficial tool built on publicly available DOTM PDF records. &nbsp;·&nbsp;
-      Not affiliated with the Government of Nepal. &nbsp;·&nbsp;
-      For official queries, visit <a href="https://www.dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np</a>
-    </p>
+    <div class="footer-inner">
+      <p>
+        Unofficial tool built on publicly available DOTM PDF records &nbsp;·&nbsp; Not affiliated with the Government of Nepal
+      </p>
+      <div class="footer-links">
+        <a href="https://www.dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np ↗</a>
+        <a href="#">About</a>
+        <a href="#">Feedback</a>
+      </div>
+    </div>
   </footer>
 
   <!-- TOAST -->
-  <div id="toast">⚠ Please enter a license number</div>
+  <div id="toast">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3B5C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Please enter a license number
+  </div>
 
   <script>
     const input    = document.getElementById('license-input');
@@ -798,7 +1226,17 @@
       document.getElementById('printDate').textContent   = data.print_date  ?? '—';
       document.getElementById('district').textContent    = data.district    ?? '—';
       document.getElementById('cardTimestamp').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('lastUpdated').textContent = `Last synced: ${data.last_updated ?? '—'}`;
+      document.getElementById('lastUpdated').textContent = `Synced: ${data.last_updated ?? '—'}`;
+      document.getElementById('queryBadge').textContent  = data.license_no  ?? input.value.trim();
+    }
+
+    function copyResult() {
+      const name = document.getElementById('holderName').textContent;
+      const no   = document.getElementById('licenseNo').textContent;
+      const cat  = document.getElementById('licCategory').textContent;
+      const date = document.getElementById('printDate').textContent;
+      const txt  = `DOTM License Status\nName: ${name}\nLicense No: ${no}\nCategory: ${cat}\nPrint Date: ${date}`;
+      navigator.clipboard.writeText(txt).then(() => showToast('Result copied to clipboard!'));
     }
 
     function resetSearch() {
@@ -815,7 +1253,10 @@
 
     function showToast(msg) {
       const t = document.getElementById('toast');
-      t.textContent = msg;
+      t.querySelector ? null : null;
+      // Update text node only
+      const nodes = t.childNodes;
+      nodes.forEach(n => { if (n.nodeType === 3) n.textContent = msg; });
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 3000);
     }
