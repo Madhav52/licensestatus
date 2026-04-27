@@ -1,1265 +1,638 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>License Print Status – DOTM Nepal</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <meta name="description" content="Check your Nepal driving license print status instantly. Official DOTM data."/>
+  <title>License Status Nepal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --bg:          #030B16;
-      --surface:     #060F1E;
-      --card:        #0A1828;
-      --card2:       #0D1F33;
-      --border:      rgba(255,255,255,0.06);
-      --border-glow: rgba(220,20,60,0.35);
-      --text:        #EBF2FF;
-      --text-soft:   #C4D3EE;
-      --muted:       #5A6E91;
-      --accent:      #DC143C;
-      --accent2:     #FF4D6D;
-      --accent-dim:  rgba(220,20,60,0.08);
-      --success:     #00D4A0;
-      --success-dim: rgba(0,212,160,0.08);
-      --warning:     #FFB830;
-      --error:       #FF3B5C;
-      --gold:        #F0C040;
-      --radius:      16px;
-      --radius-sm:   10px;
-      --font:        'Sora', sans-serif;
-      --mono:        'JetBrains Mono', monospace;
+      --red:     #C0392B;
+      --red2:    #E74C3C;
+      --green:   #27AE60;
+      --bg:      #F7F8FA;
+      --white:   #FFFFFF;
+      --text:    #1A1A2E;
+      --muted:   #8590A6;
+      --border:  #E8ECF0;
+      --shadow:  0 4px 24px rgba(0,0,0,0.08);
+      --radius:  16px;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--font);
+    html, body {
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LAYOUT ── */
+    .page {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow-x: hidden;
+      padding: 0 16px 40px;
     }
 
-    /* ── MESH BACKGROUND ── */
-    .bg-mesh {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .bg-mesh::before {
-      content: '';
-      position: absolute;
-      width: 900px; height: 900px;
-      top: -300px; left: 50%;
-      transform: translateX(-50%);
-      background: radial-gradient(circle, rgba(220,20,60,0.13) 0%, transparent 65%);
-      animation: driftA 18s ease-in-out infinite alternate;
-    }
-    .bg-mesh::after {
-      content: '';
-      position: absolute;
-      width: 600px; height: 600px;
-      bottom: -100px; right: -100px;
-      background: radial-gradient(circle, rgba(0,200,150,0.07) 0%, transparent 60%);
-      animation: driftB 22s ease-in-out infinite alternate;
-    }
-    .bg-grid {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
-      background-size: 48px 48px;
-      mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 30%, transparent 100%);
-    }
-
-    /* ── HEADER ── */
-    header {
-      position: relative;
-      z-index: 10;
+    /* ── TOP BAR ── */
+    .topbar {
       width: 100%;
-      max-width: 960px;
-      padding: 28px 32px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo-group {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .emblem-ring {
-      position: relative;
-      width: 46px; height: 46px;
-      flex-shrink: 0;
-    }
-    .emblem-ring svg.ring {
-      position: absolute; inset: 0;
-      animation: spinRing 20s linear infinite;
-    }
-    .emblem-inner {
-      position: absolute; inset: 6px;
-      background: rgba(220,20,60,0.1);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-    }
-
-    .logo-text h1 {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: var(--text);
-      text-transform: uppercase;
-    }
-    .logo-text p {
-      font-size: 10.5px;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-      margin-top: 2px;
-    }
-
-    .header-right {
+      max-width: 560px;
+      padding: 20px 0 0;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .live-indicator {
+    .flag {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .topbar-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      margin-left: auto;
       display: flex;
       align-items: center;
       gap: 6px;
-      font-family: var(--mono);
-      font-size: 10px;
-      padding: 5px 12px;
-      border: 1px solid rgba(0,212,160,0.2);
-      border-radius: 100px;
-      color: var(--success);
-      background: rgba(0,212,160,0.05);
-      letter-spacing: 0.06em;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--green);
     }
-    .live-dot {
-      width: 6px; height: 6px;
+
+    .live-dot::before {
+      content: '';
+      width: 7px; height: 7px;
       border-radius: 50%;
-      background: var(--success);
-      animation: pulse 2s infinite;
-    }
-
-    .header-badge {
-      font-family: var(--mono);
-      font-size: 9.5px;
-      padding: 5px 11px;
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-      background: rgba(255,255,255,0.02);
-    }
-
-    /* ── DIVIDER ── */
-    .header-divider {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      max-width: 960px;
-      padding: 0 32px;
-      margin-top: 24px;
-    }
-    .header-divider hr {
-      border: none;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 30%, rgba(220,20,60,0.2) 50%, rgba(255,255,255,0.06) 70%, transparent);
-    }
-
-    /* ── MAIN ── */
-    main {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      max-width: 700px;
-      padding: 0 24px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 64px;
+      background: var(--green);
+      animation: blink 2s infinite;
     }
 
     /* ── HERO ── */
     .hero {
+      width: 100%;
+      max-width: 560px;
       text-align: center;
-      margin-bottom: 52px;
-      animation: fadeUp 0.7s ease both;
+      padding: 48px 0 36px;
     }
 
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--mono);
-      font-size: 10.5px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--accent2);
-      margin-bottom: 24px;
-      padding: 7px 16px;
-      border: 1px solid rgba(220,20,60,0.2);
-      border-radius: 100px;
-      background: rgba(220,20,60,0.05);
-    }
-    .hero-eyebrow::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent2);
-      animation: pulse 2s infinite;
-    }
-
-    .hero h2 {
-      font-size: clamp(2.2rem, 6vw, 3.6rem);
+    .hero h1 {
+      font-size: clamp(26px, 7vw, 42px);
       font-weight: 800;
-      line-height: 1.08;
-      letter-spacing: -0.04em;
-      margin-bottom: 18px;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 12px;
     }
-    .hero h2 em {
-      font-style: normal;
-      background: linear-gradient(135deg, #DC143C 0%, #FF6B8A 60%, #FF9EAF 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+
+    .hero h1 span {
+      color: var(--red);
     }
 
     .hero p {
-      font-size: 15px;
+      font-size: clamp(14px, 3.5vw, 16px);
       color: var(--muted);
-      line-height: 1.75;
-      max-width: 440px;
-      margin: 0 auto;
-      font-weight: 400;
+      line-height: 1.6;
     }
 
-    /* ── STATS STRIP (moved above search) ── */
-    .stats-strip {
+    /* ── SEARCH ── */
+    .search-wrap {
       width: 100%;
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 32px;
-      flex-wrap: wrap;
-      animation: fadeUp 0.7s 0.1s ease both;
+      max-width: 560px;
     }
 
-    .stat-pill {
+    .search-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 9px 16px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      font-size: 12px;
-      color: var(--muted);
-      transition: border-color 0.2s;
-    }
-    .stat-pill:hover { border-color: rgba(255,255,255,0.12); }
-    .stat-pill strong { color: var(--text-soft); font-weight: 600; }
-    .stat-icon { opacity: 0.6; }
-
-    /* ── SEARCH BOX ── */
-    .search-wrapper {
-      width: 100%;
-      animation: fadeUp 0.7s 0.15s ease both;
+      border: 1.5px solid var(--border);
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .search-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .search-label::before {
-      content: '';
-      width: 3px; height: 14px;
-      background: var(--accent);
-      border-radius: 2px;
-      display: inline-block;
-    }
-
-    .search-box {
-      position: relative;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      background: var(--card);
-      border: 1.5px solid rgba(255,255,255,0.07);
-      border-radius: 20px;
-      padding: 7px 7px 7px 22px;
-      transition: border-color 0.3s, box-shadow 0.3s;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
-    }
-    .search-box:focus-within {
-      border-color: rgba(220,20,60,0.45);
-      box-shadow: 0 0 0 4px rgba(220,20,60,0.07), 0 8px 40px rgba(0,0,0,0.35);
+    .search-card:focus-within {
+      border-color: var(--red);
+      box-shadow: 0 0 0 4px rgba(192,57,43,0.1), var(--shadow);
     }
 
     .search-icon {
+      padding: 0 4px 0 10px;
       color: var(--muted);
       flex-shrink: 0;
-      margin-right: 14px;
-      transition: color 0.2s;
     }
-    .search-box:focus-within .search-icon { color: var(--accent2); }
 
-    #license-input {
+    #inp {
       flex: 1;
-      background: transparent;
       border: none;
       outline: none;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 17px;
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(15px, 4vw, 17px);
       font-weight: 500;
-      letter-spacing: 0.06em;
-      padding: 11px 0;
-      caret-color: var(--accent);
+      color: var(--text);
+      background: transparent;
+      padding: 10px 4px;
+      min-width: 0;
     }
-    #license-input::placeholder {
-      color: var(--muted);
-      font-family: var(--font);
-      font-size: 14.5px;
-      letter-spacing: 0;
+
+    #inp::placeholder {
+      color: #BEC5D0;
       font-weight: 400;
-      opacity: 0.7;
     }
 
     .search-btn {
       flex-shrink: 0;
-      background: linear-gradient(135deg, #DC143C, #B01030);
-      color: white;
+      background: var(--red);
+      color: #fff;
       border: none;
-      border-radius: 14px;
-      padding: 14px 30px;
-      font-family: var(--font);
+      border-radius: 10px;
+      padding: 13px clamp(14px, 4vw, 24px);
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.03em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 20px rgba(220,20,60,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
-    }
-    .search-btn:hover {
-      background: linear-gradient(135deg, #FF4D6D, #DC143C);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 28px rgba(220,20,60,0.4);
-    }
-    .search-btn:active { transform: translateY(0); }
-    .search-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    .search-hints {
-      margin-top: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .search-hint-left {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .search-hint-left kbd {
-      font-family: var(--mono);
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 2px 8px;
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-    .format-tags {
-      display: flex;
-      gap: 6px;
-    }
-    .format-tag {
-      font-family: var(--mono);
-      font-size: 10px;
-      padding: 3px 9px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--muted);
-      background: var(--surface);
-      letter-spacing: 0.04em;
-    }
-
-    /* ── HOW IT WORKS STRIP ── */
-    .how-strip {
-      width: 100%;
-      margin-top: 36px;
-      animation: fadeUp 0.7s 0.2s ease both;
-    }
-    .how-strip-inner {
-      display: flex;
-      gap: 0;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .how-step {
-      flex: 1;
-      padding: 18px 20px;
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      position: relative;
-    }
-    .how-step + .how-step::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 16px; bottom: 16px;
-      width: 1px;
-      background: var(--border);
-    }
-    .how-num {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: var(--accent-dim);
-      border: 1px solid rgba(220,20,60,0.2);
-      color: var(--accent2);
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 500;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-    .how-text h4 {
-      font-size: 12px;
       font-weight: 600;
-      color: var(--text-soft);
-      margin-bottom: 3px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
     }
-    .how-text p {
-      font-size: 11px;
+
+    .search-btn:hover  { background: var(--red2); }
+    .search-btn:active { transform: scale(0.97); }
+
+    .hint {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
       color: var(--muted);
-      line-height: 1.5;
     }
 
     /* ── RESULT AREA ── */
-    #result-area {
+    #result {
       width: 100%;
-      margin-top: 32px;
-      animation: fadeUp 0.5s ease both;
+      max-width: 560px;
+      margin-top: 24px;
     }
 
-    /* ── SKELETON ── */
-    .skeleton-card {
-      background: var(--card);
-      border: 1.5px solid var(--border);
+    /* Skeleton */
+    .skeleton {
+      background: var(--white);
       border-radius: var(--radius);
-      padding: 28px;
+      padding: 24px;
+      box-shadow: var(--shadow);
       display: none;
     }
-    .skeleton-card.active { display: block; }
-    .skel {
-      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 75%);
-      background-size: 400% 100%;
-      border-radius: 8px;
-      animation: shimmer 1.4s infinite;
-    }
-    .skel-header { height: 36px; border-radius: 100px; width: 140px; margin-bottom: 24px; }
-    .skel-title  { height: 22px; width: 55%; margin-bottom: 8px; }
-    .skel-sub    { height: 14px; width: 35%; margin-bottom: 28px; }
-    .skel-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .skel-cell   { height: 72px; border-radius: 10px; }
+    .skeleton.show { display: block; }
 
-    /* ── RESULT CARD ── */
-    .result-card {
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      display: none;
-    }
-    .result-card.active {
-      display: block;
-      animation: fadeUp 0.4s ease both;
-    }
-
-    .card-header {
-      padding: 22px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-      overflow: hidden;
-    }
-    .card-header::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: inherit;
-      pointer-events: none;
-    }
-    .card-header.found {
-      background: linear-gradient(135deg, rgba(0,212,160,0.07) 0%, rgba(0,150,100,0.04) 100%);
-      border-bottom: 1px solid rgba(0,212,160,0.12);
-    }
-    .card-header.notfound {
-      background: linear-gradient(135deg, rgba(255,59,92,0.07) 0%, rgba(180,0,40,0.04) 100%);
-      border-bottom: 1px solid rgba(255,59,92,0.12);
-    }
-
-    .header-left { display: flex; flex-direction: column; gap: 6px; }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 18px;
-      border-radius: 100px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .status-badge.printed {
-      background: rgba(0,212,160,0.1);
-      color: var(--success);
-      border: 1px solid rgba(0,212,160,0.25);
-    }
-    .status-badge.not-found {
-      background: rgba(255,59,92,0.1);
-      color: var(--error);
-      border: 1px solid rgba(255,59,92,0.25);
-    }
-    .status-badge::before {
-      content: '';
-      width: 7px; height: 7px;
-      border-radius: 50%;
-    }
-    .status-badge.printed::before   { background: var(--success); box-shadow: 0 0 6px var(--success); }
-    .status-badge.not-found::before { background: var(--error); animation: pulse 1.5s infinite; }
-
-    .card-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .card-timestamp {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-    }
-    .query-badge {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
+    .skel-line {
       border-radius: 6px;
-      padding: 3px 8px;
+      background: linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);
+      background-size: 400% 100%;
+      animation: shimmer 1.2s infinite;
+      margin-bottom: 12px;
     }
+    .skel-line:nth-child(1) { height: 18px; width: 60%; }
+    .skel-line:nth-child(2) { height: 14px; width: 85%; }
+    .skel-line:nth-child(3) { height: 14px; width: 70%; }
+    .skel-line:nth-child(4) { height: 14px; width: 50%; margin-bottom: 0; }
 
-    /* card accent bar */
-    .card-accent-bar {
-      height: 3px;
-      background: linear-gradient(90deg, var(--success), transparent);
-      opacity: 0.6;
+    /* ── SUCCESS CARD ── */
+    .result-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: none;
+      animation: fadeUp 0.35s ease;
     }
-    .card-accent-bar.error { background: linear-gradient(90deg, var(--error), transparent); }
+    .result-card.show { display: block; }
 
-    .card-body { padding: 28px; }
-
-    .holder-section {
+    .card-top {
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--border);
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      margin-bottom: 28px;
-      gap: 16px;
-    }
-
-    .holder-avatar {
-      width: 52px; height: 52px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, rgba(220,20,60,0.15), rgba(220,20,60,0.05));
-      border: 1px solid rgba(220,20,60,0.2);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      font-size: 22px;
-    }
-
-    .holder-info { flex: 1; }
-    .license-name {
-      font-size: 21px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 4px;
-    }
-    .license-number {
-      font-family: var(--mono);
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
 
-    .info-item {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 15px 16px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .info-item:hover { border-color: rgba(255,255,255,0.1); }
-    .info-item::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.04), transparent);
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 14px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
     }
 
-    .info-label {
-      font-size: 9.5px;
+    .badge-green {
+      background: #E8F8EF;
+      color: var(--green);
+    }
+
+    .badge-red {
+      background: #FDEDEC;
+      color: var(--red);
+    }
+
+    .badge-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+    .badge-green .badge-dot { background: var(--green); }
+    .badge-red   .badge-dot { background: var(--red); animation: blink 1.5s infinite; }
+
+    .card-time {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .card-body {
+      padding: 20px 22px;
+    }
+
+    .holder-name {
+      font-size: clamp(18px, 5vw, 24px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .license-num {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 20px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-box {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .info-box-label {
+      font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 7px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      margin-bottom: 4px;
     }
-    .info-label-icon { font-size: 11px; opacity: 0.7; }
 
-    .info-value {
-      font-size: 15px;
+    .info-box-value {
+      font-size: 14px;
       font-weight: 600;
       color: var(--text);
     }
 
-    .info-item.category .info-value {
-      font-family: var(--mono);
-      font-size: 20px;
-      color: var(--gold);
-      text-shadow: 0 0 20px rgba(240,192,64,0.3);
-    }
-    .info-item.category {
-      background: rgba(240,192,64,0.04);
-      border-color: rgba(240,192,64,0.15);
-    }
-
-    .info-item.print-status-item .info-value {
-      color: var(--success);
-    }
-    .info-item.print-status-item {
-      background: rgba(0,212,160,0.04);
-      border-color: rgba(0,212,160,0.12);
+    .info-box.cat .info-box-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--red);
     }
 
     .card-footer {
-      padding: 15px 28px;
+      padding: 12px 22px;
       border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(255,255,255,0.01);
-    }
-    .official-source {
-      display: flex;
-      align-items: center;
-      gap: 8px;
       font-size: 11px;
       color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .source-dot {
+
+    .footer-dot {
       width: 6px; height: 6px;
       border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 6px var(--success);
+      background: var(--green);
+      flex-shrink: 0;
     }
-    .footer-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .icon-btn {
-      width: 30px; height: 30px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s;
-      font-size: 13px;
-    }
-    .icon-btn:hover { border-color: rgba(255,255,255,0.15); color: var(--text); background: rgba(255,255,255,0.04); }
 
-    /* ── NOT FOUND CARD ── */
-    .not-found-card {
-      background: var(--card);
-      border: 1.5px solid rgba(255,59,92,0.15);
+    /* ── NOT FOUND ── */
+    .not-found {
+      background: var(--white);
       border-radius: var(--radius);
-      overflow: hidden;
-      display: none;
-    }
-    .not-found-card.active {
-      display: block;
-      animation: fadeUp 0.4s ease both;
-    }
-
-    .not-found-inner {
-      padding: 48px 28px;
+      box-shadow: var(--shadow);
+      padding: 36px 24px;
       text-align: center;
+      display: none;
+      animation: fadeUp 0.35s ease;
     }
+    .not-found.show { display: block; }
 
-    .not-found-icon {
-      width: 64px; height: 64px;
-      margin: 0 auto 20px;
-      background: rgba(255,59,92,0.08);
-      border: 1px solid rgba(255,59,92,0.2);
-      border-radius: 20px;
+    .nf-icon {
+      width: 52px; height: 52px;
+      background: #FDEDEC;
+      border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 22px;
     }
 
-    .not-found-card h3 {
-      font-size: 20px;
+    .not-found h3 {
+      font-size: 18px;
       font-weight: 700;
-      margin-bottom: 10px;
-      letter-spacing: -0.02em;
-    }
-    .not-found-card p {
-      font-size: 13.5px;
-      color: var(--muted);
-      line-height: 1.65;
-      max-width: 360px;
-      margin: 0 auto 28px;
+      margin-bottom: 8px;
     }
 
-    .not-found-tips {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: 360px;
-      margin: 0 auto 28px;
-      text-align: left;
+    .not-found p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 320px;
+      margin: 0 auto 18px;
     }
-    .tip-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--border);
+
+    .retry-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 10px 20px;
       border-radius: 10px;
-      font-size: 12px;
-      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s;
     }
-    .tip-icon { color: var(--warning); font-size: 13px; flex-shrink: 0; }
+    .retry-btn:hover { border-color: var(--red); color: var(--red); }
 
-    .not-found-actions {
+    /* ── STATS ── */
+    .stats {
+      width: 100%;
+      max-width: 560px;
+      margin-top: 20px;
       display: flex;
       gap: 10px;
       justify-content: center;
+      flex-wrap: wrap;
     }
 
-    .try-again-btn {
-      background: transparent;
-      border: 1.5px solid var(--border);
-      color: var(--text-soft);
-      padding: 11px 24px;
-      border-radius: 12px;
-      font-family: var(--font);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
+    .stat {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 7px 16px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .try-again-btn:hover { border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.03); }
-
-    .dotm-link-btn {
-      background: rgba(220,20,60,0.08);
-      border: 1.5px solid rgba(220,20,60,0.2);
-      color: var(--accent2);
-      padding: 11px 24px;
-      border-radius: 12px;
-      font-family: var(--font);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .dotm-link-btn:hover { background: rgba(220,20,60,0.13); }
+    .stat strong { color: var(--text); font-weight: 700; }
 
     /* ── FOOTER ── */
     footer {
-      position: relative;
-      z-index: 10;
       width: 100%;
-      max-width: 960px;
-      padding: 24px 32px;
-      margin-top: 48px;
-    }
-    .footer-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    footer p {
+      max-width: 560px;
+      margin-top: 32px;
+      text-align: center;
       font-size: 11px;
       color: var(--muted);
-      line-height: 1.7;
+      line-height: 1.8;
     }
-    footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
-    footer a:hover { color: var(--text-soft); }
 
-    .footer-links {
-      display: flex;
-      gap: 16px;
-    }
-    .footer-links a {
-      font-size: 11px;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .footer-links a:hover { color: var(--text-soft); }
+    footer a { color: var(--muted); }
 
     /* ── TOAST ── */
     #toast {
       position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--card2);
-      border: 1px solid rgba(255,59,92,0.3);
-      color: var(--text);
-      padding: 12px 22px;
-      border-radius: 14px;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%) translateY(70px);
+      background: var(--text);
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 100px;
       font-size: 13px;
-      z-index: 1000;
-      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      font-weight: 500;
       white-space: nowrap;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      z-index: 999;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* ── KEYFRAMES ── */
+    /* ── ANIMATIONS ── */
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from { opacity:0; transform: translateY(14px); }
+      to   { opacity:1; transform: translateY(0); }
     }
     @keyframes shimmer {
-      0%   { background-position: 200% 0; }
+      0%   { background-position:  200% 0; }
       100% { background-position: -200% 0; }
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.3; }
-    }
-    @keyframes spinRing {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
-    @keyframes driftA {
-      from { transform: translateX(-50%) scale(1); }
-      to   { transform: translateX(-50%) scale(1.15) translateY(30px); }
-    }
-    @keyframes driftB {
-      from { transform: scale(1) rotate(0deg); }
-      to   { transform: scale(1.2) rotate(15deg); }
+    @keyframes blink {
+      0%,100% { opacity:1; }
+      50%      { opacity:0.2; }
     }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 620px) {
-      header { padding: 20px 20px 0; }
-      .header-divider { padding: 0 20px; }
-      main { padding: 0 16px; padding-top: 48px; }
-      .hero h2 { font-size: 2rem; }
-      .info-grid { grid-template-columns: 1fr; }
-      .search-btn { padding: 14px 18px; font-size: 13px; }
-      .how-step { padding: 14px 12px; }
-      .how-text h4 { font-size: 11px; }
-      .footer-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
-      .card-footer { flex-direction: column; gap: 10px; align-items: flex-start; }
-      .holder-section { flex-direction: column; }
-      .header-right { gap: 6px; }
-      .live-indicator span { display: none; }
-      .not-found-actions { flex-direction: column; align-items: center; }
+    /* ── RESPONSIVE tweaks ── */
+    @media (max-width: 400px) {
+      .search-btn { padding: 13px 14px; font-size: 13px; }
+      .info-row   { grid-template-columns: 1fr; }
+      .card-top   { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
+<div class="page">
 
-  <!-- BACKGROUND -->
-  <div class="bg-mesh"></div>
-  <div class="bg-grid"></div>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span class="flag">🇳🇵</span>
+    <span class="topbar-text">DOTM Nepal</span>
+    <span class="live-dot">Live Data</span>
+  </div>
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo-group">
-      <div class="emblem-ring">
-        <svg class="ring" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="23" cy="23" r="21.5" stroke="rgba(220,20,60,0.25)" stroke-width="1" stroke-dasharray="4 3"/>
-        </svg>
-        <div class="emblem-inner">🇳🇵</div>
-      </div>
-      <div class="logo-text">
-        <h1>DOTM Nepal</h1>
-        <p>Department of Transport Management</p>
-      </div>
-    </div>
-    <div class="header-right">
-      <div class="live-indicator">
-        <div class="live-dot"></div>
-        <span>SYSTEM LIVE</span>
-      </div>
-      <div class="header-badge">OFFICIAL PORTAL</div>
-    </div>
-  </header>
+  <!-- HERO -->
+  <div class="hero">
+    <h1>License <span>Print</span><br>Status Check</h1>
+    <p>Enter your license number to instantly check<br>if it has been printed by DOTM.</p>
+  </div>
 
-  <div class="header-divider"><hr></div>
-
-  <!-- MAIN -->
-  <main>
-    <!-- HERO -->
-    <div class="hero">
-      <div class="hero-eyebrow">Live License Status</div>
-      <h2>Check Your License<br><em>Print Status</em></h2>
-      <p>Instantly verify if your driving license has been printed by entering your license number below. Data sourced directly from official DOTM records.</p>
-    </div>
-
-    <!-- STATS STRIP -->
-    <div class="stats-strip" id="statsStrip">
-      <div class="stat-pill">
-        <svg class="stat-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        <strong id="totalRecords">—</strong>&nbsp;Records Indexed
-      </div>
-      <div class="stat-pill">
-        <svg class="stat-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00D4A0" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Synced:&nbsp;<strong id="lastSync">—</strong>
-      </div>
-      <div class="stat-pill">
-        <svg class="stat-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F0C040" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        Response:&nbsp;<strong>&lt;100ms</strong>
-      </div>
-    </div>
-
-    <!-- SEARCH WRAPPER -->
-    <div class="search-wrapper">
-      <div class="search-label">Enter Your License Number</div>
-      <div class="search-box" id="searchBox">
-        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <div class="search-card">
+      <span class="search-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        <input
-          type="text"
-          id="license-input"
-          placeholder="e.g. 07-01-00012345"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-          autofocus
-        />
-        <button class="search-btn" id="searchBtn" onclick="checkLicense()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Check Status
-        </button>
+      </span>
+      <input id="inp" type="text" placeholder="e.g. 07-01-00012345"
+             autocomplete="off" autocorrect="off" spellcheck="false" autofocus/>
+      <button class="search-btn" onclick="check()">Check</button>
+    </div>
+    <p class="hint">Press Enter to search &nbsp;·&nbsp; Format: 07-01-XXXXXXXX</p>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="result">
+
+    <!-- Skeleton -->
+    <div class="skeleton" id="skel">
+      <div class="skel-line"></div>
+      <div class="skel-line"></div>
+      <div class="skel-line"></div>
+      <div class="skel-line"></div>
+    </div>
+
+    <!-- Success card -->
+    <div class="result-card" id="card">
+      <div class="card-top">
+        <span class="badge badge-green" id="badge">
+          <span class="badge-dot"></span> PRINTED
+        </span>
+        <span class="card-time" id="ctime"></span>
       </div>
-      <div class="search-hints">
-        <div class="search-hint-left">Press <kbd>Enter</kbd> to search</div>
-        <div class="format-tags">
-          <span class="format-tag">07-01-XXXXXXXX</span>
-          <span class="format-tag">07-02-XXXXXXXX</span>
+      <div class="card-body">
+        <div class="holder-name" id="cname"></div>
+        <div class="license-num"  id="cno"></div>
+        <div class="info-row">
+          <div class="info-box cat">
+            <div class="info-box-label">Category</div>
+            <div class="info-box-value" id="ccat"></div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label">Office</div>
+            <div class="info-box-value" id="coffice"></div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label">Print Date</div>
+            <div class="info-box-value" id="cdate"></div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label">District</div>
+            <div class="info-box-value" id="cdistrict"></div>
+          </div>
         </div>
+      </div>
+      <div class="card-footer">
+        <div class="footer-dot"></div>
+        Official DOTM data &nbsp;·&nbsp; <span id="cupdated"></span>
       </div>
     </div>
 
-    <!-- HOW IT WORKS -->
-    <div class="how-strip">
-      <div class="how-strip-inner">
-        <div class="how-step">
-          <div class="how-num">1</div>
-          <div class="how-text">
-            <h4>Enter License No.</h4>
-            <p>Type your license number in the field above</p>
-          </div>
-        </div>
-        <div class="how-step">
-          <div class="how-num">2</div>
-          <div class="how-text">
-            <h4>Instant Lookup</h4>
-            <p>We query DOTM PDF records in real time</p>
-          </div>
-        </div>
-        <div class="how-step">
-          <div class="how-num">3</div>
-          <div class="how-text">
-            <h4>View Status</h4>
-            <p>See if your license is printed & ready</p>
-          </div>
-        </div>
-      </div>
+    <!-- Not found -->
+    <div class="not-found" id="notfound">
+      <div class="nf-icon">🔍</div>
+      <h3>Not Found</h3>
+      <p>No record for this license number. It may not be printed yet, or the number is incorrect.</p>
+      <button class="retry-btn" onclick="reset()">Try Again</button>
     </div>
 
-    <!-- RESULT AREA -->
-    <div id="result-area">
+  </div>
 
-      <!-- Skeleton -->
-      <div class="skeleton-card" id="skeletonCard">
-        <div class="skel skel-header"></div>
-        <div class="skel skel-title"></div>
-        <div class="skel skel-sub"></div>
-        <div class="skel-grid">
-          <div class="skel skel-cell"></div>
-          <div class="skel skel-cell"></div>
-          <div class="skel skel-cell"></div>
-          <div class="skel skel-cell"></div>
-        </div>
-      </div>
-
-      <!-- Success Card -->
-      <div class="result-card" id="resultCard">
-        <div class="card-accent-bar" id="accentBar"></div>
-        <div class="card-header found" id="cardHeader">
-          <div class="header-left">
-            <span class="status-badge printed" id="statusBadge">✓ &nbsp;PRINTED</span>
-          </div>
-          <div class="card-meta">
-            <span class="query-badge" id="queryBadge">—</span>
-            <span class="card-timestamp" id="cardTimestamp">—</span>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="holder-section">
-            <div>
-              <div class="license-name" id="holderName">—</div>
-              <div class="license-number" id="licenseNo">—</div>
-            </div>
-            <div class="holder-avatar">🪪</div>
-          </div>
-          <div class="info-grid">
-            <div class="info-item category">
-              <div class="info-label"><span class="info-label-icon">🏷</span> Category</div>
-              <div class="info-value" id="licCategory">—</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label"><span class="info-label-icon">🏢</span> Issuing Office</div>
-              <div class="info-value" id="officeName">—</div>
-            </div>
-            <div class="info-item print-status-item">
-              <div class="info-label"><span class="info-label-icon">📅</span> Print Date</div>
-              <div class="info-value" id="printDate">—</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label"><span class="info-label-icon">📍</span> District</div>
-              <div class="info-value" id="district">—</div>
-            </div>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="official-source">
-            <div class="source-dot"></div>
-            Sourced from official DOTM / Yatayat PDF records
-          </div>
-          <div class="footer-actions">
-            <span style="font-size:11px;color:var(--muted)" id="lastUpdated">—</span>
-            <button class="icon-btn" title="Copy result" onclick="copyResult()">⎘</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Not Found Card -->
-      <div class="not-found-card" id="notFoundCard">
-        <div class="card-accent-bar error"></div>
-        <div class="not-found-inner">
-          <div class="not-found-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF3B5C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-          </div>
-          <h3>License Not Found</h3>
-          <p>No records match the entered license number. Here are a few things to check:</p>
-          <div class="not-found-tips">
-            <div class="tip-row">
-              <span class="tip-icon">⚠</span>
-              The license may not have been printed yet — check again in a few days
-            </div>
-            <div class="tip-row">
-              <span class="tip-icon">⚠</span>
-              Ensure the format is correct: <strong style="color:var(--text-soft);font-family:var(--mono);font-size:11px;margin-left:4px;">07-01-XXXXXXXX</strong>
-            </div>
-            <div class="tip-row">
-              <span class="tip-icon">⚠</span>
-              Double-check the district code (07-01, 07-02, etc.)
-            </div>
-          </div>
-          <div class="not-found-actions">
-            <button class="try-again-btn" onclick="resetSearch()">Try Another Number</button>
-            <a href="https://www.dotm.gov.np" target="_blank" rel="noopener" class="dotm-link-btn">Visit DOTM Portal ↗</a>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </main>
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">📋 <strong id="srec">—</strong> records</div>
+    <div class="stat">🕐 Updated: <strong id="sup">—</strong></div>
+    <div class="stat">⚡ <strong>&lt;1ms</strong> search</div>
+  </div>
 
   <!-- FOOTER -->
   <footer>
-    <div class="footer-inner">
-      <p>
-        Unofficial tool built on publicly available DOTM PDF records &nbsp;·&nbsp; Not affiliated with the Government of Nepal
-      </p>
-      <div class="footer-links">
-        <a href="https://www.dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np ↗</a>
-        <a href="#">About</a>
-        <a href="#">Feedback</a>
-      </div>
-    </div>
+    Unofficial tool · Data from <a href="https://dotm.gov.np" target="_blank">dotm.gov.np</a> PDFs<br>
+    Not affiliated with Government of Nepal
   </footer>
 
-  <!-- TOAST -->
-  <div id="toast">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3B5C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    Please enter a license number
-  </div>
+</div>
 
-  <script>
-    const input    = document.getElementById('license-input');
-    const skeleton = document.getElementById('skeletonCard');
-    const resultCard  = document.getElementById('resultCard');
-    const notFoundCard = document.getElementById('notFoundCard');
+<!-- TOAST -->
+<div id="toast">Please enter a license number</div>
 
-    // Auto-focus
-    input.focus();
+<script>
+  const inp = document.getElementById('inp');
+  inp.focus();
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
 
-    // Enter key
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') checkLicense();
-    });
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const r = await fetch('/api/stats');
+      const d = await r.json();
+      document.getElementById('srec').textContent = (d.total_records || 0).toLocaleString();
+      document.getElementById('sup').textContent  = d.last_updated || '—';
+    } catch(_) {}
+  });
 
-    // Load stats on page load
-    window.addEventListener('DOMContentLoaded', loadStats);
+  async function check() {
+    const v = inp.value.trim();
+    if (!v) { toast('Enter a license number'); return; }
 
-    async function loadStats() {
-      try {
-        const res = await fetch('/api/stats');
-        if (!res.ok) return;
-        const d = await res.json();
-        document.getElementById('totalRecords').textContent = d.total_records?.toLocaleString() ?? '—';
-        document.getElementById('lastSync').textContent = d.last_updated ?? '—';
-      } catch (_) {}
-    }
+    hide();
+    show('skel');
+    document.querySelector('.search-btn').disabled = true;
 
-    async function checkLicense() {
-      const val = input.value.trim();
-      if (!val) { showToast('Please enter a license number'); return; }
+    try {
+      const r = await fetch('/api/check?license=' + encodeURIComponent(v));
+      const d = await r.json();
+      hide();
+      document.querySelector('.search-btn').disabled = false;
 
-      hideAll();
-      skeleton.classList.add('active');
-      document.getElementById('searchBtn').disabled = true;
-
-      try {
-        const res  = await fetch(`/api/check?license=${encodeURIComponent(val)}`);
-        const data = await res.json();
-
-        skeleton.classList.remove('active');
-        document.getElementById('searchBtn').disabled = false;
-
-        if (data.found) {
-          populateCard(data);
-          resultCard.classList.add('active');
-          resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } else {
-          notFoundCard.classList.add('active');
-        }
-      } catch (err) {
-        skeleton.classList.remove('active');
-        document.getElementById('searchBtn').disabled = false;
-        showToast('Network error. Please try again.');
+      if (d.found) {
+        document.getElementById('badge').className = 'badge badge-green';
+        document.getElementById('badge').innerHTML = '<span class="badge-dot"></span> PRINTED';
+        document.getElementById('cname').textContent     = d.name         || '—';
+        document.getElementById('cno').textContent       = d.license_no   || '—';
+        document.getElementById('ccat').textContent      = d.category     || '—';
+        document.getElementById('coffice').textContent   = d.office       || '—';
+        document.getElementById('cdate').textContent     = d.print_date   || '—';
+        document.getElementById('cdistrict').textContent = d.district     || '—';
+        document.getElementById('ctime').textContent     = new Date().toLocaleTimeString();
+        document.getElementById('cupdated').textContent  = 'Synced ' + (d.last_updated || '—');
+        show('card');
+        document.getElementById('card').scrollIntoView({behavior:'smooth', block:'nearest'});
+      } else {
+        show('notfound');
       }
+    } catch(_) {
+      hide();
+      document.querySelector('.search-btn').disabled = false;
+      toast('Connection error. Try again.');
     }
+  }
 
-    function populateCard(data) {
-      document.getElementById('holderName').textContent  = data.name        ?? '—';
-      document.getElementById('licenseNo').textContent   = data.license_no  ?? '—';
-      document.getElementById('licCategory').textContent = data.category    ?? '—';
-      document.getElementById('officeName').textContent  = data.office      ?? '—';
-      document.getElementById('printDate').textContent   = data.print_date  ?? '—';
-      document.getElementById('district').textContent    = data.district    ?? '—';
-      document.getElementById('cardTimestamp').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('lastUpdated').textContent = `Synced: ${data.last_updated ?? '—'}`;
-      document.getElementById('queryBadge').textContent  = data.license_no  ?? input.value.trim();
-    }
+  function reset() { hide(); inp.value = ''; inp.focus(); }
 
-    function copyResult() {
-      const name = document.getElementById('holderName').textContent;
-      const no   = document.getElementById('licenseNo').textContent;
-      const cat  = document.getElementById('licCategory').textContent;
-      const date = document.getElementById('printDate').textContent;
-      const txt  = `DOTM License Status\nName: ${name}\nLicense No: ${no}\nCategory: ${cat}\nPrint Date: ${date}`;
-      navigator.clipboard.writeText(txt).then(() => showToast('Result copied to clipboard!'));
-    }
+  function hide() {
+    ['skel','card','notfound'].forEach(id =>
+      document.getElementById(id).classList.remove('show')
+    );
+  }
 
-    function resetSearch() {
-      hideAll();
-      input.value = '';
-      input.focus();
-    }
+  function show(id) {
+    document.getElementById(id).classList.add('show');
+  }
 
-    function hideAll() {
-      skeleton.classList.remove('active');
-      resultCard.classList.remove('active');
-      notFoundCard.classList.remove('active');
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.querySelector ? null : null;
-      // Update text node only
-      const nodes = t.childNodes;
-      nodes.forEach(n => { if (n.nodeType === 3) n.textContent = msg; });
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3000);
-    }
-  </script>
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
 </body>
 </html>

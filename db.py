@@ -39,7 +39,7 @@ def get_conn():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row          # dict-like rows
     conn.execute("PRAGMA journal_mode=WAL")  # concurrent reads while writing
-    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA synchronous=FULL")
     conn.execute("PRAGMA cache_size=-64000") # 64 MB page cache
     conn.execute("PRAGMA temp_store=MEMORY")
     try:
