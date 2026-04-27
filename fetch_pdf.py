@@ -37,6 +37,8 @@ HEADERS = {
 DIRECT_PDF_URLS = {
     "Chabahil":   "https://giwmscdnone.gov.np/media/pdf_upload/Chabahil%20Printed%20License%20Card%20List_5siwppy.pdf",
     "Radheradhe": "https://giwmscdnone.gov.np/media/pdf_upload/Radhe%20radhe%20Printed%20License%20175598_kmfke54.pdf",
+    "Thulobharyang": "https://giwmscdnone.gov.np/media/pdf_upload/Thulobharyang%20Printed%20License_1kxpnum.pdf",
+    
 
     # Add more offices below when you get the URLs:
     # "Thulobharyang": "https://giwmscdnone.gov.np/media/pdf_upload/...",
