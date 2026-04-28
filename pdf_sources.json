@@ -1,1 +1,18 @@
-{}
+{
+  "Okhaldhunga": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Okhaldhunga%20Printed%20License%20Details_bbdvdfy.pdf",
+    "district": "Okhaldhunga"
+  },
+  "Gaur": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Gaur%20Printed%20License%20Detail_1vfpinc.pdf",
+    "district": "Rautahat"
+  },
+  "Nawalparasi": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Printed%20Nawalparasi%20License%208410_hunzizw.pdf",
+    "district": "Nawalparasi"
+  },
+  "Rajbiraj": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Rajbiraj%20Saptari%20Printed%20License%20Details_b3eba9b.pdf",
+    "district": "Saptari"
+  }
+}

@@ -101,7 +101,6 @@
       cursor: default;
     }
 
-    /* The card-shaped logo icon */
     .logo-card {
       position: relative;
       width: 46px;
@@ -121,7 +120,6 @@
       box-shadow: 0 5px 16px rgba(192, 57, 43, 0.4);
     }
 
-    /* Card header band */
     .logo-card::before {
       content: '';
       position: absolute;
@@ -132,7 +130,6 @@
       background: rgba(0, 0, 0, 0.18);
     }
 
-    /* Card inner SVG details */
     .logo-card-svg {
       position: absolute;
       inset: 0;
@@ -589,9 +586,10 @@
       font-weight: 600;
     }
 
+    /* ── Desktop: 3-column grid ── */
     .office-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 10px;
     }
 
@@ -599,7 +597,7 @@
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 14px 14px;
+      padding: 14px;
       transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
     }
 
@@ -652,6 +650,64 @@
       background: var(--white);
       border: 1px dashed var(--border);
       border-radius: 12px;
+    }
+
+    /* ── Show More button — desktop only ── */
+    .show-more-wrap {
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .show-more-btn {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 9px 24px;
+      border-radius: 100px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.18s, color 0.18s, background 0.18s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .show-more-btn:hover {
+      border-color: var(--red);
+      color: var(--red);
+      background: #FDF2F1;
+    }
+
+    /* ── Mobile: horizontal swipe scroll — all cards visible, no Show More ── */
+    @media (max-width: 600px) {
+      .office-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        gap: 10px;
+        padding-bottom: 10px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .office-grid::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* Force ALL cards visible in mobile scroll — override any JS hidden state */
+      .office-grid .office-card {
+        display: block !important;
+        flex: 0 0 148px;
+        min-width: 148px;
+        scroll-snap-align: start;
+      }
+
+      .show-more-wrap {
+        display: none !important;
+      }
     }
 
     /* ══════════════════════════
@@ -793,7 +849,7 @@
     }
 
     /* ══════════════════════════
-       RESPONSIVE
+       RESPONSIVE MISC
     ══════════════════════════ */
     @media (max-width: 420px) {
       .search-btn {
@@ -822,40 +878,29 @@
 
     <!-- TOP BAR -->
     <div class="topbar">
-
-      <!-- ── LOGO ── -->
       <div class="logo">
-
-        <!-- License card shaped icon -->
         <div class="logo-card">
           <svg class="logo-card-svg" viewBox="0 0 46 30" xmlns="http://www.w3.org/2000/svg">
-            <!-- Chip / photo box -->
             <rect x="4" y="11" width="9" height="12" rx="2" fill="#fff" opacity=".25" />
-            <!-- Lines -->
             <rect x="15" y="12" width="18" height="2.2" rx="1.1" fill="#fff" opacity=".75" />
             <rect x="15" y="17" width="13" height="1.8" rx=".9" fill="#fff" opacity=".5" />
             <rect x="15" y="21" width="15" height="1.8" rx=".9" fill="#fff" opacity=".35" />
-            <!-- Nepal flag tiny -->
             <text x="34" y="10" font-size="7" font-family="Arial">🇳🇵</text>
-            <!-- Green verified dot -->
             <circle cx="39" cy="23" r="5.5" fill="#27AE60" />
             <path d="M36.5 23.3l1.8 1.9 3.8-4" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"
               stroke-linejoin="round" />
           </svg>
         </div>
-
         <div class="logo-text">
           <div class="logo-name">License<span class="r">Status</span></div>
           <div class="logo-tagline">Nepal · DOTM Print Tracker</div>
         </div>
       </div>
 
-      <!-- Live pill -->
       <div class="live-pill">
         <div class="live-pill-dot"></div>
         Live Data
       </div>
-
     </div>
 
     <!-- HERO -->
@@ -945,13 +990,22 @@
     </div>
 
     <!-- OFFICE RECORDS -->
-    <div class="offices">
+    <div class="offices" id="offices-section">
       <div class="offices-header">
         <div class="offices-title">Office Records</div>
         <div class="offices-total" id="offices-total">—</div>
       </div>
       <div class="office-grid" id="office-grid">
         <div class="office-empty">Loading offices…</div>
+      </div>
+      <div class="show-more-wrap" id="show-more-wrap" style="display:none;">
+        <button class="show-more-btn" id="show-more-btn">
+          Show more
+          <svg id="show-more-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -986,18 +1040,26 @@
       loadOffices();
     });
 
+    /* ──────────────────────────────────────────
+       OFFICE RECORDS
+       • Desktop (>600px) → show 3 cards initially, "Show More / Show Less" button
+       • Mobile (≤600px)  → all cards in horizontal swipe scroll, no button
+    ────────────────────────────────────────── */
     async function loadOffices() {
       const grid = document.getElementById('office-grid');
       const totalEl = document.getElementById('offices-total');
-      try {
-        const d = await (await fetch('/api/offices')).json();
-        const offices = d.offices || [];
-        totalEl.textContent = (d.total || 0).toLocaleString() + ' total';
-        if (!offices.length) {
-          grid.innerHTML = '<div class="office-empty">No office records available yet.</div>';
-          return;
-        }
-        grid.innerHTML = offices.map(o => `
+      const wrapBtn = document.getElementById('show-more-wrap');
+      const btn = document.getElementById('show-more-btn');
+      const icon = document.getElementById('show-more-icon');
+      const INITIAL = 3;
+
+      let allOffices = [];
+      let expanded = false;
+
+      function isMobile() { return window.innerWidth <= 600; }
+
+      function cardHTML(o) {
+        return `
           <div class="office-card">
             <div class="office-card-name">${escapeHtml(o.office)}</div>
             ${o.district ? `<div class="office-card-district">${escapeHtml(o.district)}</div>` : ''}
@@ -1005,8 +1067,60 @@
               <span class="office-card-count">${(o.count || 0).toLocaleString()}</span>
               <span class="office-card-count-label">records</span>
             </div>
-          </div>
-        `).join('');
+          </div>`;
+      }
+
+      function render() {
+        if (isMobile()) {
+          /* ── MOBILE: ALL cards, horizontal scroll, no button ── */
+          grid.innerHTML = allOffices.map(cardHTML).join('');
+          wrapBtn.style.display = 'none';
+        } else {
+          /* ── DESKTOP: first 3 visible; rest toggled by button ── */
+          const visible = expanded ? allOffices : allOffices.slice(0, INITIAL);
+          grid.innerHTML = visible.map(cardHTML).join('');
+
+          if (allOffices.length > INITIAL) {
+            const remaining = allOffices.length - INITIAL;
+            if (expanded) {
+              btn.childNodes[0].textContent = 'Show less ';
+              icon.innerHTML = '<polyline points="18 15 12 9 6 15"/>';
+            } else {
+              btn.childNodes[0].textContent = `Show ${remaining} more `;
+              icon.innerHTML = '<polyline points="6 9 12 15 18 9"/>';
+            }
+            wrapBtn.style.display = 'block';
+          } else {
+            wrapBtn.style.display = 'none';
+          }
+        }
+      }
+
+      /* Toggle handler */
+      btn.addEventListener('click', () => {
+        expanded = !expanded;
+        render();
+      });
+
+      /* Re-render on resize (e.g. rotating phone to tablet) */
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(render, 120);
+      });
+
+      /* Fetch data */
+      try {
+        const d = await (await fetch('/api/offices')).json();
+        allOffices = d.offices || [];
+        totalEl.textContent = (d.total || 0).toLocaleString() + ' total';
+
+        if (!allOffices.length) {
+          grid.innerHTML = '<div class="office-empty">No office records available yet.</div>';
+          return;
+        }
+
+        render();
       } catch (_) {
         grid.innerHTML = '<div class="office-empty">Could not load office records.</div>';
       }
