@@ -1,29 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-  <meta name="description" content="Check your Nepal driving license print status instantly. Official DOTM data."/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="Check your Nepal driving license print status instantly. Official DOTM data." />
   <title>License Status Nepal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='4' y='10' width='56' height='40' rx='7' fill='%23C0392B'/><rect x='4' y='10' width='56' height='14' rx='7' fill='%23A93226'/><rect x='4' y='17' width='56' height='7' fill='%23A93226'/><rect x='10' y='28' width='13' height='16' rx='3' fill='%23fff' opacity='.9'/><rect x='27' y='29' width='22' height='3' rx='1.5' fill='%23fff' opacity='.9'/><rect x='27' y='35' width='17' height='2.5' rx='1.25' fill='%23fff' opacity='.65'/><rect x='27' y='40' width='20' height='2.5' rx='1.25' fill='%23fff' opacity='.5'/><circle cx='50' cy='45' r='10' fill='%2327AE60'/><path d='M46 45.5l2.8 2.8 5.5-5.8' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 
-    :root {
-      --red:     #C0392B;
-      --red2:    #E74C3C;
-      --green:   #27AE60;
-      --bg:      #F7F8FA;
-      --white:   #FFFFFF;
-      --text:    #1A1A2E;
-      --muted:   #8590A6;
-      --border:  #E8ECF0;
-      --shadow:  0 4px 24px rgba(0,0,0,0.08);
-      --radius:  16px;
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html, body {
+    :root {
+      --red: #C0392B;
+      --red2: #E74C3C;
+      --green: #27AE60;
+      --bg: #F7F8FA;
+      --white: #FFFFFF;
+      --text: #1A1A2E;
+      --muted: #8590A6;
+      --border: #E8ECF0;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      --radius: 16px;
+    }
+
+    html,
+    body {
       min-height: 100vh;
       font-family: 'Inter', sans-serif;
       background: var(--bg);
@@ -31,62 +42,129 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── LAYOUT ── */
     .page {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 0 16px 40px;
+      padding: 0 16px 48px;
     }
 
-    /* ── TOP BAR ── */
+    /* ══════════════════════════
+       TOP BAR
+    ══════════════════════════ */
     .topbar {
       width: 100%;
       max-width: 560px;
-      padding: 20px 0 0;
+      padding: 22px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ── LOGO ── */
+    .logo {
       display: flex;
       align-items: center;
       gap: 10px;
+      text-decoration: none;
+      cursor: default;
     }
 
-    .flag {
-      font-size: 22px;
-      line-height: 1;
+    /* The card-shaped logo icon */
+    .logo-card {
+      position: relative;
+      width: 46px;
+      height: 30px;
+      background: linear-gradient(135deg, #C0392B 0%, #96281B 100%);
+      border-radius: 6px;
+      box-shadow:
+        0 2px 8px rgba(192, 57, 43, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      flex-shrink: 0;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .topbar-text {
-      font-size: 12px;
+    .logo:hover .logo-card {
+      transform: translateY(-1px) rotate(-1deg);
+      box-shadow: 0 5px 16px rgba(192, 57, 43, 0.4);
+    }
+
+    /* Card header band */
+    .logo-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 9px;
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    /* Card inner SVG details */
+    .logo-card-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .logo-text {
+      line-height: 1.2;
+    }
+
+    .logo-name {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .logo-name .r {
+      color: var(--red);
+    }
+
+    .logo-tagline {
+      font-size: 9.5px;
       font-weight: 600;
       color: var(--muted);
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
+      margin-top: 1px;
     }
 
-    .live-dot {
-      margin-left: auto;
+    /* Live indicator */
+    .live-pill {
       display: flex;
       align-items: center;
       gap: 6px;
+      background: rgba(39, 174, 96, 0.08);
+      border: 1px solid rgba(39, 174, 96, 0.2);
+      border-radius: 100px;
+      padding: 5px 11px;
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--green);
     }
 
-    .live-dot::before {
-      content: '';
-      width: 7px; height: 7px;
+    .live-pill-dot {
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--green);
       animation: blink 2s infinite;
     }
 
-    /* ── HERO ── */
+    /* ══════════════════════════
+       HERO
+    ══════════════════════════ */
     .hero {
       width: 100%;
       max-width: 560px;
       text-align: center;
-      padding: 48px 0 36px;
+      padding: 52px 0 36px;
+      animation: up 0.6s ease both;
     }
 
     .hero h1 {
@@ -105,13 +183,16 @@
     .hero p {
       font-size: clamp(14px, 3.5vw, 16px);
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.65;
     }
 
-    /* ── SEARCH ── */
+    /* ══════════════════════════
+       SEARCH
+    ══════════════════════════ */
     .search-wrap {
       width: 100%;
       max-width: 560px;
+      animation: up 0.6s 0.07s ease both;
     }
 
     .search-card {
@@ -128,7 +209,7 @@
 
     .search-card:focus-within {
       border-color: var(--red);
-      box-shadow: 0 0 0 4px rgba(192,57,43,0.1), var(--shadow);
+      box-shadow: 0 0 0 4px rgba(192, 57, 43, 0.08), var(--shadow);
     }
 
     .search-icon {
@@ -164,14 +245,24 @@
       padding: 13px clamp(14px, 4vw, 24px);
       font-family: 'Inter', sans-serif;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: background 0.15s, transform 0.1s;
       white-space: nowrap;
     }
 
-    .search-btn:hover  { background: var(--red2); }
-    .search-btn:active { transform: scale(0.97); }
+    .search-btn:hover {
+      background: var(--red2);
+    }
+
+    .search-btn:active {
+      transform: scale(0.97);
+    }
+
+    .search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
     .hint {
       text-align: center;
@@ -180,14 +271,15 @@
       color: var(--muted);
     }
 
-    /* ── RESULT AREA ── */
+    /* ══════════════════════════
+       RESULT
+    ══════════════════════════ */
     #result {
       width: 100%;
       max-width: 560px;
-      margin-top: 24px;
+      margin-top: 22px;
     }
 
-    /* Skeleton */
     .skeleton {
       background: var(--white);
       border-radius: var(--radius);
@@ -195,38 +287,73 @@
       box-shadow: var(--shadow);
       display: none;
     }
-    .skeleton.show { display: block; }
+
+    .skeleton.show {
+      display: block;
+    }
 
     .skel-line {
       border-radius: 6px;
-      background: linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);
+      background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
       background-size: 400% 100%;
       animation: shimmer 1.2s infinite;
       margin-bottom: 12px;
     }
-    .skel-line:nth-child(1) { height: 18px; width: 60%; }
-    .skel-line:nth-child(2) { height: 14px; width: 85%; }
-    .skel-line:nth-child(3) { height: 14px; width: 70%; }
-    .skel-line:nth-child(4) { height: 14px; width: 50%; margin-bottom: 0; }
 
-    /* ── SUCCESS CARD ── */
+    .skel-line:nth-child(1) {
+      height: 18px;
+      width: 60%;
+    }
+
+    .skel-line:nth-child(2) {
+      height: 14px;
+      width: 85%;
+    }
+
+    .skel-line:nth-child(3) {
+      height: 14px;
+      width: 70%;
+    }
+
+    .skel-line:nth-child(4) {
+      height: 14px;
+      width: 50%;
+      margin-bottom: 0;
+    }
+
     .result-card {
       background: var(--white);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow: hidden;
       display: none;
-      animation: fadeUp 0.35s ease;
+      animation: up 0.35s ease;
     }
-    .result-card.show { display: block; }
+
+    .result-card.show {
+      display: block;
+    }
+
+    .card-stripe {
+      height: 3px;
+    }
+
+    .stripe-green {
+      background: var(--green);
+    }
+
+    .stripe-red {
+      background: var(--red);
+    }
 
     .card-top {
-      padding: 20px 22px 16px;
+      padding: 18px 22px 14px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     .badge {
@@ -235,9 +362,10 @@
       gap: 7px;
       padding: 7px 14px;
       border-radius: 100px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
     .badge-green {
@@ -251,11 +379,19 @@
     }
 
     .badge-dot {
-      width: 7px; height: 7px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
     }
-    .badge-green .badge-dot { background: var(--green); }
-    .badge-red   .badge-dot { background: var(--red); animation: blink 1.5s infinite; }
+
+    .badge-green .badge-dot {
+      background: var(--green);
+    }
+
+    .badge-red .badge-dot {
+      background: var(--red);
+      animation: blink 1.5s infinite;
+    }
 
     .card-time {
       font-size: 11px;
@@ -326,13 +462,13 @@
     }
 
     .footer-dot {
-      width: 6px; height: 6px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--green);
       flex-shrink: 0;
     }
 
-    /* ── NOT FOUND ── */
     .not-found {
       background: var(--white);
       border-radius: var(--radius);
@@ -340,15 +476,21 @@
       padding: 36px 24px;
       text-align: center;
       display: none;
-      animation: fadeUp 0.35s ease;
+      animation: up 0.35s ease;
     }
-    .not-found.show { display: block; }
+
+    .not-found.show {
+      display: block;
+    }
 
     .nf-icon {
-      width: 52px; height: 52px;
+      width: 52px;
+      height: 52px;
       background: #FDEDEC;
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin: 0 auto 14px;
       font-size: 22px;
     }
@@ -377,11 +519,17 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, color 0.15s;
     }
-    .retry-btn:hover { border-color: var(--red); color: var(--red); }
 
-    /* ── STATS ── */
+    .retry-btn:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    /* ══════════════════════════
+       STATS
+    ══════════════════════════ */
     .stats {
       width: 100%;
       max-width: 560px;
@@ -390,6 +538,7 @@
       gap: 10px;
       justify-content: center;
       flex-wrap: wrap;
+      animation: up 0.6s 0.14s ease both;
     }
 
     .stat {
@@ -403,25 +552,65 @@
       align-items: center;
       gap: 6px;
     }
-    .stat strong { color: var(--text); font-weight: 700; }
 
-    /* ── FOOTER ── */
+    .stat strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* ══════════════════════════
+       FOOTER
+    ══════════════════════════ */
     footer {
       width: 100%;
       max-width: 560px;
-      margin-top: 32px;
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
       text-align: center;
       font-size: 11px;
       color: var(--muted);
-      line-height: 1.8;
+      line-height: 2;
     }
 
-    footer a { color: var(--muted); }
+    footer .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
 
-    /* ── TOAST ── */
+    footer .sep {
+      color: var(--border);
+      font-size: 13px;
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      text-underline-offset: 3px;
+      transition: color 0.15s;
+    }
+
+    footer a:hover {
+      color: var(--red);
+      text-decoration: underline;
+    }
+
+    footer .disclaimer {
+      margin-top: 6px;
+      font-size: 10.5px;
+      color: #B0BAC9;
+    }
+
+    /* ══════════════════════════
+       TOAST
+    ══════════════════════════ */
     #toast {
       position: fixed;
-      bottom: 20px; left: 50%;
+      bottom: 20px;
+      left: 50%;
       transform: translateX(-50%) translateY(70px);
       background: var(--text);
       color: #fff;
@@ -431,208 +620,279 @@
       font-weight: 500;
       white-space: nowrap;
       z-index: 999;
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     }
-    #toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* ── ANIMATIONS ── */
-    @keyframes fadeUp {
-      from { opacity:0; transform: translateY(14px); }
-      to   { opacity:1; transform: translateY(0); }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
     }
+
+    /* ══════════════════════════
+       ANIMATIONS
+    ══════════════════════════ */
+    @keyframes up {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     @keyframes shimmer {
-      0%   { background-position:  200% 0; }
-      100% { background-position: -200% 0; }
-    }
-    @keyframes blink {
-      0%,100% { opacity:1; }
-      50%      { opacity:0.2; }
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
     }
 
-    /* ── RESPONSIVE tweaks ── */
-    @media (max-width: 400px) {
-      .search-btn { padding: 13px 14px; font-size: 13px; }
-      .info-row   { grid-template-columns: 1fr; }
-      .card-top   { flex-direction: column; align-items: flex-start; }
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.2;
+      }
+    }
+
+    /* ══════════════════════════
+       RESPONSIVE
+    ══════════════════════════ */
+    @media (max-width: 420px) {
+      .search-btn {
+        padding: 13px 14px;
+        font-size: 13px;
+      }
+
+      .info-row {
+        grid-template-columns: 1fr;
+      }
+
+      .card-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .logo-name {
+        font-size: 13px;
+      }
     }
   </style>
 </head>
+
 <body>
-<div class="page">
+  <div class="page">
 
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <span class="flag">🇳🇵</span>
-    <span class="topbar-text">DOTM Nepal</span>
-    <span class="live-dot">Live Data</span>
-  </div>
+    <!-- TOP BAR -->
+    <div class="topbar">
 
-  <!-- HERO -->
-  <div class="hero">
-    <h1>License <span>Print</span><br>Status Check</h1>
-    <p>Enter your license number to instantly check<br>if it has been printed by DOTM.</p>
-  </div>
+      <!-- ── LOGO ── -->
+      <div class="logo">
 
-  <!-- SEARCH -->
-  <div class="search-wrap">
-    <div class="search-card">
-      <span class="search-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-      </span>
-      <input id="inp" type="text" placeholder="e.g. 07-01-00012345"
-             autocomplete="off" autocorrect="off" spellcheck="false" autofocus/>
-      <button class="search-btn" onclick="check()">Check</button>
-    </div>
-    <p class="hint">Press Enter to search &nbsp;·&nbsp; Format: 07-01-XXXXXXXX</p>
-  </div>
+        <!-- License card shaped icon -->
+        <div class="logo-card">
+          <svg class="logo-card-svg" viewBox="0 0 46 30" xmlns="http://www.w3.org/2000/svg">
+            <!-- Chip / photo box -->
+            <rect x="4" y="11" width="9" height="12" rx="2" fill="#fff" opacity=".25" />
+            <!-- Lines -->
+            <rect x="15" y="12" width="18" height="2.2" rx="1.1" fill="#fff" opacity=".75" />
+            <rect x="15" y="17" width="13" height="1.8" rx=".9" fill="#fff" opacity=".5" />
+            <rect x="15" y="21" width="15" height="1.8" rx=".9" fill="#fff" opacity=".35" />
+            <!-- Nepal flag tiny -->
+            <text x="34" y="10" font-size="7" font-family="Arial">🇳🇵</text>
+            <!-- Green verified dot -->
+            <circle cx="39" cy="23" r="5.5" fill="#27AE60" />
+            <path d="M36.5 23.3l1.8 1.9 3.8-4" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </div>
 
-  <!-- RESULTS -->
-  <div id="result">
-
-    <!-- Skeleton -->
-    <div class="skeleton" id="skel">
-      <div class="skel-line"></div>
-      <div class="skel-line"></div>
-      <div class="skel-line"></div>
-      <div class="skel-line"></div>
-    </div>
-
-    <!-- Success card -->
-    <div class="result-card" id="card">
-      <div class="card-top">
-        <span class="badge badge-green" id="badge">
-          <span class="badge-dot"></span> PRINTED
-        </span>
-        <span class="card-time" id="ctime"></span>
-      </div>
-      <div class="card-body">
-        <div class="holder-name" id="cname"></div>
-        <div class="license-num"  id="cno"></div>
-        <div class="info-row">
-          <div class="info-box cat">
-            <div class="info-box-label">Category</div>
-            <div class="info-box-value" id="ccat"></div>
-          </div>
-          <div class="info-box">
-            <div class="info-box-label">Office</div>
-            <div class="info-box-value" id="coffice"></div>
-          </div>
-          <div class="info-box">
-            <div class="info-box-label">Print Date</div>
-            <div class="info-box-value" id="cdate"></div>
-          </div>
-          <div class="info-box">
-            <div class="info-box-label">District</div>
-            <div class="info-box-value" id="cdistrict"></div>
-          </div>
+        <div class="logo-text">
+          <div class="logo-name">License<span class="r">Status</span></div>
+          <div class="logo-tagline">Nepal · DOTM Print Tracker</div>
         </div>
       </div>
-      <div class="card-footer">
-        <div class="footer-dot"></div>
-        Official DOTM data &nbsp;·&nbsp; <span id="cupdated"></span>
+
+      <!-- Live pill -->
+      <div class="live-pill">
+        <div class="live-pill-dot"></div>
+        Live Data
       </div>
+
     </div>
 
-    <!-- Not found -->
-    <div class="not-found" id="notfound">
-      <div class="nf-icon">🔍</div>
-      <h3>Not Found</h3>
-      <p>No record for this license number. It may not be printed yet, or the number is incorrect.</p>
-      <button class="retry-btn" onclick="reset()">Try Again</button>
+    <!-- HERO -->
+    <div class="hero">
+      <h1>Check Your<br><span>Print</span> Status</h1>
+      <p>Enter your license number to instantly verify<br>if your driving license has been printed by DOTM.</p>
     </div>
+
+    <!-- SEARCH -->
+    <div class="search-wrap">
+      <div class="search-card">
+        <span class="search-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </span>
+        <input id="inp" type="text" placeholder="e.g. 07-01-00012345" autocomplete="off" autocorrect="off"
+          spellcheck="false" autofocus />
+        <button class="search-btn" id="btn" onclick="check()">Check</button>
+      </div>
+      <p class="hint">Press Enter to search &nbsp;·&nbsp; Format: 07-01-XXXXXXXX</p>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="result">
+
+      <div class="skeleton" id="skel">
+        <div class="skel-line"></div>
+        <div class="skel-line"></div>
+        <div class="skel-line"></div>
+        <div class="skel-line"></div>
+      </div>
+
+      <div class="result-card" id="card">
+        <div class="card-stripe stripe-green" id="cstripe"></div>
+        <div class="card-top">
+          <span class="badge badge-green" id="badge">
+            <span class="badge-dot"></span> PRINTED
+          </span>
+          <span class="card-time" id="ctime"></span>
+        </div>
+        <div class="card-body">
+          <div class="holder-name" id="cname"></div>
+          <div class="license-num" id="cno"></div>
+          <div class="info-row">
+            <div class="info-box cat">
+              <div class="info-box-label">Category</div>
+              <div class="info-box-value" id="ccat"></div>
+            </div>
+            <div class="info-box">
+              <div class="info-box-label">Office</div>
+              <div class="info-box-value" id="coffice"></div>
+            </div>
+            <div class="info-box">
+              <div class="info-box-label">Print Date</div>
+              <div class="info-box-value" id="cdate"></div>
+            </div>
+            <div class="info-box">
+              <div class="info-box-label">District</div>
+              <div class="info-box-value" id="cdistrict"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="footer-dot"></div>
+          Data sourced from official DOTM Nepal PDF records &nbsp;·&nbsp; <span id="cupdated"></span>
+        </div>
+      </div>
+
+      <div class="not-found" id="notfound">
+        <div class="nf-icon">🔍</div>
+        <h3>License Not Found</h3>
+        <p>No printed record was found for this license number. Your license may not have been printed yet, or the
+          number entered may be incorrect.</p>
+        <button class="retry-btn" onclick="reset()">Try Again</button>
+      </div>
+
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat">📋 <strong id="srec">—</strong> records indexed</div>
+      <div class="stat">🕐 Updated: <strong id="sup">—</strong></div>
+      <div class="stat">⚡ <strong>&lt;1ms</strong> search</div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-row">
+        <span>Built using publicly available PDF records from</span>
+        <a href="https://dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np</a>
+        <span class="sep">·</span>
+        <span class="sep">·</span>
+      </div>
+      <div class="disclaimer">
+        For official queries, please visit the Department of Transport Management at
+        <a href="https://dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np</a>
+      </div>
+    </footer>
 
   </div>
 
-  <!-- STATS -->
-  <div class="stats">
-    <div class="stat">📋 <strong id="srec">—</strong> records</div>
-    <div class="stat">🕐 Updated: <strong id="sup">—</strong></div>
-    <div class="stat">⚡ <strong>&lt;1ms</strong> search</div>
-  </div>
+  <div id="toast"></div>
 
-  <!-- FOOTER -->
-  <footer>
-    Unofficial tool · Data from <a href="https://dotm.gov.np" target="_blank">dotm.gov.np</a> PDFs<br>
-    Not affiliated with Government of Nepal
-  </footer>
+  <script>
+    const inp = document.getElementById('inp');
+    inp.focus();
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
 
-</div>
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const d = await (await fetch('/api/stats')).json();
+        document.getElementById('srec').textContent = (d.total_records || 0).toLocaleString();
+        document.getElementById('sup').textContent = d.last_updated || '—';
+      } catch (_) { }
+    });
 
-<!-- TOAST -->
-<div id="toast">Please enter a license number</div>
-
-<script>
-  const inp = document.getElementById('inp');
-  inp.focus();
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
-
-  window.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const r = await fetch('/api/stats');
-      const d = await r.json();
-      document.getElementById('srec').textContent = (d.total_records || 0).toLocaleString();
-      document.getElementById('sup').textContent  = d.last_updated || '—';
-    } catch(_) {}
-  });
-
-  async function check() {
-    const v = inp.value.trim();
-    if (!v) { toast('Enter a license number'); return; }
-
-    hide();
-    show('skel');
-    document.querySelector('.search-btn').disabled = true;
-
-    try {
-      const r = await fetch('/api/check?license=' + encodeURIComponent(v));
-      const d = await r.json();
-      hide();
-      document.querySelector('.search-btn').disabled = false;
-
-      if (d.found) {
-        document.getElementById('badge').className = 'badge badge-green';
-        document.getElementById('badge').innerHTML = '<span class="badge-dot"></span> PRINTED';
-        document.getElementById('cname').textContent     = d.name         || '—';
-        document.getElementById('cno').textContent       = d.license_no   || '—';
-        document.getElementById('ccat').textContent      = d.category     || '—';
-        document.getElementById('coffice').textContent   = d.office       || '—';
-        document.getElementById('cdate').textContent     = d.print_date   || '—';
-        document.getElementById('cdistrict').textContent = d.district     || '—';
-        document.getElementById('ctime').textContent     = new Date().toLocaleTimeString();
-        document.getElementById('cupdated').textContent  = 'Synced ' + (d.last_updated || '—');
-        show('card');
-        document.getElementById('card').scrollIntoView({behavior:'smooth', block:'nearest'});
-      } else {
-        show('notfound');
+    async function check() {
+      const v = inp.value.trim();
+      if (!v) { toast('Please enter a license number'); return; }
+      hide(); show('skel');
+      document.getElementById('btn').disabled = true;
+      try {
+        const d = await (await fetch('/api/check?license=' + encodeURIComponent(v))).json();
+        hide();
+        document.getElementById('btn').disabled = false;
+        if (d.found) {
+          document.getElementById('cstripe').className = 'card-stripe stripe-green';
+          document.getElementById('badge').className = 'badge badge-green';
+          document.getElementById('badge').innerHTML = '<span class="badge-dot"></span> PRINTED';
+          document.getElementById('cname').textContent = d.name || '—';
+          document.getElementById('cno').textContent = d.license_no || '—';
+          document.getElementById('ccat').textContent = d.category || '—';
+          document.getElementById('coffice').textContent = d.office || '—';
+          document.getElementById('cdate').textContent = d.print_date || '—';
+          document.getElementById('cdistrict').textContent = d.district || '—';
+          document.getElementById('ctime').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          document.getElementById('cupdated').textContent = 'Synced ' + (d.last_updated || '—');
+          show('card');
+          document.getElementById('card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          document.getElementById('cstripe').className = 'card-stripe stripe-red';
+          show('notfound');
+        }
+      } catch (_) {
+        hide();
+        document.getElementById('btn').disabled = false;
+        toast('Connection error. Please try again.');
       }
-    } catch(_) {
-      hide();
-      document.querySelector('.search-btn').disabled = false;
-      toast('Connection error. Try again.');
     }
-  }
 
-  function reset() { hide(); inp.value = ''; inp.focus(); }
+    function reset() { hide(); inp.value = ''; inp.focus(); }
+    function hide() { ['skel', 'card', 'notfound'].forEach(id => document.getElementById(id).classList.remove('show')); }
+    function show(id) { document.getElementById(id).classList.add('show'); }
 
-  function hide() {
-    ['skel','card','notfound'].forEach(id =>
-      document.getElementById(id).classList.remove('show')
-    );
-  }
-
-  function show(id) {
-    document.getElementById(id).classList.add('show');
-  }
-
-  function toast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2800);
-  }
-</script>
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+  </script>
 </body>
+
 </html>

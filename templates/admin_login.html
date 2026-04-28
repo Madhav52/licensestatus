@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOTM Admin Login</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --navy: #0A1628;
+      --navy2: #0F1F3D;
+      --navy3: #132848;
+      --blue: #1E40AF;
+      --blue2: #2563EB;
+      --cyan: #06B6D4;
+      --gold: #F59E0B;
+      --green: #10B981;
+      --red: #EF4444;
+      --redl: #FEF2F2;
+      --white: #FFFFFF;
+      --off: #F1F5F9;
+      --muted: #64748B;
+      --line: #E2E8F0;
+      --r: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: Poppins, sans-serif;
+      background: linear-gradient(135deg, var(--navy), var(--navy3));
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Card */
+    .login-card {
+      width: 380px;
+      background: var(--white);
+      padding: 42px 38px;
+      border-radius: var(--r);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+      animation: fade .6s ease;
+    }
+
+    /* Logo badge */
+    .badge {
+      width: 54px;
+      height: 54px;
+      background: linear-gradient(135deg, var(--blue2), var(--cyan));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: auto;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, .35);
+    }
+
+    .title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 6px 0 26px;
+    }
+
+    .err {
+      display: none;
+      background: var(--redl);
+      color: var(--red);
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .err.show {
+      display: block
+    }
+
+    .field {
+      margin-bottom: 16px
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: .2s;
+    }
+
+    .field input:focus {
+      border-color: var(--blue2);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+    }
+
+    /* Button */
+    button {
+      width: 100%;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: #fff;
+      border: none;
+      padding: 13px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+      box-shadow: 0 6px 18px rgba(37, 99, 235, .35);
+    }
+
+    button:hover {
+      transform: translateY(-1px)
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 18px;
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-card">
+
+    <div class="badge">🇳🇵</div>
+
+    <div class="title">DOTM Admin</div>
+    <div class="subtitle">License Management System</div>
+
+    <div class="err" id="err">Invalid username or password</div>
+
+    <form method="POST" action="/admin/login">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" required>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" required>
+      </div>
+
+      <button type="submit">Sign In</button>
+    </form>
+
+    <div class="footer">Secure Admin Access</div>
+
+  </div>
+
+  <script>
+    if (new URLSearchParams(location.search).get('error')) {
+      document.getElementById('err').classList.add('show');
+    }
+  </script>
+
+</body>
+
+</html>

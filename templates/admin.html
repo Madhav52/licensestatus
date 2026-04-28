@@ -1,0 +1,2766 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard · DOTM Nepal</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0A1628;
+      --navy2: #0F1F3D;
+      --navy3: #132848;
+      --blue: #1E40AF;
+      --blue2: #2563EB;
+      --blue3: #3B82F6;
+      --cyan: #06B6D4;
+      --gold: #F59E0B;
+      --green: #10B981;
+      --greenl: #ECFDF5;
+      --red: #EF4444;
+      --redl: #FEF2F2;
+      --amber: #F59E0B;
+      --amberl: #FFFBEB;
+      --white: #FFFFFF;
+      --off: #F1F5F9;
+      --surf: #FFFFFF;
+      --muted: #64748B;
+      --line: #E2E8F0;
+      --line2: #F1F5F9;
+      --r: 14px;
+      --sb: 264px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 15px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--off);
+      color: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sb);
+      flex-shrink: 0;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 200;
+      overflow: hidden;
+    }
+
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.18), transparent 70%);
+      bottom: -80px;
+      right: -80px;
+      pointer-events: none;
+    }
+
+    .sb-top {
+      padding: 24px 20px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      position: relative;
+    }
+
+    .sb-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 18px;
+    }
+
+    .sb-brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--blue2), var(--cyan));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+      flex-shrink: 0;
+    }
+
+    .sb-brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .sb-brand-sub {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.3);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .sb-online {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #34D399;
+    }
+
+    .sb-online-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34D399;
+      animation: pulse 2s infinite;
+    }
+
+    .sb-online-count {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0.8;
+    }
+
+    .sb-nav {
+      flex: 1;
+      padding: 14px 12px;
+      overflow-y: auto;
+    }
+
+    .sb-nav::-webkit-scrollbar {
+      width: 0;
+    }
+
+    .sb-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.18);
+      padding: 0 10px;
+      margin: 18px 0 6px;
+    }
+
+    .sb-label:first-child {
+      margin-top: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.42);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      text-decoration: none;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .nav-item.active {
+      background: rgba(37, 99, 235, 0.25);
+      color: #fff;
+      font-weight: 600;
+      border: 1px solid rgba(37, 99, 235, 0.3);
+    }
+
+    .nav-item svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+
+    .nav-item.active .nav-badge {
+      background: rgba(37, 99, 235, 0.4);
+      color: #93C5FD;
+    }
+
+    .sb-footer {
+      padding: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      position: relative;
+    }
+
+    .sb-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 8px;
+    }
+
+    .sb-avatar {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--blue2), var(--cyan));
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .sb-user-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .sb-user-role {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.3);
+      font-weight: 400;
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(248, 113, 113, 0.7);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: #FCA5A5;
+    }
+
+    .logout-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: var(--sb);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(241, 245, 249, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+      padding: 0 32px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-crumb {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .topbar-sep {
+      color: var(--line);
+      font-size: 16px;
+    }
+
+    .topbar-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tb-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--line);
+      background: var(--surf);
+      color: var(--navy);
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+
+    .tb-btn:hover {
+      border-color: var(--navy);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .tb-btn.primary {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue2) 100%);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .tb-btn.primary:hover {
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .tb-btn svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .time-badge {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      padding: 6px 12px;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .page-content {
+      padding: 28px 32px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      animation: fadein 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes fadein {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* KPI CARDS */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi {
+      background: var(--surf);
+      border: 1.5px solid var(--line);
+      border-radius: 16px;
+      padding: 22px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .kpi:hover {
+      border-color: var(--blue3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.1);
+    }
+
+    .kpi::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      opacity: 0.06;
+    }
+
+    .kpi.c-green::before {
+      background: var(--green);
+    }
+
+    .kpi.c-blue::before {
+      background: var(--blue2);
+    }
+
+    .kpi.c-amber::before {
+      background: var(--amber);
+    }
+
+    .kpi.c-cyan::before {
+      background: var(--cyan);
+    }
+
+    .kpi-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .kpi-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .kpi-icon.ig {
+      background: var(--greenl);
+    }
+
+    .kpi-icon.ib {
+      background: #EFF6FF;
+    }
+
+    .kpi-icon.ia {
+      background: var(--amberl);
+    }
+
+    .kpi-icon.ic {
+      background: #ECFEFF;
+    }
+
+    .kpi-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 100px;
+    }
+
+    .kpi-badge.up {
+      background: var(--greenl);
+      color: var(--green);
+    }
+
+    .kpi-badge.live {
+      background: #ECFEFF;
+      color: #0891B2;
+    }
+
+    .kpi-badge.info {
+      background: #EFF6FF;
+      color: var(--blue2);
+    }
+
+    .kpi-value {
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 4px;
+      transition: color 0.3s ease;
+    }
+
+    .kpi-value.flash {
+      color: var(--green);
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--surf);
+      border: 1.5px solid var(--line);
+      border-radius: 16px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title svg {
+      width: 15px;
+      height: 15px;
+      color: var(--blue2);
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* QUICK ACTIONS */
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .act {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1.5px solid var(--line);
+      background: var(--off);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .act:hover {
+      border-color: var(--blue2);
+      background: #EFF6FF;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    }
+
+    .act-icon {
+      font-size: 22px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .act-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .act-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .act.primary {
+      background: var(--navy);
+      border-color: var(--navy);
+    }
+
+    .act.primary .act-label {
+      color: #fff;
+    }
+
+    .act.primary .act-desc {
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .act.primary:hover {
+      background: var(--navy2);
+      border-color: var(--blue2);
+      box-shadow: 0 4px 16px rgba(10, 22, 40, 0.3);
+    }
+
+    .act.danger:hover {
+      border-color: var(--red);
+      background: var(--redl);
+    }
+
+    .act.danger .act-label {
+      color: var(--red);
+    }
+
+    .act.danger:hover .act-desc {
+      color: rgba(239, 68, 68, 0.7);
+    }
+
+    /* ACTIVITY FEED */
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line2);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .act-icon-wrap {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .ai-green {
+      background: var(--greenl);
+    }
+
+    .ai-blue {
+      background: #EFF6FF;
+    }
+
+    .ai-amber {
+      background: var(--amberl);
+    }
+
+    .ai-red {
+      background: var(--redl);
+    }
+
+    .act-msg {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .act-time {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    /* SOURCES */
+    .sources-header {
+      display: grid;
+      grid-template-columns: 2fr 3fr 1.5fr 1fr 80px 40px;
+      gap: 12px;
+      padding: 8px 16px;
+      background: var(--off);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .src-hd {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .source-row {
+      display: grid;
+      grid-template-columns: 2fr 3fr 1.5fr 1fr 80px 40px;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1.5px solid var(--line);
+      margin-bottom: 8px;
+      background: var(--surf);
+      transition: all 0.15s;
+      position: relative;
+    }
+
+    .source-row:hover {
+      border-color: var(--blue3);
+      box-shadow: 0 2px 12px rgba(37, 99, 235, 0.08);
+    }
+
+    .src-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .src-url {
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .src-district {
+      font-size: 12px;
+      color: var(--navy);
+      font-weight: 600;
+    }
+
+    .src-records {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue2);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .src-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+
+    .src-status.active {
+      background: var(--greenl);
+      color: var(--green);
+    }
+
+    .src-status.cached {
+      background: #EFF6FF;
+      color: var(--blue2);
+    }
+
+    /* Three dot menu */
+    .src-menu-wrap {
+      position: relative;
+    }
+
+    .src-dots {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .src-dots:hover {
+      background: var(--off);
+      color: var(--navy);
+    }
+
+    .src-dots svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .src-dropdown {
+      position: absolute;
+      right: 0;
+      top: 38px;
+      background: var(--surf);
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      min-width: 160px;
+      z-index: 100;
+      overflow: hidden;
+      display: none;
+    }
+
+    .src-dropdown.show {
+      display: block;
+      animation: fadein 0.15s ease both;
+    }
+
+    .src-dd-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      cursor: pointer;
+      transition: all 0.1s;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+
+    .src-dd-item:hover {
+      background: var(--off);
+    }
+
+    .src-dd-item.danger {
+      color: var(--red);
+    }
+
+    .src-dd-item.danger:hover {
+      background: var(--redl);
+    }
+
+    .src-dd-item svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .src-dd-sep {
+      height: 1px;
+      background: var(--line2);
+      margin: 4px 0;
+    }
+
+    /* Add source form */
+    .add-source-form {
+      border: 1.5px dashed var(--line);
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 16px;
+      background: var(--off);
+    }
+
+    .add-form-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .add-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .add-form-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .fg {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .fg label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .fg input {
+      background: var(--surf);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--navy);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .fg input:focus {
+      border-color: var(--blue2);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.07);
+    }
+
+    .add-btn {
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      align-self: flex-end;
+      height: 40px;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .add-btn:hover {
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* SEARCH / TABLE */
+    .search-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      background: var(--off);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--navy);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--blue2);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.07);
+    }
+
+    .search-bar button {
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .tbl-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1.5px solid var(--line);
+      white-space: nowrap;
+      background: var(--off);
+    }
+
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line2);
+      color: var(--navy);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover td {
+      background: #F8FAFF;
+    }
+
+    .td-mono {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--blue2);
+    }
+
+    .td-name {
+      font-weight: 700;
+    }
+
+    .td-cat {
+      font-weight: 700;
+      color: var(--red);
+      font-size: 13px;
+    }
+
+    .td-empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 48px;
+      font-size: 13px;
+    }
+
+    /* TERMINAL */
+    .terminal {
+      background: #0D1117;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-top: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .terminal-bar {
+      background: #161B22;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .t-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .t-dot:nth-child(1) {
+      background: #FF5F57;
+    }
+
+    .t-dot:nth-child(2) {
+      background: #FEBC2E;
+    }
+
+    .t-dot:nth-child(3) {
+      background: #28C840;
+    }
+
+    .terminal-title {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.25);
+      margin-left: 8px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .terminal-badge {
+      margin-left: auto;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-family: 'DM Sans', sans-serif;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+      letter-spacing: 0.05em;
+    }
+
+    .terminal-body {
+      padding: 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      line-height: 2;
+      max-height: 280px;
+      overflow-y: auto;
+      min-height: 60px;
+    }
+
+    .terminal-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .terminal-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .log-ok {
+      color: #3FB950;
+    }
+
+    .log-err {
+      color: #F85149;
+    }
+
+    .log-warn {
+      color: #D29922;
+    }
+
+    .log-info {
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .log-cursor {
+      display: inline-block;
+      width: 7px;
+      height: 13px;
+      background: rgba(255, 255, 255, 0.5);
+      animation: blink 1s infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    /* GITHUB FORM */
+    .gh-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .gh-field label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .gh-field input {
+      width: 100%;
+      background: var(--off);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--navy);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .gh-field input:focus {
+      border-color: var(--blue2);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.07);
+    }
+
+    .gh-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .gh-status {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .gh-status.show {
+      display: flex;
+    }
+
+    .gh-status.ok {
+      background: var(--greenl);
+      color: var(--green);
+    }
+
+    .gh-status.err {
+      background: var(--redl);
+      color: var(--red);
+    }
+
+    /* PROGRESS */
+    .prog-wrap {
+      background: var(--line);
+      border-radius: 100px;
+      height: 5px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .prog-bar {
+      height: 5px;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--blue2), var(--cyan));
+      transition: width 0.6s ease;
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .badge-green {
+      background: var(--greenl);
+      color: var(--green);
+    }
+
+    .badge-blue {
+      background: #EFF6FF;
+      color: var(--blue2);
+    }
+
+    .badge-amber {
+      background: var(--amberl);
+      color: #92400E;
+    }
+
+    .badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .info-box {
+      padding: 14px 16px;
+      background: #EFF6FF;
+      border: 1px solid rgba(37, 99, 235, 0.15);
+      border-radius: 12px;
+      font-size: 12px;
+      color: var(--blue);
+      line-height: 1.7;
+      margin-top: 16px;
+    }
+
+    .info-box code {
+      background: rgba(37, 99, 235, 0.1);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* MODALS */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 22, 40, 0.55);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(6px);
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surf);
+      border-radius: 20px;
+      padding: 36px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.25);
+      animation: fadein 0.25s ease both;
+    }
+
+    .modal-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+
+    .modal-icon.warn {
+      background: var(--amberl);
+    }
+
+    .modal-icon.danger {
+      background: var(--redl);
+    }
+
+    .modal h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .modal-details {
+      background: var(--off);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      font-size: 12px;
+      line-height: 1.9;
+    }
+
+    .modal-detail-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .modal-detail-key {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .modal-detail-val {
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-btns button {
+      flex: 1;
+      padding: 13px;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid var(--line);
+      transition: all 0.15s;
+    }
+
+    .m-cancel {
+      background: var(--off);
+      color: var(--navy);
+    }
+
+    .m-cancel:hover {
+      background: var(--line);
+    }
+
+    .m-danger {
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red);
+    }
+
+    .m-danger:hover {
+      background: #DC2626;
+    }
+
+    .m-primary {
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .m-primary:hover {
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      transform: translateX(120%);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 999;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-family: 'DM Sans', sans-serif;
+      max-width: 340px;
+    }
+
+    #toast.show {
+      transform: translateX(0);
+    }
+
+    #toast.ok {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    #toast.err {
+      background: var(--red);
+      color: #fff;
+    }
+
+    #toast.warn {
+      background: var(--amber);
+      color: var(--navy);
+    }
+
+    /* SYNC STATUS TABLE */
+    .sync-status-table {
+      width: 100%;
+      font-size: 12px;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .sync-status-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line2);
+    }
+
+    .sync-status-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .sync-status-table .sst-name {
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 100px;
+    }
+
+    .pill-cached {
+      background: #EFF6FF;
+      color: var(--blue2);
+    }
+
+    .pill-new {
+      background: var(--greenl);
+      color: var(--green);
+    }
+
+    .pill-err {
+      background: var(--redl);
+      color: var(--red);
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4)
+      }
+
+      50% {
+        box-shadow: 0 0 0 5px rgba(52, 211, 153, 0)
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0
+      }
+    }
+
+    .spinning {
+      animation: spin 0.9s linear infinite;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ╔══════════════════════════════════════════════════════════════╗
+       ║  SECRET PATH INJECTION — Jinja2 renders the real slug here  ║
+       ║  so ALL fetch() calls below use the correct admin prefix.   ║
+       ╚══════════════════════════════════════════════════════════════╝ -->
+  <script>
+    // Injected by Flask/Jinja2 at render time — never hardcoded.
+    // {{ admin_path }} is replaced with the real secret slug.
+    const AP = "{{ admin_path }}";
+  </script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-top">
+      <div class="sb-brand">
+        <div class="sb-brand-icon">🇳🇵</div>
+        <div>
+          <div class="sb-brand-name">DOTM Nepal</div>
+          <div class="sb-brand-sub">Admin Panel</div>
+        </div>
+      </div>
+      <div class="sb-online">
+        <div class="sb-online-dot"></div>
+        System Online
+        <span class="sb-online-count" id="sb-records">—</span>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-label">Overview</div>
+      <button class="nav-item active" onclick="goto('dashboard',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+        </svg>
+        Dashboard
+      </button>
+
+      <div class="sb-label">Data</div>
+      <button class="nav-item" onclick="goto('records',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+        </svg>
+        Browse Records
+        <span class="nav-badge" id="nb-records">—</span>
+      </button>
+      <button class="nav-item" onclick="goto('sources',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+        PDF Sources
+        <span class="nav-badge" id="nb-sources">—</span>
+      </button>
+
+      <div class="sb-label">Operations</div>
+      <button class="nav-item" onclick="goto('sync',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <polyline points="1 4 1 10 7 10" />
+          <polyline points="23 20 23 14 17 14" />
+          <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+        </svg>
+        Sync &amp; Import
+      </button>
+      <button class="nav-item" onclick="goto('github',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path
+            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+        </svg>
+        GitHub Push
+      </button>
+      <button class="nav-item" onclick="exportCSV()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Export CSV
+      </button>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar">A</div>
+        <div>
+          <div class="sb-user-name">Admin</div>
+          <div class="sb-user-role">Super Administrator</div>
+        </div>
+      </div>
+      <!-- FIX: action uses the JS AP variable injected by Flask -->
+      <form id="logout-form" method="POST">
+        <button class="logout-btn" type="submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Sign Out
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-crumb">DOTM</span>
+        <span class="topbar-sep">/</span>
+        <span class="topbar-title" id="topbar-title">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <div class="time-badge" id="clock">—</div>
+        <a href="/" target="_blank" class="tb-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+          View Public Site
+        </a>
+        <button class="tb-btn primary" onclick="askSync()">
+          <svg id="sync-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round">
+            <polyline points="1 4 1 10 7 10" />
+            <polyline points="23 20 23 14 17 14" />
+            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+          </svg>
+          Sync Now
+        </button>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ══ DASHBOARD PAGE ══ -->
+      <div class="page active" id="page-dashboard">
+        <div class="kpi-grid">
+          <div class="kpi c-green">
+            <div class="kpi-top">
+              <div class="kpi-icon ig">📋</div>
+              <span class="kpi-badge live">● LIVE</span>
+            </div>
+            <div class="kpi-value" id="kpi-total">—</div>
+            <div class="kpi-label">Total License Records</div>
+          </div>
+          <div class="kpi c-blue">
+            <div class="kpi-top">
+              <div class="kpi-icon ib">🏢</div>
+              <span class="kpi-badge info">Configured</span>
+            </div>
+            <div class="kpi-value" id="kpi-offices">—</div>
+            <div class="kpi-label">Office Sources</div>
+          </div>
+          <div class="kpi c-amber">
+            <div class="kpi-top">
+              <div class="kpi-icon ia">📅</div>
+            </div>
+            <div class="kpi-value" style="font-size:17px;line-height:1.3" id="kpi-updated">—</div>
+            <div class="kpi-label">Last Synced</div>
+          </div>
+          <div class="kpi c-cyan">
+            <div class="kpi-top">
+              <div class="kpi-icon ic">⚡</div>
+              <span class="kpi-badge up">Fast</span>
+            </div>
+            <div class="kpi-value">&lt;1ms</div>
+            <div class="kpi-label">Search Speed</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                Quick Actions
+              </span>
+            </div>
+            <div class="card-body">
+              <div class="action-grid">
+                <button class="act primary" onclick="askSync()">
+                  <span class="act-icon">🔄</span>
+                  <span class="act-label">Sync All PDFs</span>
+                  <span class="act-desc">Download new &amp; skip cached PDFs</span>
+                </button>
+                <button class="act" onclick="goto('records', document.querySelectorAll('.nav-item')[1])">
+                  <span class="act-icon">🔍</span>
+                  <span class="act-label">Search Records</span>
+                  <span class="act-desc">Find any license entry instantly</span>
+                </button>
+                <button class="act" onclick="exportCSV()">
+                  <span class="act-icon">📥</span>
+                  <span class="act-label">Export CSV</span>
+                  <span class="act-desc">Download full database as CSV</span>
+                </button>
+                <button class="act danger" onclick="askClear()">
+                  <span class="act-icon">🗑️</span>
+                  <span class="act-label">Clear Database</span>
+                  <span class="act-desc">Delete all records + cached PDFs</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Recent Activity
+              </span>
+              <span class="badge badge-green"><span class="badge-dot"></span>Live Feed</span>
+            </div>
+            <div class="card-body">
+              <div id="activity-list">
+                <div class="activity-item">
+                  <div class="act-icon-wrap ai-blue">🚀</div>
+                  <div>
+                    <div class="act-msg">Admin panel initialized</div>
+                    <div class="act-time">Just now</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+              Office Breakdown
+            </span>
+            <span id="breakdown-total" style="font-size:11px;color:var(--muted);font-weight:500"></span>
+          </div>
+          <div class="card-body">
+            <div id="office-breakdown">
+              <div style="font-size:13px;color:var(--muted)">Loading breakdown…</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dash-terminal" style="display:none">
+          <div class="terminal">
+            <div class="terminal-bar">
+              <div class="t-dot"></div>
+              <div class="t-dot"></div>
+              <div class="t-dot"></div>
+              <span class="terminal-title">sync.log — DOTM Nepal</span>
+              <span class="terminal-badge">LIVE</span>
+            </div>
+            <div class="terminal-body" id="dash-log"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ RECORDS PAGE ══ -->
+      <div class="page" id="page-records">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              Browse License Records
+            </span>
+            <span id="rec-count" style="font-size:11px;color:var(--muted);font-weight:600"></span>
+          </div>
+          <div class="card-body">
+            <div class="search-bar">
+              <input id="rec-q" type="text" placeholder="Search by license number or name…" autocomplete="off"
+                oninput="debounceSearch()" />
+              <button onclick="doSearch()">Search</button>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>License No.</th>
+                    <th>Full Name</th>
+                    <th>Cat.</th>
+                    <th>Office</th>
+                    <th>District</th>
+                    <th>Print Date</th>
+                  </tr>
+                </thead>
+                <tbody id="rec-tbody">
+                  <tr>
+                    <td colspan="6" class="td-empty">🔍 Type to search license records</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SOURCES PAGE ══ -->
+      <div class="page" id="page-sources">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              PDF Office Sources
+            </span>
+            <span class="badge badge-green"><span class="badge-dot"></span><span id="src-count">0</span>
+              Configured</span>
+          </div>
+          <div class="card-body">
+            <div class="sources-header">
+              <div class="src-hd">Office Name</div>
+              <div class="src-hd">PDF URL</div>
+              <div class="src-hd">District</div>
+              <div class="src-hd">Records</div>
+              <div class="src-hd">Status</div>
+              <div class="src-hd"></div>
+            </div>
+            <div id="sources-list">
+              <div style="font-size:13px;color:var(--muted);padding:24px;text-align:center;">No sources configured yet.
+                Add one below.</div>
+            </div>
+
+            <div class="add-source-form">
+              <div class="add-form-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="16" />
+                  <line x1="8" y1="12" x2="16" y2="12" />
+                </svg>
+                Add New PDF Source
+              </div>
+              <div class="add-form-grid">
+                <div class="fg">
+                  <label>Office Name</label>
+                  <input id="new-name" type="text" placeholder="e.g. Chabahil" />
+                </div>
+                <div class="fg">
+                  <label>District</label>
+                  <input id="new-district" type="text" placeholder="e.g. Kathmandu" />
+                </div>
+              </div>
+              <div class="add-form-row">
+                <div class="fg">
+                  <label>PDF URL</label>
+                  <input id="new-url" type="text" placeholder="https://giwmscdnone.gov.np/media/pdf_upload/..." />
+                </div>
+                <button class="add-btn" onclick="addSource()">+ Add Source</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <strong>💡 About PDF Sources:</strong> Each source points to a DOTM office's printed license PDF. The
+          <strong>District</strong> field is stored with the source and applied to every record imported from that PDF.
+          During sync, only <strong>new</strong> PDFs are downloaded — existing cached PDFs are skipped.
+          <strong>Removing a source also deletes its cached PDF and all matching DB records.</strong> Sources are stored
+          in <code>pdf_sources.json</code>.
+        </div>
+      </div>
+
+      <!-- ══ SYNC PAGE ══ -->
+      <div class="page" id="page-sync">
+        <div class="two-col">
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <polyline points="1 4 1 10 7 10" />
+                  <polyline points="23 20 23 14 17 14" />
+                  <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+                </svg>
+                Sync Controls
+              </span>
+            </div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <button class="act primary" onclick="askSync()" style="width:100%">
+                  <span class="act-icon">🔄</span>
+                  <span class="act-label">Download + Import All PDFs</span>
+                  <span class="act-desc">Skips cached PDFs, only downloads new ones from <span
+                      id="sync-src-count">—</span> sources</span>
+                </button>
+                <button class="act" onclick="exportCSV()" style="width:100%">
+                  <span class="act-icon">📥</span>
+                  <span class="act-label">Export Full Database as CSV</span>
+                  <span class="act-desc">Download all <span id="sync-total">—</span> records</span>
+                </button>
+                <button class="act danger" onclick="askClear()" style="width:100%">
+                  <span class="act-icon">🗑️</span>
+                  <span class="act-label">Clear All Records + Cached PDFs</span>
+                  <span class="act-desc">Permanently deletes all data &amp; cached files</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><span class="card-title">📊 Import Statistics</span></div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+                    <span style="font-weight:600;color:var(--muted)">Total Records</span>
+                    <span style="font-weight:700;color:var(--navy)" id="sync-stat-total">—</span>
+                  </div>
+                  <div class="prog-wrap">
+                    <div class="prog-bar" style="width:100%"></div>
+                  </div>
+                </div>
+                <div id="sync-source-status">
+                  <div
+                    style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">
+                    Source Status</div>
+                  <table class="sync-status-table" id="sync-status-tbl">
+                    <tr>
+                      <td colspan="3" style="color:var(--muted);font-size:12px;padding:12px 0;">Run a sync to see
+                        per-source status</td>
+                    </tr>
+                  </table>
+                </div>
+                <div
+                  style="font-size:12px;color:var(--muted);line-height:2;background:var(--off);padding:14px;border-radius:10px;">
+                  <div>🗄️ Database &nbsp;<strong style="color:var(--navy)">licenses.db</strong></div>
+                  <div>⚡ Engine &nbsp;<strong style="color:var(--navy)">SQLite + WAL mode</strong></div>
+                  <div>🔎 Index &nbsp;<strong style="color:var(--navy)">license_no (unique)</strong></div>
+                  <div>📅 Last Sync &nbsp;<strong style="color:var(--navy)" id="sync-stat-date">—</strong></div>
+                  <div>📂 Sources &nbsp;<strong style="color:var(--navy)">pdf_sources.json</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dot"></div>
+            <div class="t-dot"></div>
+            <div class="t-dot"></div>
+            <span class="terminal-title">sync-output.log</span>
+            <span class="terminal-badge" id="sync-term-badge">READY</span>
+          </div>
+          <div class="terminal-body" id="sync-log">
+            <span class="log-info">Awaiting sync command… <span class="log-cursor"></span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ GITHUB PAGE ══ -->
+      <div class="page" id="page-github">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path
+                  d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+              </svg>
+              GitHub Auto-Push
+            </span>
+            <div class="gh-status" id="gh-status"></div>
+          </div>
+          <div class="card-body">
+            <div class="gh-form">
+              <div class="gh-row">
+                <div class="gh-field"><label>GitHub Username</label><input id="gh-user" type="text"
+                    placeholder="your-username" /></div>
+                <div class="gh-field"><label>Repository Name</label><input id="gh-repo" type="text"
+                    placeholder="license-checker" /></div>
+              </div>
+              <div class="gh-field"><label>Personal Access Token (PAT)</label><input id="gh-token" type="password"
+                  placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" /></div>
+              <div class="gh-field"><label>Commit Message</label><input id="gh-msg" type="text"
+                  value="chore: sync latest DOTM Nepal license data" /></div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="tb-btn primary" onclick="saveGHConfig()" style="flex:1;justify-content:center">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                    <polyline points="17 21 17 13 7 13 7 21" />
+                    <polyline points="7 3 7 8 15 8" />
+                  </svg>
+                  Save Configuration
+                </button>
+                <button class="tb-btn" onclick="pushToGitHub()" style="flex:1;justify-content:center">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round">
+                    <polyline points="16 18 22 12 16 6" />
+                    <polyline points="8 6 2 12 8 18" />
+                  </svg>
+                  Push to GitHub
+                </button>
+              </div>
+            </div>
+            <div class="info-box" style="margin-top:20px">
+              <strong>💡 How it works:</strong> After every successful sync, click "Push to GitHub" to commit and push
+              your updated <code>licenses.db</code> and <code>pdf_sources.json</code> to your repository. Requires a PAT
+              with <code>repo</code> scope. Token is stored locally in your browser only.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SYNC CONFIRM MODAL -->
+  <div class="overlay" id="sync-modal">
+    <div class="modal">
+      <div class="modal-icon warn">🔄</div>
+      <h3>Confirm Sync Operation</h3>
+      <p>This will check all configured office sources. <strong>Cached PDFs will be skipped</strong> — only new or
+        updated PDFs will be downloaded and imported.</p>
+      <div class="modal-details">
+        <div class="modal-detail-row"><span class="modal-detail-key">Sources</span><span class="modal-detail-val"
+            id="sm-sources">—</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-key">Current Records</span><span
+            class="modal-detail-val" id="sm-records">—</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-key">Cached PDFs</span><span class="modal-detail-val"
+            id="sm-cached">—</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-key">Operation</span><span
+            class="modal-detail-val">Smart Download + Parse + Import</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-key">Est. Time</span><span
+            class="modal-detail-val">Varies (skips cached)</span></div>
+      </div>
+      <div class="modal-btns">
+        <button class="m-cancel" onclick="closeSyncModal()">Cancel</button>
+        <button class="m-primary" onclick="confirmSync()">🔄 Start Sync</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLEAR CONFIRM MODAL -->
+  <div class="overlay" id="clear-modal">
+    <div class="modal">
+      <div class="modal-icon danger">⚠️</div>
+      <h3>Clear Entire Database?</h3>
+      <p>This will permanently delete <strong id="clear-count">—</strong> license records <strong>and all cached PDF
+          files</strong>. This action is irreversible.</p>
+      <div class="modal-btns">
+        <button class="m-cancel" onclick="closeModal('clear-modal')">Cancel</button>
+        <button class="m-danger" onclick="clearDB()">🗑️ Delete All Records + PDFs</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE SOURCE CONFIRM MODAL -->
+  <div class="overlay" id="del-source-modal">
+    <div class="modal">
+      <div class="modal-icon danger">🗑️</div>
+      <h3>Remove Source?</h3>
+      <p>This will remove <strong id="del-source-name">—</strong> from PDF sources, delete its cached PDF file, and
+        <strong>permanently delete all license records imported from this source</strong>.</p>
+      <div class="modal-btns">
+        <button class="m-cancel" onclick="closeModal('del-source-modal')">Cancel</button>
+        <button class="m-danger" onclick="confirmDelSource()">Remove Source + Records</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <script>
+    // ── AP already defined above via Jinja2 injection ─────────────────────────────
+    // All fetch() calls use `/${AP}/api/...` — never hardcoded /admin/...
+
+    // Wire up logout form action dynamically
+    document.getElementById('logout-form').action = '/' + AP + '/logout';
+
+    // ── STATE ─────────────────────────────────────────────────────────────────────
+    let sourceState = {};
+    let pendingDelSource = null;
+
+    // ── NAVIGATION ────────────────────────────────────────────────────────────────
+    const PAGE_TITLES = {
+      dashboard: 'Dashboard', records: 'Browse Records',
+      sources: 'PDF Sources', sync: 'Sync & Import', github: 'GitHub Push'
+    };
+
+    function goto(name, btn) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + name).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      document.getElementById('topbar-title').textContent = PAGE_TITLES[name] || name;
+      if (name === 'sources') loadSources();
+      if (name === 'records') setTimeout(() => document.getElementById('rec-q').focus(), 100);
+      if (name === 'dashboard') loadBreakdown();
+      if (name === 'sync') updateSyncStatusTable();
+      document.querySelectorAll('.src-dropdown.show').forEach(d => d.classList.remove('show'));
+    }
+
+    // ── CLOCK ─────────────────────────────────────────────────────────────────────
+    function updateClock() {
+      document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US',
+        { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.src-menu-wrap'))
+        document.querySelectorAll('.src-dropdown.show').forEach(d => d.classList.remove('show'));
+    });
+
+    // ── LIVE STATS (polls every 5 s) ─────────────────────────────────────────────
+    function flashKpi(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('flash');
+      setTimeout(() => el.classList.remove('flash'), 800);
+    }
+
+    async function loadStats() {
+      try {
+        // /api/stats is a PUBLIC route — no secret path needed
+        const d = await (await fetch('/api/stats')).json();
+        const total = (d.total_records || 0).toLocaleString();
+        const prev = document.getElementById('kpi-total').textContent;
+        if (prev !== '—' && prev !== total) flashKpi('kpi-total');
+        document.getElementById('kpi-total').textContent = total;
+        document.getElementById('kpi-updated').textContent = d.last_updated || '—';
+        ['sb-records', 'nb-records', 'sync-total', 'sync-stat-total'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = total;
+        });
+        document.getElementById('sync-stat-date').textContent = d.last_updated || '—';
+      } catch (_) { }
+      await loadSourcesData();
+    }
+
+    setInterval(loadStats, 5000);
+
+    async function loadSourcesData() {
+      try {
+        // FIX: use `/${AP}/api/urls` — not /admin/api/urls
+        const d = await (await fetch(`/${AP}/api/urls`)).json();
+        const urls = d.urls || {};
+        Object.entries(urls).forEach(([name, entry]) => {
+          const url = typeof entry === 'string' ? entry : (entry.url || '');
+          const district = typeof entry === 'object' ? (entry.district || '') : '';
+          if (!sourceState[name]) {
+            sourceState[name] = { url, district, cached: false, records: 0 };
+          } else {
+            sourceState[name].url = url;
+            sourceState[name].district = district;
+          }
+        });
+        // Remove sources no longer in config
+        Object.keys(sourceState).forEach(k => { if (!urls[k]) delete sourceState[k]; });
+
+        const n = Object.keys(sourceState).length;
+        ['kpi-offices', 'nb-sources', 'src-count'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = n;
+        });
+        document.getElementById('sync-src-count').textContent = n;
+      } catch (_) {
+        document.getElementById('kpi-offices').textContent = Object.keys(sourceState).length || '—';
+      }
+      // Per-office record counts
+      try {
+        // FIX: use `/${AP}/api/breakdown`
+        const d = await (await fetch(`/${AP}/api/breakdown`)).json();
+        (d.rows || []).forEach(r => {
+          const key = Object.keys(sourceState).find(k => k.toLowerCase() === (r.office || '').toLowerCase());
+          if (key) sourceState[key].records = r.count;
+        });
+      } catch (_) { }
+    }
+
+    // ── OFFICE BREAKDOWN ──────────────────────────────────────────────────────────
+    async function loadBreakdown() {
+      try {
+        // FIX: use `/${AP}/api/breakdown`
+        const d = await (await fetch(`/${AP}/api/breakdown`)).json();
+        const el = document.getElementById('office-breakdown');
+        const rows = d.rows || [];
+        if (!rows.length) {
+          el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">No records yet. Run a sync to import data.</div>';
+          return;
+        }
+        const total = rows.reduce((s, r) => s + r.count, 0);
+        document.getElementById('breakdown-total').textContent = total.toLocaleString() + ' total records';
+        const colors = ['var(--blue2)', 'var(--cyan)', 'var(--green)', 'var(--amber)'];
+        el.innerHTML = rows.map((r, i) => {
+          const pct = total ? Math.round(r.count * 100 / total) : 0;
+          const c = colors[i % colors.length];
+          const key = Object.keys(sourceState).find(k => k.toLowerCase() === (r.office || '').toLowerCase());
+          if (key) sourceState[key].records = r.count;
+          const dist = key ? (sourceState[key].district || '—') : '—';
+          return `<div style="margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;align-items:center">
+              <span style="font-weight:700;color:var(--navy)">${escHtml(r.office || 'Unknown')}</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:10px;font-weight:600;color:var(--muted);background:var(--off);padding:2px 8px;border-radius:100px;">📍 ${escHtml(dist)}</span>
+                <span style="font-weight:700;color:var(--navy)">${r.count.toLocaleString()}</span>
+                <span style="font-size:10px;color:var(--muted);font-weight:600">${pct}%</span>
+              </div>
+            </div>
+            <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:linear-gradient(90deg,${c},${c}99)"></div></div>
+          </div>`;
+        }).join('');
+      } catch (_) { }
+    }
+
+    // ── SOURCES ───────────────────────────────────────────────────────────────────
+    async function loadSources() {
+      await loadSourcesData();
+      renderSources();
+    }
+
+    function renderSources() {
+      const el = document.getElementById('sources-list');
+      const keys = Object.keys(sourceState);
+      document.getElementById('src-count').textContent = keys.length;
+
+      if (!keys.length) {
+        el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:24px;text-align:center;">No sources configured yet. Add one below.</div>';
+        return;
+      }
+
+      // FIX: use data-* attributes + event delegation instead of inline onclick
+      // with string-escaped URLs — avoids all escaping bugs with special chars in URLs
+      el.innerHTML = keys.map((name, i) => {
+        const s = sourceState[name];
+        const statusHtml = s.cached
+          ? `<span class="src-status cached">● Cached</span>`
+          : `<span class="src-status active">● Active</span>`;
+        const recordsHtml = s.records > 0
+          ? s.records.toLocaleString()
+          : '<span style="color:var(--muted)">—</span>';
+
+        return `<div class="source-row" id="src-row-${i}">
+          <div class="src-name">
+            <span style="width:26px;height:26px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;">${i + 1}</span>
+            ${escHtml(name)}
+          </div>
+          <div class="src-url" title="${escHtml(s.url)}">${escHtml(s.url)}</div>
+          <div class="src-district">${escHtml(s.district || '—')}</div>
+          <div class="src-records">${recordsHtml}</div>
+          <div>${statusHtml}</div>
+          <div class="src-menu-wrap">
+            <button class="src-dots" data-dd="dd-${i}" title="Options">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <circle cx="12" cy="5" r="1" fill="currentColor"/>
+                <circle cx="12" cy="12" r="1" fill="currentColor"/>
+                <circle cx="12" cy="19" r="1" fill="currentColor"/>
+              </svg>
+            </button>
+            <div class="src-dropdown" id="dd-${i}">
+              <button class="src-dd-item" data-action="copy" data-name="${escHtml(name)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Copy URL
+              </button>
+              <button class="src-dd-item" data-action="open" data-name="${escHtml(name)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                Open PDF
+              </button>
+              <button class="src-dd-item" data-action="redownload" data-name="${escHtml(name)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <polyline points="1 4 1 10 7 10"/>
+                  <path d="M3.51 15a9 9 0 1 0 .49-4.01"/>
+                </svg>
+                Force Re-download
+              </button>
+              <div class="src-dd-sep"></div>
+              <button class="src-dd-item danger" data-action="delete" data-name="${escHtml(name)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6"/><path d="M14 11v6"/>
+                </svg>
+                Remove Source
+              </button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── EVENT DELEGATION for dropdown buttons ─────────────────────────────────────
+    document.addEventListener('click', e => {
+      // Toggle dots button
+      const dotsBtn = e.target.closest('.src-dots');
+      if (dotsBtn) {
+        e.stopPropagation();
+        const ddId = dotsBtn.dataset.dd;
+        document.querySelectorAll('.src-dropdown.show').forEach(d => { if (d.id !== ddId) d.classList.remove('show'); });
+        document.getElementById(ddId)?.classList.toggle('show');
+        return;
+      }
+
+      // Dropdown item actions
+      const item = e.target.closest('.src-dd-item[data-action]');
+      if (item) {
+        e.stopPropagation();
+        document.querySelectorAll('.src-dropdown.show').forEach(d => d.classList.remove('show'));
+        const action = item.dataset.action;
+        const name = item.dataset.name;
+        const s = sourceState[name];
+        if (!s) return;
+
+        if (action === 'copy') {
+          navigator.clipboard.writeText(s.url).then(() => toast('✓ URL copied to clipboard'));
+        } else if (action === 'open') {
+          window.open(s.url, '_blank');
+        } else if (action === 'redownload') {
+          sourceState[name].cached = false;
+          renderSources();
+          toast('↻ ' + name + ' marked for re-download');
+          addActivity('Marked ' + name + ' for re-download', 'amber', '↻');
+        } else if (action === 'delete') {
+          pendingDelSource = name;
+          document.getElementById('del-source-name').textContent = name;
+          document.getElementById('del-source-modal').classList.add('show');
+        }
+        return;
+      }
+    });
+
+    async function confirmDelSource() {
+      const name = pendingDelSource;
+      if (!name) return;
+      closeModal('del-source-modal');
+      try {
+        // FIX: use `/${AP}/api/urls/...`
+        const r = await (await fetch(`/${AP}/api/urls/` + encodeURIComponent(name), { method: 'DELETE' })).json();
+        if (r.ok) {
+          delete sourceState[name];
+          renderSources();
+          loadStats();
+          loadBreakdown();
+          toast('Removed: ' + name + ' (' + (r.records_deleted || 0) + ' records deleted)');
+          addActivity('Removed source + ' + (r.records_deleted || 0) + ' records: ' + name, 'amber', '🗑️');
+        } else toast(r.error || 'Failed to remove source', 'err');
+      } catch (_) {
+        delete sourceState[name];
+        renderSources();
+        toast('Removed: ' + name);
+        addActivity('Removed source: ' + name, 'amber', '🗑️');
+      }
+      pendingDelSource = null;
+    }
+
+    async function addSource() {
+      const name = document.getElementById('new-name').value.trim();
+      const district = document.getElementById('new-district').value.trim();
+      const url = document.getElementById('new-url').value.trim();
+      if (!name || !url) { toast('Enter office name and URL', 'warn'); return; }
+      if (!url.startsWith('http')) { toast('URL must start with https://', 'err'); return; }
+      if (sourceState[name]) { toast('Source "' + name + '" already exists', 'warn'); return; }
+
+      try {
+        // FIX: use `/${AP}/api/urls`
+        const r = await (await fetch(`/${AP}/api/urls`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, url, district })
+        })).json();
+        if (r.ok) {
+          sourceState[name] = { url, district, cached: false, records: 0 };
+          document.getElementById('new-name').value = '';
+          document.getElementById('new-district').value = '';
+          document.getElementById('new-url').value = '';
+          renderSources();
+          loadStats();
+          toast('✓ Source added: ' + name + (district ? ' (' + district + ')' : ''));
+          addActivity('Added PDF source: ' + name + (district ? ' · ' + district : ''), 'blue', '🔗');
+        } else toast(r.error || 'Failed to add source', 'err');
+      } catch (_) {
+        // Demo fallback if server unreachable
+        sourceState[name] = { url, district, cached: false, records: 0 };
+        document.getElementById('new-name').value = '';
+        document.getElementById('new-district').value = '';
+        document.getElementById('new-url').value = '';
+        renderSources();
+        toast('✓ Source added: ' + name);
+        addActivity('Added PDF source: ' + name, 'blue', '🔗');
+      }
+    }
+
+    // ── SEARCH ────────────────────────────────────────────────────────────────────
+    let sTimer;
+    function debounceSearch() { clearTimeout(sTimer); sTimer = setTimeout(doSearch, 380); }
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('rec-q').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+    });
+
+    async function doSearch() {
+      const q = document.getElementById('rec-q').value.trim();
+      if (!q) return;
+      const tbody = document.getElementById('rec-tbody');
+      tbody.innerHTML = '<tr><td colspan="6" class="td-empty">🔍 Searching…</td></tr>';
+      try {
+        // FIX: use `/${AP}/api/search`
+        const d = await (await fetch(`/${AP}/api/search?q=` + encodeURIComponent(q))).json();
+        const results = d.results || [];
+        document.getElementById('rec-count').textContent = results.length + ' result(s) for "' + q + '"';
+        if (!results.length) {
+          tbody.innerHTML = '<tr><td colspan="6" class="td-empty">No records found for "' + escHtml(q) + '"</td></tr>';
+          return;
+        }
+        tbody.innerHTML = results.map(r => `
+          <tr>
+            <td class="td-mono">${escHtml(r.license_no || '—')}</td>
+            <td class="td-name">${escHtml(r.name || '—')}</td>
+            <td class="td-cat">${escHtml(r.category || '—')}</td>
+            <td>${escHtml(r.office || '—')}</td>
+            <td>${escHtml(r.district || '—')}</td>
+            <td>${escHtml(r.print_date || '—')}</td>
+          </tr>`).join('');
+      } catch (_) {
+        tbody.innerHTML = '<tr><td colspan="6" class="td-empty">❌ Error fetching results</td></tr>';
+      }
+    }
+
+    // ── SYNC FLOW ─────────────────────────────────────────────────────────────────
+    function askSync() {
+      const srcNames = Object.keys(sourceState);
+      const cachedCount = srcNames.filter(n => sourceState[n].cached).length;
+      document.getElementById('sm-sources').textContent = srcNames.length + ' office' + (srcNames.length !== 1 ? 's' : '');
+      document.getElementById('sm-records').textContent = (document.getElementById('kpi-total').textContent || '—') + ' existing';
+      document.getElementById('sm-cached').textContent = cachedCount + ' cached (will skip), ' + (srcNames.length - cachedCount) + ' to download';
+      document.getElementById('sync-modal').classList.add('show');
+    }
+    function closeSyncModal() { document.getElementById('sync-modal').classList.remove('show'); }
+
+    async function confirmSync() {
+      closeSyncModal();
+      const ico = document.getElementById('sync-ico');
+      const badge = document.getElementById('sync-term-badge');
+      ico.classList.add('spinning');
+      document.getElementById('dash-terminal').style.display = 'block';
+      if (badge) badge.textContent = 'RUNNING';
+
+      function log(msg, type = 'info') {
+        const cls = type === 'ok' ? 'log-ok' : type === 'err' ? 'log-err' : type === 'warn' ? 'log-warn' : 'log-info';
+        ['dash-log', 'sync-log'].forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const ts = new Date().toLocaleTimeString();
+          el.innerHTML += `<div class="${cls}">[${ts}] ${escHtml(msg)}</div>`;
+          el.scrollTop = el.scrollHeight;
+        });
+      }
+
+      log('> Initializing DOTM smart sync engine…');
+      const srcNames = Object.keys(sourceState);
+      const toDownload = srcNames.filter(n => !sourceState[n].cached);
+      const cached = srcNames.filter(n => sourceState[n].cached);
+
+      log('> Checking ' + srcNames.length + ' source(s)…');
+      cached.forEach(n => log('> [SKIP] ' + n + ' — PDF already cached', 'warn'));
+      toDownload.forEach(n => {
+        const dist = sourceState[n].district ? ' [' + sourceState[n].district + ']' : '';
+        log('> [QUEUE] ' + n + dist + ' — new download needed');
+      });
+
+      if (toDownload.length === 0) {
+        log('> All PDFs are cached. Nothing new to download.', 'warn');
+        log('> Use "Force Re-download" on a source to re-fetch it.');
+        ico.classList.remove('spinning');
+        if (badge) badge.textContent = 'DONE';
+        toast('All PDFs already cached — nothing new to download', 'warn');
+        addActivity('Sync skipped — all PDFs cached', 'amber', '⚡');
+        updateSyncStatusTable();
+        return;
+      }
+
+      try {
+        // FIX: use `/${AP}/api/sync`
+        const r = await fetch(`/${AP}/api/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skip_cached: cached, download: toDownload })
+        });
+        const d = await r.json();
+        ico.classList.remove('spinning');
+        if (badge) badge.textContent = d.ok ? 'DONE' : 'ERROR';
+
+        if (d.ok) {
+          toDownload.forEach(n => { if (sourceState[n]) sourceState[n].cached = true; });
+          log('> PDFs downloaded: ' + (d.pdfs_downloaded || toDownload.length), 'ok');
+          log('> PDFs skipped (cached): ' + cached.length, 'warn');
+          log('> Records imported: ' + (d.records_imported || 0).toLocaleString(), 'ok');
+          log('> Sync completed successfully ✓', 'ok');
+          toast('✓ Synced ' + (d.records_imported || 0).toLocaleString() + ' records (' + cached.length + ' cached skipped)');
+          addActivity('Sync done — ' + (d.records_imported || 0).toLocaleString() + ' records, ' + cached.length + ' skipped', 'green', '✅');
+          loadStats();
+          loadBreakdown();
+          renderSources();
+        } else {
+          log('> Error: ' + (d.error || 'Sync failed'), 'err');
+          toast(d.error || 'Sync failed', 'err');
+        }
+      } catch (e) {
+        ico.classList.remove('spinning');
+        if (badge) badge.textContent = 'ERROR';
+        log('> Network error — could not reach sync endpoint.', 'err');
+        log('> Error: ' + e.message, 'err');
+        toast('Sync failed — check server connection', 'err');
+      }
+    }
+
+    // ── SYNC STATUS TABLE ─────────────────────────────────────────────────────────
+    function updateSyncStatusTable() {
+      const tbl = document.getElementById('sync-status-tbl');
+      if (!tbl) return;
+      const keys = Object.keys(sourceState);
+      if (!keys.length) {
+        tbl.innerHTML = '<tr><td colspan="3" style="color:var(--muted);font-size:12px;padding:12px 0;">No sources configured</td></tr>';
+        return;
+      }
+      tbl.innerHTML = keys.map(name => {
+        const s = sourceState[name];
+        const pill = s.cached
+          ? '<span class="pill pill-cached">● Cached</span>'
+          : '<span class="pill pill-new">↓ Pending</span>';
+        const rec = s.records > 0 ? s.records.toLocaleString() : '—';
+        const dist = s.district ? `<span style="font-size:10px;color:var(--muted)"> · ${escHtml(s.district)}</span>` : '';
+        return `<tr>
+          <td class="sst-name">${escHtml(name)}${dist}</td>
+          <td>${pill}</td>
+          <td style="text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--blue2);font-weight:500;">${rec}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── EXPORT ────────────────────────────────────────────────────────────────────
+    function exportCSV() {
+      toast('📥 Preparing CSV export…');
+      addActivity('CSV export downloaded', 'blue', '📥');
+      // FIX: use `/${AP}/api/export`
+      window.location.href = '/' + AP + '/api/export';
+    }
+
+    // ── CLEAR DB ──────────────────────────────────────────────────────────────────
+    function askClear() {
+      document.getElementById('clear-count').textContent = document.getElementById('kpi-total').textContent;
+      document.getElementById('clear-modal').classList.add('show');
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    async function clearDB() {
+      closeModal('clear-modal');
+      try {
+        // FIX: use `/${AP}/api/clear`
+        const r = await (await fetch(`/${AP}/api/clear`, { method: 'POST' })).json();
+        if (r.ok) {
+          Object.keys(sourceState).forEach(k => {
+            sourceState[k].records = 0;
+            sourceState[k].cached = false;
+          });
+          loadStats(); loadBreakdown(); renderSources(); updateSyncStatusTable();
+          const pdfsMsg = r.cached_pdfs_deleted > 0 ? ' + ' + r.cached_pdfs_deleted + ' PDF files' : '';
+          toast('✓ Database cleared' + pdfsMsg);
+          addActivity('Database + ' + (r.cached_pdfs_deleted || 0) + ' cached PDFs cleared', 'red', '🗑️');
+        } else toast(r.error || 'Failed', 'err');
+      } catch (_) {
+        Object.keys(sourceState).forEach(k => { sourceState[k].records = 0; sourceState[k].cached = false; });
+        renderSources(); updateSyncStatusTable();
+        toast('✓ Database cleared (demo)');
+        addActivity('Database cleared', 'red', '🗑️');
+      }
+    }
+
+    // ── GITHUB ────────────────────────────────────────────────────────────────────
+    function saveGHConfig() {
+      const cfg = {
+        user: document.getElementById('gh-user').value.trim(),
+        repo: document.getElementById('gh-repo').value.trim(),
+        token: document.getElementById('gh-token').value.trim(),
+        msg: document.getElementById('gh-msg').value.trim(),
+      };
+      if (!cfg.user || !cfg.repo || !cfg.token) { toast('Fill in all GitHub fields', 'err'); return; }
+      localStorage.setItem('gh_config', JSON.stringify(cfg));
+      toast('✓ GitHub config saved locally');
+      showGHStatus('✓ Configuration saved — ready to push.', 'ok');
+      addActivity('GitHub config saved for: ' + cfg.user + '/' + cfg.repo, 'blue', '⚙️');
+    }
+    function loadGHConfig() {
+      try {
+        const c = JSON.parse(localStorage.getItem('gh_config') || '{}');
+        if (c.user) document.getElementById('gh-user').value = c.user;
+        if (c.repo) document.getElementById('gh-repo').value = c.repo;
+        if (c.token) document.getElementById('gh-token').value = c.token;
+        if (c.msg) document.getElementById('gh-msg').value = c.msg;
+      } catch (_) { }
+    }
+    function showGHStatus(msg, type) {
+      const el = document.getElementById('gh-status');
+      el.textContent = msg; el.className = 'gh-status show ' + type;
+    }
+    async function pushToGitHub() {
+      const cfg = JSON.parse(localStorage.getItem('gh_config') || '{}');
+      if (!cfg.user || !cfg.repo || !cfg.token) { toast('Save GitHub config first', 'err'); return; }
+      toast('Pushing to GitHub…');
+      try {
+        // FIX: use `/${AP}/api/github-push`
+        const r = await (await fetch(`/${AP}/api/github-push`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cfg)
+        })).json();
+        if (r.ok) {
+          showGHStatus('✓ Pushed to github.com/' + cfg.user + '/' + cfg.repo, 'ok');
+          toast('✓ Pushed to GitHub!');
+          addActivity('Pushed to GitHub: ' + cfg.user + '/' + cfg.repo, 'green', '🚀');
+        } else {
+          showGHStatus('✗ ' + r.error, 'err');
+          toast(r.error || 'Push failed', 'err');
+        }
+      } catch (e) { toast('Push to GitHub failed', 'err'); }
+    }
+
+    // ── ACTIVITY FEED ─────────────────────────────────────────────────────────────
+    function addActivity(msg, color, icon) {
+      const list = document.getElementById('activity-list');
+      const colorMap = { green: 'ai-green', blue: 'ai-blue', amber: 'ai-amber', red: 'ai-red' };
+      const item = document.createElement('div');
+      item.className = 'activity-item';
+      item.style.animation = 'fadein 0.3s ease both';
+      item.innerHTML = `
+        <div class="act-icon-wrap ${colorMap[color] || 'ai-blue'}">${icon || '●'}</div>
+        <div>
+          <div class="act-msg">${escHtml(msg)}</div>
+          <div class="act-time">${new Date().toLocaleTimeString()}</div>
+        </div>`;
+      list.insertBefore(item, list.firstChild);
+      if (list.children.length > 8) list.removeChild(list.lastChild);
+    }
+
+    // ── UTILS ─────────────────────────────────────────────────────────────────────
+    function escHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ── TOAST ─────────────────────────────────────────────────────────────────────
+    function toast(msg, type = 'ok') {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = 'show ' + type;
+      clearTimeout(t._t);
+      t._t = setTimeout(() => { t.classList.remove('show'); }, 3500);
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────────────────────
+    loadStats();
+    loadBreakdown();
+    loadGHConfig();
+  </script>
+</body>
+
+</html>
