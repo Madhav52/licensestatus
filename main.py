@@ -42,7 +42,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY",        "dotm-secret-change-me-2081")
 
 # ⚠️  Change this to something only you know.
 # Set via env var:  export ADMIN_SECRET_PATH="your-secret-slug"
-ADMIN_SECRET_PATH = os.environ.get("ADMIN_SECRET_PATH", "dotm-panel-x7k2")
+ADMIN_SECRET_PATH = os.environ.get("ADMIN_SECRET_PATH", "dotm-admin")
 AP = ADMIN_SECRET_PATH   # short alias
 
 
