@@ -1587,9 +1587,8 @@
        ║  so ALL fetch() calls below use the correct admin prefix.   ║
        ╚══════════════════════════════════════════════════════════════╝ -->
   <script>
-    // Injected by Flask/Jinja2 at render time — never hardcoded.
-    // {{ admin_path }} is replaced with the real secret slug.
-    const AP = "{{ admin_path }}";
+    // Hardcoded admin path
+    const AP = "dotm-admin";
   </script>
 
   <!-- SIDEBAR -->
@@ -2595,12 +2594,12 @@
 
         if (d.ok) {
           toDownload.forEach(n => { if (sourceState[n]) sourceState[n].cached = true; });
-          log('> PDFs downloaded: ' + (d.pdfs_downloaded || toDownload.length), 'ok');
-          log('> PDFs skipped (cached): ' + cached.length, 'warn');
+          log('> PDFs downloaded: ' + (d.pdfs_downloaded || 0), 'ok');
+          log('> PDFs skipped (cached): ' + (d.pdfs_skipped || cached.length), 'warn');
           log('> Records imported: ' + (d.records_imported || 0).toLocaleString(), 'ok');
-          log('> Sync completed successfully ✓', 'ok');
-          toast('✓ Synced ' + (d.records_imported || 0).toLocaleString() + ' records (' + cached.length + ' cached skipped)');
-          addActivity('Sync done — ' + (d.records_imported || 0).toLocaleString() + ' records, ' + cached.length + ' skipped', 'green', '✅');
+          log('> Sync completed successfully', 'ok');
+          toast('Synced ' + (d.records_imported || 0).toLocaleString() + ' records');
+          addActivity('Sync done — ' + (d.records_imported || 0).toLocaleString() + ' records imported, ' + (d.pdfs_skipped || 0) + ' PDFs cached', 'green', '✅');
           loadStats();
           loadBreakdown();
           renderSources();

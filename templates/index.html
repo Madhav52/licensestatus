@@ -528,6 +528,103 @@
     }
 
     /* ══════════════════════════
+       OFFICES
+    ══════════════════════════ */
+    .offices {
+      width: 100%;
+      max-width: 560px;
+      margin-top: 28px;
+      animation: up 0.6s 0.18s ease both;
+    }
+
+    .offices-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    .offices-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .offices-total {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .office-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .office-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 14px;
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+
+    .office-card:hover {
+      border-color: var(--red);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    }
+
+    .office-card-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .office-card-district {
+      font-size: 10.5px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .office-card-count {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--red);
+      letter-spacing: -0.02em;
+    }
+
+    .office-card-count-label {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    .office-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 22px 16px;
+      color: var(--muted);
+      font-size: 13px;
+      background: var(--white);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+    }
+
+    /* ══════════════════════════
        STATS
     ══════════════════════════ */
     .stats {
@@ -817,6 +914,17 @@
       <div class="stat">⚡ <strong>&lt;1ms</strong> search</div>
     </div>
 
+    <!-- OFFICE RECORDS -->
+    <div class="offices">
+      <div class="offices-header">
+        <div class="offices-title">Office Records</div>
+        <div class="offices-total" id="offices-total">—</div>
+      </div>
+      <div class="office-grid" id="office-grid">
+        <div class="office-empty">Loading offices…</div>
+      </div>
+    </div>
+
     <!-- FOOTER -->
     <footer>
       <div class="footer-row">
@@ -825,9 +933,8 @@
         <span class="sep">·</span>
         <span class="sep">·</span>
       </div>
-      <div class="disclaimer">
-        For official queries, please visit the Department of Transport Management at
-        <a href="https://dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np</a>
+      <div class="disclaimer" style="margin-top: 10px; border-top: 1px solid #E8ECF0; padding-top: 10px;">
+        Copyright © 2026 Shushant Giri. All rights reserved.
       </div>
     </footer>
 
@@ -846,7 +953,40 @@
         document.getElementById('srec').textContent = (d.total_records || 0).toLocaleString();
         document.getElementById('sup').textContent = d.last_updated || '—';
       } catch (_) { }
+      loadOffices();
     });
+
+    async function loadOffices() {
+      const grid = document.getElementById('office-grid');
+      const totalEl = document.getElementById('offices-total');
+      try {
+        const d = await (await fetch('/api/offices')).json();
+        const offices = d.offices || [];
+        totalEl.textContent = (d.total || 0).toLocaleString() + ' total';
+        if (!offices.length) {
+          grid.innerHTML = '<div class="office-empty">No office records available yet.</div>';
+          return;
+        }
+        grid.innerHTML = offices.map(o => `
+          <div class="office-card">
+            <div class="office-card-name">${escapeHtml(o.office)}</div>
+            ${o.district ? `<div class="office-card-district">${escapeHtml(o.district)}</div>` : ''}
+            <div>
+              <span class="office-card-count">${(o.count || 0).toLocaleString()}</span>
+              <span class="office-card-count-label">records</span>
+            </div>
+          </div>
+        `).join('');
+      } catch (_) {
+        grid.innerHTML = '<div class="office-empty">Could not load office records.</div>';
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
 
     async function check() {
       const v = inp.value.trim();
