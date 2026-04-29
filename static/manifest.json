@@ -4,8 +4,8 @@
     "description": "Nepal DOTM driving license print status checker",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#4B0082",
-    "theme_color": "#663399",
+    "background_color": "#EBF4FF",
+    "theme_color": "#1A6FBF,",
     "icons": [
         {
             "src": "/static/icons/icon-192.png",
