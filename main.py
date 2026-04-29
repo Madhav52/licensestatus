@@ -439,8 +439,12 @@ def service_worker():
 
 @app.route("/manifest.json")
 def manifest():
-    return app.send_static_file("manifest.json")
-
+    from flask import send_from_directory
+    return send_from_directory(
+        os.path.join(BASE_DIR, "static"),
+        "manifest.json",
+        mimetype="application/json"
+    )
 # ══════════════════════════════════════════════════════════════════
 #   PUBLIC ROUTES
 # ══════════════════════════════════════════════════════════════════
