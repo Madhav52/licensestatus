@@ -60,14 +60,16 @@ DB_PATH = BASE_DIR / "licenses.db"
 PDF_SOURCES_FILE = BASE_DIR / "pdf_sources.json"
 TEMP_DIR = BASE_DIR / ".pdf_tmp"
 
-ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "dotm2081")
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "shushantgiri@admin.com")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "License@123!@#")
 SECRET_KEY = os.environ.get("SECRET_KEY",     "dotm-secret-change-me-2081")
 
 # reCAPTCHA v3 — bot mitigation for /api/check.
 # When RECAPTCHA_SECRET_KEY is unset the gate is disabled (dev-friendly).
-RECAPTCHA_SITE_KEY = os.environ.get("RECAPTCHA_SITE_KEY", "").strip()
-RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "").strip()
+RECAPTCHA_SITE_KEY = os.environ.get(
+    "RECAPTCHA_SITE_KEY", "6LcHR9AsAAAAANdSalPzoKda3cZh6R4b3_SI7PX4").strip()
+RECAPTCHA_SECRET_KEY = os.environ.get(
+    "RECAPTCHA_SECRET_KEY", "6LcHR9AsAAAAANOvjD0q7cIhAWbnY1Dc3SBOpFmr").strip()
 try:
     RECAPTCHA_MIN_SCORE = float(os.environ.get("RECAPTCHA_MIN_SCORE", "0.5"))
 except ValueError:
@@ -902,7 +904,8 @@ def _run_sync_job(sources: dict):
     try:
         for idx, (office, entry) in enumerate(sources.items(), 1):
             url = entry["url"] if isinstance(entry, dict) else entry
-            district = entry.get("district", "") if isinstance(entry, dict) else ""
+            district = entry.get("district", "") if isinstance(
+                entry, dict) else ""
             tmp_pdf = _temp_pdf_path(office)
 
             _job_set(current_office=office, office_index=idx,
