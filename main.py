@@ -439,16 +439,13 @@ def service_worker():
 
 @app.route("/manifest.json")
 def manifest():
-    """Serve the PWA manifest from root."""
-    response = app.send_static_file("manifest.json")
-    response.headers["Content-Type"] = "application/manifest+json"
-    response.headers["Cache-Control"] = "public, max-age=86400"
-    return response
-
+    return app.send_static_file("manifest.json")
 
 # ══════════════════════════════════════════════════════════════════
 #   PUBLIC ROUTES
 # ══════════════════════════════════════════════════════════════════
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
