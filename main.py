@@ -162,6 +162,11 @@ def init_db():
 
             CREATE INDEX IF NOT EXISTS idx_search_log_created
                 ON search_log (created_at DESC);
+
+            CREATE TABLE IF NOT EXISTS office_order (
+                office      TEXT PRIMARY KEY,
+                order_index INTEGER DEFAULT 0
+            );
         """)
 
 
@@ -231,9 +236,7 @@ def get_office_breakdown() -> list[dict]:
             GROUP BY office
         """).fetchall()
     rows = [dict(r) for r in rows]
-    sources = load_pdf_sources()
-    order_map = {n: int(e.get("order", 9999))
-                 for n, e in sources.items()}
+    order_map = get_office_order_map()
     UNRANKED = 10**6
     rows.sort(key=lambda r: (
         order_map.get(r["office"], UNRANKED),
@@ -250,6 +253,12 @@ def set_meta(key: str, value: str):
             "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
             (key, value)
         )
+
+
+def get_office_order_map() -> dict:
+    with get_conn() as conn:
+        rows = conn.execute("SELECT office, order_index FROM office_order").fetchall()
+    return {r["office"]: r["order_index"] for r in rows}
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -444,6 +453,22 @@ def save_pdf_sources(sources: dict):
     )
 
 
+def sync_office_order_from_sources(sources: dict):
+    """Mirror the `order` field of every source into the office_order table.
+
+    Called whenever pdf_sources.json's ordering changes (add / reorder / rename /
+    delete). The dashboard's office breakdown sorts by office_order.order_index,
+    so without this sync the breakdown drifts out of step with the sources list.
+    """
+    with get_conn() as conn:
+        conn.execute("DELETE FROM office_order")
+        for name, entry in sources.items():
+            conn.execute(
+                "INSERT INTO office_order (office, order_index) VALUES (?, ?)",
+                (name, int(entry.get("order", 0))),
+            )
+
+
 def _temp_pdf_path(office: str) -> Path:
     TEMP_DIR.mkdir(exist_ok=True)
     safe = re.sub(r'[^\w]', '_', office.lower())
@@ -564,6 +589,10 @@ app = Flask(
     static_url_path="/static",
 )
 app.secret_key = SECRET_KEY
+# Flask 3 alphabetises dict keys in jsonify by default. We rely on dict
+# insertion order in /dotm-admin/api/urls to communicate the configured
+# source ordering — sorting would silently revert reorders to A→Z.
+app.json.sort_keys = False
 CORS(app)
 
 
@@ -795,6 +824,7 @@ def admin_add_url():
 
     sources[name] = {"url": url, "district": district, "order": new_order}
     save_pdf_sources(sources)
+    sync_office_order_from_sources(sources)
     log.info("Added source: %s → %s (district: %s, order: %d)",
              name, url[:60], district, new_order)
     return jsonify({"ok": True, "order": new_order + 1})
@@ -823,7 +853,79 @@ def admin_reorder_urls():
             sources[name]["order"] = next_order
             next_order += 1
     save_pdf_sources(sources)
+    sync_office_order_from_sources(sources)
     return jsonify({"ok": True, "order": list(load_pdf_sources().keys())})
+
+
+@app.route("/dotm-admin/api/offices/reorder", methods=["POST"])
+@admin_required
+def admin_reorder_offices():
+    data = request.get_json() or {}
+    offices = data.get("offices")
+    if not isinstance(offices, list):
+        return jsonify({"ok": False, "error": "offices must be a list"}), 400
+
+    with get_conn() as conn:
+        for idx, office in enumerate(offices):
+            conn.execute("INSERT OR REPLACE INTO office_order (office, order_index) VALUES (?, ?)", (office, idx))
+    return jsonify({"ok": True})
+
+
+@app.route("/dotm-admin/api/urls/<name>", methods=["PUT"])
+@admin_required
+def admin_rename_url(name=None):
+    data = request.get_json() or {}
+    new_name = data.get("new_name", "").strip()
+    if not new_name:
+        return jsonify({"ok": False, "error": "New name required"}), 400
+
+    sources = load_pdf_sources()
+    if name not in sources:
+        return jsonify({"ok": False, "error": "Not found"}), 404
+    if new_name == name:
+        return jsonify({"ok": True, "records_updated": 0, "unchanged": True})
+    if new_name in sources:
+        return jsonify({"ok": False, "error": "An office with that name already exists"}), 409
+
+    # Rebuild the dict preserving insertion order, replacing the renamed key.
+    renamed = {}
+    for k, v in sources.items():
+        renamed[new_name if k == name else k] = v
+
+    updated_records = 0
+    try:
+        with get_conn() as conn:
+            cur = conn.execute(
+                "UPDATE licenses SET office = ? WHERE office = ?",
+                (new_name, name),
+            )
+            updated_records = cur.rowcount
+            # office_order has office as PK — clear any stale row at the
+            # destination key before moving the source row over.
+            conn.execute("DELETE FROM office_order WHERE office = ?", (new_name,))
+            conn.execute(
+                "UPDATE office_order SET office = ? WHERE office = ?",
+                (new_name, name),
+            )
+    except Exception as e:
+        log.error("Failed to rename office '%s' → '%s': %s", name, new_name, e)
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+    save_pdf_sources(renamed)
+
+    # Move the cached PDF, if any, so a re-sync still finds it under the new name.
+    old_pdf = _temp_pdf_path(name)
+    new_pdf = _temp_pdf_path(new_name)
+    try:
+        if old_pdf.exists():
+            old_pdf.replace(new_pdf)
+    except OSError as e:
+        log.warning("Could not rename cached PDF %s → %s: %s",
+                    old_pdf.name, new_pdf.name, e)
+
+    log.info("Renamed source: '%s' → '%s' (%d records updated)",
+             name, new_name, updated_records)
+    return jsonify({"ok": True, "records_updated": updated_records})
 
 
 @app.route("/dotm-admin/api/urls/<name>", methods=["DELETE"])
@@ -843,6 +945,8 @@ def admin_del_url(name=None):
         log.error("Failed to delete DB records for %s: %s", name, e)
     del sources[name]
     save_pdf_sources(sources)
+    with get_conn() as conn:
+        conn.execute("DELETE FROM office_order WHERE office = ?", (name,))
     log.info("Removed source: %s (%d records deleted)", name, deleted_records)
     return jsonify({"ok": True, "records_deleted": deleted_records})
 
@@ -1162,6 +1266,7 @@ def admin_clear():
         with get_conn() as conn:
             conn.execute("DELETE FROM licenses")
             conn.execute("DELETE FROM meta")
+            conn.execute("DELETE FROM office_order")
         deleted_files = 0
         if TEMP_DIR.exists():
             for f in TEMP_DIR.glob("*.pdf"):
@@ -1192,8 +1297,16 @@ def server_error(e):
 # ══════════════════════════════════════════════════════════════════
 #   ENTRY POINT
 # ══════════════════════════════════════════════════════════════════
+def migrate_office_order():
+    # pdf_sources.json is the source of truth for ordering. Mirror it into the
+    # office_order table on every startup so any drift from earlier sessions
+    # (e.g. reorders that didn't sync) gets corrected.
+    sync_office_order_from_sources(load_pdf_sources())
+
+
 if __name__ == "__main__":
     init_db()
+    migrate_office_order()
     start_keepalive()
 
     port = int(os.environ.get("PORT",  5000))
