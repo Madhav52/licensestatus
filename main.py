@@ -6,6 +6,7 @@ All app logic lives here:
   • SQLite database layer
   • PDF parser
   • PDF source manager (downloads via admin-supplied URLs)
+  • Keepalive (prevents Render free tier from sleeping)
 
 Records originate exclusively from PDF URLs added by the admin —
 no sample data is ever loaded.
@@ -23,6 +24,7 @@ import time
 import hashlib
 import logging
 import sqlite3
+import threading
 from contextlib import contextmanager
 from datetime import date, datetime
 from functools import wraps
@@ -55,11 +57,41 @@ log = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).parent
 DB_PATH = BASE_DIR / "licenses.db"
 PDF_SOURCES_FILE = BASE_DIR / "pdf_sources.json"
-TEMP_DIR = BASE_DIR / ".pdf_tmp"          # short-lived; always cleaned up
+TEMP_DIR = BASE_DIR / ".pdf_tmp"
 
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "dotm2081")
-SECRET_KEY = os.environ.get("SECRET_KEY", "dotm-secret-change-me-2081")
+SECRET_KEY = os.environ.get("SECRET_KEY",     "dotm-secret-change-me-2081")
+
+
+# ══════════════════════════════════════════════════════════════════
+#   KEEPALIVE  (prevents Render free tier from sleeping)
+# ══════════════════════════════════════════════════════════════════
+def _keepalive_loop():
+    """Ping own /healthz every 10 min so Render never spins down."""
+    # Wait 90 s after startup before first ping
+    time.sleep(90)
+    url = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
+    if not url:
+        log.info("Keepalive: RENDER_EXTERNAL_URL not set — skipping")
+        return
+    ping_url = url + "/healthz"
+    log.info("Keepalive started → %s (every 10 min)", ping_url)
+    while True:
+        try:
+            with urlopen(ping_url, timeout=10) as r:
+                log.debug("Keepalive OK (%d)", r.status)
+        except Exception as e:
+            log.debug("Keepalive ping failed: %s", e)
+        time.sleep(600)   # 10 minutes
+
+
+def start_keepalive():
+    """Start the background keepalive thread (only on Render)."""
+    if not os.environ.get("RENDER"):
+        return   # Local dev — no need
+    t = threading.Thread(target=_keepalive_loop, daemon=True)
+    t.start()
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -140,11 +172,11 @@ def upsert_licenses(records: list[dict]) -> int:
     today = date.today().strftime("%Y-%m-%d")
     for r in records:
         r.setdefault("last_updated", today)
-        r.setdefault("district", "")
-        r.setdefault("category", "")
-        r.setdefault("office", "")
-        r.setdefault("print_date", "")
-        r.setdefault("name", "UNKNOWN")
+        r.setdefault("district",     "")
+        r.setdefault("category",     "")
+        r.setdefault("office",       "")
+        r.setdefault("print_date",   "")
+        r.setdefault("name",         "UNKNOWN")
 
     with get_conn() as conn:
         conn.executemany(sql, records)
@@ -159,7 +191,6 @@ def get_stats() -> dict:
         meta = conn.execute(
             "SELECT value FROM meta WHERE key='last_updated'"
         ).fetchone()
-
     return {
         "total_records": total,
         "last_updated":  meta[0] if meta else "—",
@@ -211,13 +242,13 @@ MONTH_MAP = {
 def _normalize_date(raw: str) -> str:
     raw = raw.strip()
     for mon, num in MONTH_MAP.items():
-        raw = raw.upper().replace(f'-{mon}-', f'-{num}-').replace(f'/{mon}/', f'/{num}/')
+        raw = raw.upper().replace(
+            f'-{mon}-', f'-{num}-').replace(f'/{mon}/', f'/{num}/')
     return raw.replace('/', '-')
 
 
 def _parse_line(line: str):
     today = date.today().strftime("%Y-%m-%d")
-
     m = LICENSE_RE.search(line)
     if not m:
         return None
@@ -247,11 +278,11 @@ def _parse_line(line: str):
     office = re.sub(r'^[\d\.\)\-]+', '', office).strip()
 
     return {
-        "license_no":   license_no,
-        "name":         name,
-        "category":     category,
-        "office":       office,
-        "print_date":   print_date,
+        "license_no": license_no,
+        "name":       name,
+        "category":   category,
+        "office":     office,
+        "print_date": print_date,
         "last_updated": today,
     }
 
@@ -269,12 +300,7 @@ def _parse_page_text(text: str) -> list[dict]:
 
 
 def parse_and_store(pdf_path, district: str = "", office_override: str = "") -> int:
-    """
-    Parse a PDF and store records in the database.
-    The caller is responsible for deleting the PDF file afterwards.
-    """
     init_db()
-
     pdf = Path(pdf_path)
     if not pdf.exists():
         raise FileNotFoundError(f"PDF not found: {pdf}")
@@ -320,19 +346,15 @@ def parse_and_store(pdf_path, district: str = "", office_override: str = "") -> 
 
     count = upsert_licenses(clean)
     set_meta("last_updated", date.today().strftime("%Y-%m-%d"))
-
-    log.info("Done in %.1fs — %d records imported", time.time() - t_start, count)
+    log.info("Done in %.1fs — %d records imported",
+             time.time() - t_start, count)
     return count
 
 
 # ══════════════════════════════════════════════════════════════════
-#   PDF SOURCES (admin-managed URL list)
+#   PDF SOURCES
 # ══════════════════════════════════════════════════════════════════
 def load_pdf_sources() -> dict:
-    """
-    Load PDF sources from JSON file.
-    Each entry: { "OfficeName": { "url": "...", "district": "..." } }
-    """
     if PDF_SOURCES_FILE.exists():
         try:
             raw = json.loads(PDF_SOURCES_FILE.read_text(encoding="utf-8"))
@@ -356,14 +378,12 @@ def save_pdf_sources(sources: dict):
 
 
 def _temp_pdf_path(office: str) -> Path:
-    """Return a deterministic temp path for a given office name."""
     TEMP_DIR.mkdir(exist_ok=True)
     safe = re.sub(r'[^\w]', '_', office.lower())
     return TEMP_DIR / f"{safe}.pdf"
 
 
 def _delete_temp_pdf(path: Path):
-    """Silently remove a temp PDF file."""
     try:
         if path.exists():
             path.unlink()
@@ -403,7 +423,7 @@ def _ensure_db():
 
 
 # ══════════════════════════════════════════════════════════════════
-#   PUBLIC ROUTES
+#   PUBLIC ROUTES  — only index.html visible to everyone
 # ══════════════════════════════════════════════════════════════════
 @app.route("/")
 def index():
@@ -415,10 +435,8 @@ def api_check():
     raw = request.args.get("license", "").strip()
     if not raw:
         return jsonify({"error": "License number required"}), 400
-
     license_no = raw.upper().replace(" ", "")
     record = find_license(license_no)
-
     if record:
         return jsonify({
             "found":        True,
@@ -440,7 +458,6 @@ def api_stats():
 
 @app.route("/api/offices")
 def api_offices():
-    """Public endpoint — record count grouped by office."""
     rows = get_office_breakdown()
     total = sum(r["count"] for r in rows)
     return jsonify({"offices": rows, "total": total})
@@ -452,7 +469,7 @@ def health():
 
 
 # ══════════════════════════════════════════════════════════════════
-#   DECOY: /admin always 404s (security by obscurity)
+#   DECOY — /admin always 404 so public never finds real panel
 # ══════════════════════════════════════════════════════════════════
 @app.route("/admin", defaults={"subpath": ""})
 @app.route("/admin/<path:subpath>")
@@ -461,7 +478,7 @@ def admin_decoy(subpath):
 
 
 # ══════════════════════════════════════════════════════════════════
-#   ADMIN AUTH (hardcoded path: /dotm-admin)
+#   ADMIN AUTH  (/dotm-admin — hidden from public)
 # ══════════════════════════════════════════════════════════════════
 @app.route("/dotm-admin/login", methods=["GET"])
 def admin_login():
@@ -474,14 +491,12 @@ def admin_login():
 def admin_login_post():
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "").strip()
-
     if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
         session["admin_logged_in"] = True
         session.permanent = True
         log.info("Admin login: %s", username)
         return redirect("/dotm-admin")
-
-    log.warning("Failed admin login attempt for: %s", username)
+    log.warning("Failed admin login: %s", username)
     return redirect("/dotm-admin/login?error=1")
 
 
@@ -513,20 +528,17 @@ def admin_get_urls():
 @admin_required
 def admin_add_url():
     data = request.get_json() or {}
-    name = data.get("name", "").strip()
-    url = data.get("url", "").strip()
+    name = data.get("name",     "").strip()
+    url = data.get("url",      "").strip()
     district = data.get("district", "").strip()
-
     if not name or not url:
         return jsonify({"ok": False, "error": "Name and URL required"}), 400
     if not url.startswith("http"):
         return jsonify({"ok": False, "error": "Invalid URL"}), 400
-
     sources = load_pdf_sources()
     sources[name] = {"url": url, "district": district}
     save_pdf_sources(sources)
-    log.info("Admin added PDF source: %s → %s (district: %s)",
-             name, url[:60], district)
+    log.info("Added source: %s → %s (district: %s)", name, url[:60], district)
     return jsonify({"ok": True})
 
 
@@ -536,25 +548,18 @@ def admin_del_url(name=None):
     sources = load_pdf_sources()
     if name not in sources:
         return jsonify({"ok": False, "error": "Not found"}), 404
-
-    # Clean up any leftover temp PDF for this office
-    temp_file = _temp_pdf_path(name)
-    _delete_temp_pdf(temp_file)
-
+    _delete_temp_pdf(_temp_pdf_path(name))
     deleted_records = 0
     try:
         with get_conn() as conn:
             cur = conn.execute(
                 "DELETE FROM licenses WHERE office = ?", (name,))
             deleted_records = cur.rowcount
-        log.info("Deleted %d DB records for office: %s", deleted_records, name)
     except Exception as e:
         log.error("Failed to delete DB records for %s: %s", name, e)
-
     del sources[name]
     save_pdf_sources(sources)
-    log.info("Admin removed PDF source: %s", name)
-
+    log.info("Removed source: %s (%d records deleted)", name, deleted_records)
     return jsonify({"ok": True, "records_deleted": deleted_records})
 
 
@@ -564,36 +569,24 @@ def admin_del_url(name=None):
 @app.route("/dotm-admin/api/sync", methods=["POST"])
 @admin_required
 def admin_sync():
-    """
-    For each office in pdf_sources.json:
-      1. Skip if records already exist in the DB for that office.
-      2. Download the PDF to a temp file.
-      3. Parse and store records in the DB.
-      4. Delete the temp PDF immediately — data lives in the DB only.
-    """
     TEMP_DIR.mkdir(exist_ok=True)
-
     headers = {
         "User-Agent": "Mozilla/5.0 Chrome/124.0.0.0 Safari/537.36",
         "Referer":    "https://dotm.gov.np/",
     }
-
     sources = load_pdf_sources()
     if not sources:
-        return jsonify({
-            "ok": False,
-            "error": "No PDF sources configured. Add URLs first."
-        }), 400
+        return jsonify({"ok": False, "error": "No PDF sources configured."}), 400
 
     results = []
     total_imported = 0
 
     for office, entry in sources.items():
-        url      = entry["url"]      if isinstance(entry, dict) else entry
+        url = entry["url"] if isinstance(entry, dict) else entry
         district = entry.get("district", "") if isinstance(entry, dict) else ""
-        tmp_pdf  = _temp_pdf_path(office)
+        tmp_pdf = _temp_pdf_path(office)
 
-        # ── 1. Skip if DB already has records for this office ──────────
+        # Skip if DB already has records for this office
         try:
             with get_conn() as conn:
                 existing = conn.execute(
@@ -603,44 +596,40 @@ def admin_sync():
             existing = 0
 
         if existing > 0:
-            log.info("Skipping [%s] — %d records already in DB", office, existing)
+            log.info(
+                "Skipping [%s] — %d records already in DB", office, existing)
             results.append({
                 "office": office, "status": "skipped",
-                "records": existing, "message": f"{existing} records already loaded"
+                "records": existing,
+                "message": f"{existing} records already loaded"
             })
             continue
 
-        # ── 2. Download ────────────────────────────────────────────────
+        # Download
         try:
             log.info("Downloading [%s]: %s", office, url[:80])
             req = Request(url, headers=headers)
             with urlopen(req, timeout=60) as resp:
                 data = resp.read()
-
             if not (len(data) > 512 and data.startswith(b"%PDF")):
-                log.warning("Invalid PDF response for [%s]", office)
                 results.append({
                     "office": office, "status": "invalid_pdf",
                     "records": 0, "message": "Response was not a valid PDF"
                 })
                 continue
-
             tmp_pdf.write_bytes(data)
-            log.info("Saved temp PDF: %s (%d KB)", tmp_pdf.name, len(data) // 1024)
-
         except (HTTPError, URLError, OSError) as e:
-            log.warning("Download failed [%s]: %s", office, e)
             results.append({
                 "office": office, "status": "download_failed",
                 "records": 0, "message": str(e)
             })
             continue
 
-        # ── 3. Parse → DB, then 4. Delete temp PDF ────────────────────
+        # Parse → DB → delete temp
         try:
-            n = parse_and_store(tmp_pdf, district=district, office_override=office)
+            n = parse_and_store(tmp_pdf, district=district,
+                                office_override=office)
             total_imported += n
-            log.info("[%s] %d records imported", office, n)
             results.append({
                 "office": office, "status": "imported",
                 "records": n, "message": f"{n} records imported"
@@ -652,12 +641,11 @@ def admin_sync():
                 "records": 0, "message": str(e)
             })
         finally:
-            # Always wipe the temp file — DB is the only store
             _delete_temp_pdf(tmp_pdf)
 
     imported = [r for r in results if r["status"] == "imported"]
-    skipped  = [r for r in results if r["status"] == "skipped"]
-    failed   = [r for r in results if r["status"] not in ("imported", "skipped")]
+    skipped = [r for r in results if r["status"] == "skipped"]
+    failed = [r for r in results if r["status"] not in ("imported", "skipped")]
 
     return jsonify({
         "ok":               True,
@@ -670,7 +658,7 @@ def admin_sync():
 
 
 # ══════════════════════════════════════════════════════════════════
-#   ADMIN API — SEARCH RECORDS
+#   ADMIN API — SEARCH
 # ══════════════════════════════════════════════════════════════════
 @app.route("/dotm-admin/api/search")
 @admin_required
@@ -678,7 +666,6 @@ def admin_search():
     q = request.args.get("q", "").strip()
     if not q:
         return jsonify({"results": []})
-
     pattern = f"%{q}%"
     try:
         with get_conn() as conn:
@@ -696,14 +683,13 @@ def admin_search():
 
 
 # ══════════════════════════════════════════════════════════════════
-#   ADMIN API — OFFICE BREAKDOWN
+#   ADMIN API — BREAKDOWN
 # ══════════════════════════════════════════════════════════════════
 @app.route("/dotm-admin/api/breakdown")
 @admin_required
 def admin_breakdown():
     try:
-        rows = get_office_breakdown()
-        return jsonify({"rows": rows})
+        return jsonify({"rows": get_office_breakdown()})
     except Exception as e:
         return jsonify({"rows": [], "error": str(e)}), 500
 
@@ -722,7 +708,6 @@ def admin_export():
         yield output.getvalue()
         output.truncate(0)
         output.seek(0)
-
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         try:
@@ -742,11 +727,8 @@ def admin_export():
             conn.close()
 
     filename = f"dotm_licenses_{datetime.now().strftime('%Y%m%d')}.csv"
-    return Response(
-        generate(),
-        mimetype="text/csv",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
-    )
+    return Response(generate(), mimetype="text/csv",
+                    headers={"Content-Disposition": f"attachment; filename={filename}"})
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -759,8 +741,6 @@ def admin_clear():
         with get_conn() as conn:
             conn.execute("DELETE FROM licenses")
             conn.execute("DELETE FROM meta")
-
-        # Also wipe any leftover temp PDFs (e.g. from a crashed sync)
         deleted_files = 0
         if TEMP_DIR.exists():
             for f in TEMP_DIR.glob("*.pdf"):
@@ -769,9 +749,7 @@ def admin_clear():
                     deleted_files += 1
                 except OSError:
                     pass
-
-        log.warning(
-            "Admin cleared entire database + %d leftover temp PDFs", deleted_files)
+        log.warning("Admin cleared DB + %d temp PDFs", deleted_files)
         return jsonify({"ok": True, "temp_pdfs_deleted": deleted_files})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
@@ -795,11 +773,12 @@ def server_error(e):
 # ══════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
     init_db()
+    start_keepalive()   # ← keeps Render awake, ignored on local dev
 
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT",  5000))
     debug = os.environ.get("DEBUG", "0") == "1"
 
-    log.info("Server starting on http://0.0.0.0:%d", port)
-    log.info("Admin panel → http://localhost:%d/dotm-admin", port)
-    log.info("Admin credentials → %s / %s", ADMIN_USERNAME, ADMIN_PASSWORD)
+    log.info("Server  →  http://0.0.0.0:%d", port)
+    log.info("Admin   →  http://localhost:%d/dotm-admin", port)
+    log.info("Login   →  %s / %s", ADMIN_USERNAME, ADMIN_PASSWORD)
     app.run(host="0.0.0.0", port=port, debug=debug)

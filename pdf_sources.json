@@ -14,5 +14,17 @@
   "Rajbiraj": {
     "url": "https://giwmscdnone.gov.np/media/pdf_upload/Rajbiraj%20Saptari%20Printed%20License%20Details_b3eba9b.pdf",
     "district": "Saptari"
+  },
+  "Chaujahari": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Chaurjahari%20Printed%20license%20Details_fkufqt2.pdf",
+    "district": "Rukum"
+  },
+  "Gaighat": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Udaypur%20Printed%20License_wtv1gzm.pdf",
+    "district": "Udayapur"
+  },
+  "Malangwa": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Sarlahi%20Printed%20License_fy594ef.pdf",
+    "district": "Sarlahi"
   }
 }
