@@ -67,9 +67,9 @@ SECRET_KEY = os.environ.get("SECRET_KEY",     "dotm-secret-change-me-2081")
 # reCAPTCHA v3 — bot mitigation for /api/check.
 # When RECAPTCHA_SECRET_KEY is unset the gate is disabled (dev-friendly).
 RECAPTCHA_SITE_KEY = os.environ.get(
-    "RECAPTCHA_SITE_KEY", "6LcHR9AsAAAAANdSalPzoKda3cZh6R4b3_SI7PX4").strip()
+    "RECAPTCHA_SITE_KEY", "6LfWaNAsAAAAADBb_hWUct9kkawR95qaRxUSbwt6").strip()
 RECAPTCHA_SECRET_KEY = os.environ.get(
-    "RECAPTCHA_SECRET_KEY", "6LcHR9AsAAAAANOvjD0q7cIhAWbnY1Dc3SBOpFmr").strip()
+    "RECAPTCHA_SECRET_KEY", "6LfWaNAsAAAAANP1XXVqSCbk7WPu1mUz3_CPWYAJ").strip()
 try:
     RECAPTCHA_MIN_SCORE = float(os.environ.get("RECAPTCHA_MIN_SCORE", "0.5"))
 except ValueError:
