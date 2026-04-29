@@ -11,6 +11,18 @@
     content="Nepal driving license, DOTM print status, license check Nepal, driving license printed, DOTM Nepal, license tracker" />
   <meta name="author" content="Shushant Giri" />
   <meta name="robots" content="index, follow" />
+
+  <!-- ═══ PWA: manifest + theme ═══ -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#C0392B" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="LicenseStatus" />
+  <!-- Apple touch icons (add these files in /static/icons/) -->
+  <link rel="apple-touch-icon" sizes="152x152" href="/static/icons/icon-152.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/static/icons/icon-192.png" />
+
   <link rel="canonical" href="https://license-status-checker.onrender.com/" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://license-status-checker.onrender.com/" />
@@ -170,6 +182,124 @@
       animation: blink 2s infinite;
     }
 
+    /* ── PWA INSTALL BANNER ── */
+    .install-banner {
+      width: 100%;
+      max-width: 560px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, #FDF2F1 0%, #fff 100%);
+      border: 1px solid rgba(192, 57, 43, 0.2);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-top: 16px;
+      animation: up 0.4s ease;
+    }
+
+    .install-banner.show {
+      display: flex;
+    }
+
+    .install-banner-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--red);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(192, 57, 43, 0.3);
+    }
+
+    .install-banner-text {
+      flex: 1;
+    }
+
+    .install-banner-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .install-banner-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .install-banner-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .install-btn {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .install-btn:hover {
+      background: var(--red2);
+    }
+
+    .install-dismiss {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px;
+      transition: color 0.15s;
+    }
+
+    .install-dismiss:hover {
+      color: var(--text);
+    }
+
+    /* ── OFFLINE BANNER ── */
+    .offline-banner {
+      width: 100%;
+      max-width: 560px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: #FEF3CD;
+      border: 1px solid #F5C518;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-top: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #7A5800;
+      animation: up 0.3s ease;
+    }
+
+    .offline-banner.show {
+      display: flex;
+    }
+
+    .offline-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .offline-banner b {
+      font-weight: 700;
+    }
+
     /* ── HERO ── */
     .hero {
       width: 100%;
@@ -274,7 +404,6 @@
       cursor: not-allowed;
     }
 
-    /* ── Main input clear button ── */
     .inp-clear {
       display: none;
       background: none;
@@ -299,37 +428,6 @@
       justify-content: center;
     }
 
-    /* ── Offline banner ── */
-    .offline-banner {
-      width: 100%;
-      max-width: 560px;
-      display: none;
-      align-items: center;
-      gap: 10px;
-      background: #FEF3CD;
-      border: 1px solid #F5C518;
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-top: 16px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #7A5800;
-      animation: up 0.3s ease;
-    }
-
-    .offline-banner.show {
-      display: flex;
-    }
-
-    .offline-icon {
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-
-    .offline-banner b {
-      font-weight: 700;
-    }
-
     .hint {
       text-align: center;
       margin-top: 10px;
@@ -337,7 +435,7 @@
       color: var(--muted);
     }
 
-    /* ── Search history chips ── */
+    /* ── SEARCH HISTORY ── */
     .history-wrap {
       width: 100%;
       max-width: 560px;
@@ -396,7 +494,7 @@
       color: var(--red);
     }
 
-    /* ── Share button on result card ── */
+    /* ── SHARE BUTTON ── */
     .share-btn {
       display: inline-flex;
       align-items: center;
@@ -494,7 +592,7 @@
       background: var(--red);
     }
 
-    /* ── FIX 1: card-top stays on one line, never wraps ── */
+    /* ── FIX: card-top always on one line ── */
     .card-top {
       padding: 18px 22px 14px;
       border-bottom: 1px solid var(--border);
@@ -503,7 +601,6 @@
       justify-content: space-between;
       gap: 12px;
       flex-wrap: nowrap;
-      /* ← FIXED: was "wrap", now forces single line */
       overflow: hidden;
     }
 
@@ -621,6 +718,24 @@
       flex-shrink: 0;
     }
 
+    /* ── CACHE NOTICE (shown when API returned cached data) ── */
+    .cache-notice {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: #FEF3CD;
+      border: 1px solid #F5C518;
+      border-radius: 0 0 var(--radius) var(--radius);
+      padding: 8px 22px;
+      font-size: 11px;
+      color: #7A5800;
+      font-weight: 500;
+    }
+
+    .cache-notice.show {
+      display: flex;
+    }
+
     .not-found {
       background: var(--white);
       border-radius: var(--radius);
@@ -679,9 +794,7 @@
       color: var(--red);
     }
 
-    /* ════════════════════════════════
-       STATS — original 3 separate pills
-    ════════════════════════════════ */
+    /* ── STATS ── */
     .stats {
       width: 100%;
       max-width: 560px;
@@ -711,9 +824,7 @@
       font-weight: 700;
     }
 
-    /* ════════════════════════════════
-       OFFICES
-    ════════════════════════════════ */
+    /* ── OFFICES ── */
     .offices {
       width: 100%;
       max-width: 560px;
@@ -729,6 +840,7 @@
       padding: 0 4px;
       gap: 10px;
       flex-wrap: wrap;
+      position: relative;
     }
 
     .offices-title {
@@ -745,12 +857,6 @@
       font-weight: 600;
     }
 
-    /* ── Office search — icon btn + slide-in input (all screens) ── */
-    .offices-header {
-      position: relative;
-    }
-
-    /* the search trigger button — eye-catching pill */
     .office-search-trigger {
       display: inline-flex;
       align-items: center;
@@ -780,15 +886,12 @@
       background: #FDF2F1;
     }
 
-    /* slide-in search bar */
     .office-search-wrap {
       overflow: hidden;
       max-height: 0;
       opacity: 0;
       margin-bottom: 0;
-      transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 0.22s ease,
-        margin-bottom 0.28s ease;
+      transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease, margin-bottom 0.28s ease;
     }
 
     .office-search-wrap.open {
@@ -860,7 +963,6 @@
       justify-content: center;
     }
 
-    /* no-results message for office filter */
     .office-no-results {
       display: none;
       text-align: center;
@@ -876,7 +978,6 @@
       display: block;
     }
 
-    /* ── Desktop: 3-column grid ── */
     .office-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -942,7 +1043,6 @@
       border-radius: 12px;
     }
 
-    /* ── Show More button — desktop only ── */
     .show-more-wrap {
       text-align: center;
       margin-top: 12px;
@@ -970,7 +1070,7 @@
       background: #FDF2F1;
     }
 
-    /* ── Mobile overrides ── */
+    /* ── MOBILE ── */
     @media (max-width:600px) {
       .office-search-wrap {
         display: block;
@@ -1115,8 +1215,6 @@
         grid-template-columns: 1fr;
       }
 
-      /* ── FIX 1 (mobile): card-top stays on one line even on small screens ── */
-      /* REMOVED the old flex-direction:column rule that was breaking the layout */
       .card-top {
         padding: 14px 16px 12px;
       }
@@ -1131,10 +1229,29 @@
 <body>
   <div class="page">
 
+    <!-- PWA INSTALL BANNER -->
+    <div class="install-banner" id="install-banner">
+      <div class="install-banner-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+          <line x1="12" y1="18" x2="12.01" y2="18" />
+        </svg>
+      </div>
+      <div class="install-banner-text">
+        <div class="install-banner-title">Install LicenseStatus App</div>
+        <div class="install-banner-sub">Add to home screen — works offline too</div>
+      </div>
+      <div class="install-banner-actions">
+        <button class="install-btn" id="install-btn" onclick="triggerInstall()">Install</button>
+        <button class="install-dismiss" onclick="dismissInstall()" aria-label="Dismiss">×</button>
+      </div>
+    </div>
+
     <!-- OFFLINE BANNER -->
     <div class="offline-banner" id="offline-banner">
       <span class="offline-icon">⚡</span>
-      <span><b>You're offline.</b> Check your internet connection and try again.</span>
+      <span><b>You're offline.</b> Showing cached results where available.</span>
     </div>
 
     <!-- TOP BAR -->
@@ -1250,6 +1367,9 @@
             </div>
           </div>
         </div>
+        <div class="cache-notice" id="cache-notice">
+          ⚠️ Showing cached result — connect to internet for live data
+        </div>
         <div class="card-footer">
           <div class="footer-dot"></div>
           Data sourced from official DOTM Nepal PDF records &nbsp;·&nbsp; <span id="cupdated"></span>
@@ -1264,7 +1384,7 @@
       </div>
     </div>
 
-    <!-- STATS — original pills -->
+    <!-- STATS -->
     <div class="stats">
       <div class="stat">📋 <strong id="srec">—</strong> records indexed</div>
       <div class="stat">🕐 Updated: <strong id="sup">—</strong></div>
@@ -1289,7 +1409,6 @@
         </div>
       </div>
 
-      <!-- Slide-in office search bar (mobile + desktop) -->
       <div class="office-search-wrap" id="office-search-wrap">
         <div class="office-search-inner">
           <span class="office-search-icon">
@@ -1339,34 +1458,114 @@
         Copyright © 2026 Shushant Giri. All rights reserved.
       </div>
     </footer>
-
   </div>
 
   <div id="toast"></div>
 
   <script>
+    /* ══════════════════════════════════════
+       PWA — Register Service Worker
+    ══════════════════════════════════════ */
+    let deferredInstallPrompt = null;
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('[PWA] SW registered:', reg.scope))
+          .catch(err => console.warn('[PWA] SW failed:', err));
+      });
+    }
+
+    /* Capture install prompt */
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      /* Show banner only if user hasn't dismissed before */
+      if (!localStorage.getItem('installDismissed')) {
+        document.getElementById('install-banner').classList.add('show');
+      }
+    });
+
+    /* User installed via OS */
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('install-banner').classList.remove('show');
+      deferredInstallPrompt = null;
+      toast('✅ App installed! Open from your home screen.');
+    });
+
+    function triggerInstall() {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(choice => {
+        if (choice.outcome === 'accepted') {
+          toast('Installing…');
+        }
+        deferredInstallPrompt = null;
+        document.getElementById('install-banner').classList.remove('show');
+      });
+    }
+
+    function dismissInstall() {
+      document.getElementById('install-banner').classList.remove('show');
+      localStorage.setItem('installDismissed', '1');
+    }
+
+    /* ══════════════════════════════════════
+       OFFLINE DETECTION
+    ══════════════════════════════════════ */
+    function updateOnlineStatus() {
+      document.getElementById('offline-banner').classList.toggle('show', !navigator.onLine);
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
+    /* ══════════════════════════════════════
+       HAPTIC FEEDBACK
+       navigator.vibrate() — Android only
+       Patterns: found = short pulse, not-found = double tap, error = long
+    ══════════════════════════════════════ */
+    function haptic(type) {
+      if (!navigator.vibrate) return;
+      const patterns = {
+        found: [60],           /* single short pulse — success */
+        notfound: [80, 60, 80],   /* double tap — not found */
+        error: [200],          /* long buzz — connection error */
+        tap: [20],           /* micro tap — button press */
+      };
+      navigator.vibrate(patterns[type] || [30]);
+    }
+
+    /* ══════════════════════════════════════
+       INPUT SETUP
+    ══════════════════════════════════════ */
     const inp = document.getElementById('inp');
     inp.focus();
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
 
-    /* ══════════════════════════════════════
-       AUTO-FORMAT: 07-01-XXXXXXXX
-       Strips non-digits, inserts dashes at positions 2 and 4
-    ══════════════════════════════════════ */
-    inp.addEventListener('input', function (e) {
-      const isDeleting = e.inputType && e.inputType.startsWith('delete');
-      let raw = inp.value.replace(/\D/g, '').slice(0, 12);
-      let formatted = raw;
-      if (raw.length > 2) formatted = raw.slice(0, 2) + '-' + raw.slice(2);
-      if (raw.length > 4) formatted = raw.slice(0, 2) + '-' + raw.slice(2, 4) + '-' + raw.slice(4);
-      if (!isDeleting || formatted !== inp.value) {
-        const pos = inp.selectionStart;
-        inp.value = formatted;
-        const diff = formatted.length - (raw.length + (raw.length > 2 ? 1 : 0) + (raw.length > 4 ? 1 : 0));
-        try { inp.setSelectionRange(pos + diff, pos + diff); } catch (_) { }
+    /* ⌘K / Ctrl+K to focus search */
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        inp.focus();
+        inp.select();
       }
-      // Show/hide clear button
-      document.getElementById('inp-clear').classList.toggle('visible', inp.value.length > 0);
+    });
+
+    /* ── FIXED auto-format: cursor never jumps ── */
+    inp.addEventListener('input', function () {
+      const pos = this.selectionStart;
+      let raw = this.value.replace(/\D/g, '').slice(0, 12);
+      let fmt = raw;
+      if (raw.length > 2) fmt = raw.slice(0, 2) + '-' + raw.slice(2);
+      if (raw.length > 4) fmt = raw.slice(0, 2) + '-' + raw.slice(2, 4) + '-' + raw.slice(4);
+      if (fmt === this.value) return;
+      const oldLen = this.value.length;
+      this.value = fmt;
+      const added = fmt.length - oldLen;
+      try { this.setSelectionRange(pos + added, pos + added); } catch (_) { }
+      document.getElementById('inp-clear').classList.toggle('visible', fmt.length > 0);
     });
 
     function clearInp() {
@@ -1376,25 +1575,27 @@
     }
 
     /* ══════════════════════════════════════
-       SEARCH HISTORY  (localStorage, max 5)
+       SEARCH HISTORY (localStorage, max 5)
     ══════════════════════════════════════ */
     const HISTORY_KEY = 'licenseHistory';
 
     function getHistory() {
       try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch (_) { return []; }
     }
+
     function saveHistory(num) {
       let h = getHistory().filter(n => n !== num);
-      h.unshift(num);
-      h = h.slice(0, 5);
+      h.unshift(num); h = h.slice(0, 5);
       try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch (_) { }
       renderHistory();
     }
+
     function deleteHistory(num) {
       const h = getHistory().filter(n => n !== num);
       try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch (_) { }
       renderHistory();
     }
+
     function renderHistory() {
       const wrap = document.getElementById('history-wrap');
       const container = document.getElementById('history-chips');
@@ -1407,28 +1608,25 @@
           <button class="history-chip-del" title="Remove" onclick="event.stopPropagation();deleteHistory('${escapeHtml(num)}')">&times;</button>
         </span>`).join('');
     }
-    function fillAndCheck(num) {
-      inp.value = num;
-      check();
-    }
+
+    function fillAndCheck(num) { inp.value = num; check(); }
 
     /* ══════════════════════════════════════
        SHARE RESULT
     ══════════════════════════════════════ */
     function shareResult() {
+      haptic('tap');
       const name = document.getElementById('cname').textContent;
       const no = document.getElementById('cno').textContent;
       const date = document.getElementById('cdate').textContent;
-      // ── FIX 2: URL uses license number so it auto-searches when opened ──
       const url = `${location.origin}${location.pathname}?license=${encodeURIComponent(no)}`;
       const text = `✅ ${name}'s driving license (${no}) has been printed by DOTM Nepal on ${date}.\n\nCheck yours: ${url}`;
-
       if (navigator.share) {
         navigator.share({ title: 'License Print Status — Nepal', text, url }).catch(() => { });
       } else {
-        navigator.clipboard.writeText(url).then(() => {
-          toast('Link copied! Opening it will auto-search this license.');
-        }).catch(() => toast('Could not copy link'));
+        navigator.clipboard.writeText(url)
+          .then(() => toast('Link copied! Opening it will auto-search this license.'))
+          .catch(() => toast('Could not copy link'));
       }
     }
 
@@ -1438,7 +1636,7 @@
     window.addEventListener('DOMContentLoaded', async () => {
       renderHistory();
 
-      // ── FIX 2: Auto-search if URL contains ?license= param ──
+      /* Auto-search from URL param */
       const urlParams = new URLSearchParams(location.search);
       const licenseParam = urlParams.get('license');
       if (licenseParam) {
@@ -1469,9 +1667,7 @@
       const noResults = document.getElementById('office-no-results');
       const INITIAL = 3;
 
-      let allOffices = [];
-      let expanded = false;
-      let filterQuery = '';
+      let allOffices = [], expanded = false, filterQuery = '';
 
       function isMobile() { return window.innerWidth <= 600; }
 
@@ -1501,7 +1697,9 @@
           if (!filterQuery && allOffices.length > INITIAL) {
             const remaining = allOffices.length - INITIAL;
             btn.childNodes[0].textContent = expanded ? 'Show less ' : `Show ${remaining} more `;
-            icon.innerHTML = expanded ? '<polyline points="18 15 12 9 6 15"/>' : '<polyline points="6 9 12 15 18 9"/>';
+            icon.innerHTML = expanded
+              ? '<polyline points="18 15 12 9 6 15"/>'
+              : '<polyline points="6 9 12 15 18 9"/>';
             wrapBtn.style.display = 'block';
           } else {
             wrapBtn.style.display = 'none';
@@ -1518,10 +1716,7 @@
       });
 
       let resizeTimer;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(render, 120);
-      });
+      window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 120); });
 
       try {
         const d = await (await fetch('/api/offices')).json();
@@ -1543,12 +1738,9 @@
       const officeInp = document.getElementById('office-inp');
       const isOpen = wrap.classList.contains('open');
       if (isOpen) {
-        wrap.classList.remove('open');
-        trigger.classList.remove('active');
-        clearOfficeSearch();
+        wrap.classList.remove('open'); trigger.classList.remove('active'); clearOfficeSearch();
       } else {
-        wrap.classList.add('open');
-        trigger.classList.add('active');
+        wrap.classList.add('open'); trigger.classList.add('active');
         setTimeout(() => officeInp.focus(), 200);
       }
     }
@@ -1562,7 +1754,8 @@
     }
 
     function escapeHtml(str) {
-      return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      return String(str || '').replace(/[&<>"']/g, c =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
     /* ══════════════════════════════════════
@@ -1570,18 +1763,28 @@
     ══════════════════════════════════════ */
     async function check() {
       const v = inp.value.trim();
-      if (!v) { toast('Please enter a license number'); return; }
+      if (!v) { toast('Please enter a license number'); haptic('tap'); return; }
       hide(); show('skel');
       document.getElementById('btn').disabled = true;
       try {
-        const d = await (await fetch('/api/check?license=' + encodeURIComponent(v))).json();
+        const resp = await fetch('/api/check?license=' + encodeURIComponent(v));
+        const d = await resp.json();
+        const isCached = resp.headers.get('X-Cache-Hit') === 'true' || d.offline;
+
         hide();
         document.getElementById('btn').disabled = false;
+
         if (d.found) {
+          /* ── Haptic: success pulse ── */
+          haptic('found');
+
           saveHistory(v);
-          // ── FIX 2: Update URL so browser history and sharing works ──
-          const newUrl = `${location.origin}${location.pathname}?license=${encodeURIComponent(v)}`;
-          history.replaceState(null, '', newUrl);
+
+          /* Update URL so sharing / back button works */
+          history.replaceState(null, '', `${location.origin}${location.pathname}?license=${encodeURIComponent(v)}`);
+
+          /* Save to localStorage for offline.html to display */
+          try { localStorage.setItem('lastResult', JSON.stringify(d)); } catch (_) { }
 
           document.getElementById('cstripe').className = 'card-stripe stripe-green';
           document.getElementById('badge').className = 'badge badge-green';
@@ -1595,16 +1798,23 @@
           document.getElementById('ctime').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           document.getElementById('cupdated').textContent = 'Synced ' + (d.last_updated || '—');
           document.getElementById('share-btn').style.display = 'inline-flex';
+          document.getElementById('cache-notice').classList.toggle('show', !!isCached);
           show('card');
           document.getElementById('card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
         } else {
+          /* ── Haptic: not found double tap ── */
+          haptic('notfound');
           document.getElementById('cstripe').className = 'card-stripe stripe-red';
           document.getElementById('share-btn').style.display = 'none';
+          document.getElementById('cache-notice').classList.remove('show');
           show('notfound');
         }
       } catch (_) {
         hide();
         document.getElementById('btn').disabled = false;
+        /* ── Haptic: error long buzz ── */
+        haptic('error');
         toast('Connection error. Please try again.');
       }
     }
@@ -1613,7 +1823,6 @@
       hide();
       inp.value = '';
       document.getElementById('inp-clear').classList.remove('visible');
-      // Clear license param from URL when resetting
       history.replaceState(null, '', location.pathname);
       inp.focus();
     }
