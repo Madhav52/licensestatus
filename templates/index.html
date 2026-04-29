@@ -412,6 +412,7 @@
       cursor: pointer;
       transition: border-color 0.15s, color 0.15s, background 0.15s;
       flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .share-btn:hover {
@@ -493,6 +494,7 @@
       background: var(--red);
     }
 
+    /* ── FIX 1: card-top stays on one line, never wraps ── */
     .card-top {
       padding: 18px 22px 14px;
       border-bottom: 1px solid var(--border);
@@ -500,7 +502,9 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      /* ← FIXED: was "wrap", now forces single line */
+      overflow: hidden;
     }
 
     .badge {
@@ -513,6 +517,7 @@
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
+      flex-shrink: 0;
     }
 
     .badge-green {
@@ -1110,9 +1115,10 @@
         grid-template-columns: 1fr;
       }
 
+      /* ── FIX 1 (mobile): card-top stays on one line even on small screens ── */
+      /* REMOVED the old flex-direction:column rule that was breaking the layout */
       .card-top {
-        flex-direction: column;
-        align-items: flex-start;
+        padding: 14px 16px 12px;
       }
 
       .logo-name {
@@ -1207,7 +1213,7 @@
         <div class="card-stripe stripe-green" id="cstripe"></div>
         <div class="card-top">
           <span class="badge badge-green" id="badge"><span class="badge-dot"></span> PRINTED</span>
-          <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
             <button class="share-btn" id="share-btn" onclick="shareResult()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -1353,15 +1359,21 @@
       let formatted = raw;
       if (raw.length > 2) formatted = raw.slice(0, 2) + '-' + raw.slice(2);
       if (raw.length > 4) formatted = raw.slice(0, 2) + '-' + raw.slice(2, 4) + '-' + raw.slice(4);
-      // Don't re-set if it would move cursor annoyingly mid-dash on delete
       if (!isDeleting || formatted !== inp.value) {
         const pos = inp.selectionStart;
         inp.value = formatted;
-        // Restore cursor: nudge past auto-inserted dash
         const diff = formatted.length - (raw.length + (raw.length > 2 ? 1 : 0) + (raw.length > 4 ? 1 : 0));
         try { inp.setSelectionRange(pos + diff, pos + diff); } catch (_) { }
       }
+      // Show/hide clear button
+      document.getElementById('inp-clear').classList.toggle('visible', inp.value.length > 0);
     });
+
+    function clearInp() {
+      inp.value = '';
+      document.getElementById('inp-clear').classList.remove('visible');
+      inp.focus();
+    }
 
     /* ══════════════════════════════════════
        SEARCH HISTORY  (localStorage, max 5)
@@ -1403,24 +1415,20 @@
     /* ══════════════════════════════════════
        SHARE RESULT
     ══════════════════════════════════════ */
-    let _lastLicenseNo = '';
-
     function shareResult() {
       const name = document.getElementById('cname').textContent;
       const no = document.getElementById('cno').textContent;
       const date = document.getElementById('cdate').textContent;
+      // ── FIX 2: URL uses license number so it auto-searches when opened ──
       const url = `${location.origin}${location.pathname}?license=${encodeURIComponent(no)}`;
       const text = `✅ ${name}'s driving license (${no}) has been printed by DOTM Nepal on ${date}.\n\nCheck yours: ${url}`;
 
       if (navigator.share) {
         navigator.share({ title: 'License Print Status — Nepal', text, url }).catch(() => { });
       } else {
-        navigator.clipboard.writeText(text).then(() => {
-          toast('Result copied to clipboard!');
-        }).catch(() => {
-          /* fallback: copy just the URL */
-          navigator.clipboard.writeText(url).then(() => toast('Link copied!')).catch(() => toast('Could not copy'));
-        });
+        navigator.clipboard.writeText(url).then(() => {
+          toast('Link copied! Opening it will auto-search this license.');
+        }).catch(() => toast('Could not copy link'));
       }
     }
 
@@ -1429,6 +1437,16 @@
     ══════════════════════════════════════ */
     window.addEventListener('DOMContentLoaded', async () => {
       renderHistory();
+
+      // ── FIX 2: Auto-search if URL contains ?license= param ──
+      const urlParams = new URLSearchParams(location.search);
+      const licenseParam = urlParams.get('license');
+      if (licenseParam) {
+        inp.value = licenseParam;
+        document.getElementById('inp-clear').classList.add('visible');
+        check();
+      }
+
       try {
         const d = await (await fetch('/api/stats')).json();
         document.getElementById('srec').textContent = (d.total_records || 0).toLocaleString();
@@ -1561,6 +1579,10 @@
         document.getElementById('btn').disabled = false;
         if (d.found) {
           saveHistory(v);
+          // ── FIX 2: Update URL so browser history and sharing works ──
+          const newUrl = `${location.origin}${location.pathname}?license=${encodeURIComponent(v)}`;
+          history.replaceState(null, '', newUrl);
+
           document.getElementById('cstripe').className = 'card-stripe stripe-green';
           document.getElementById('badge').className = 'badge badge-green';
           document.getElementById('badge').innerHTML = '<span class="badge-dot"></span> PRINTED';
@@ -1587,7 +1609,15 @@
       }
     }
 
-    function reset() { hide(); inp.value = ''; inp.focus(); }
+    function reset() {
+      hide();
+      inp.value = '';
+      document.getElementById('inp-clear').classList.remove('visible');
+      // Clear license param from URL when resetting
+      history.replaceState(null, '', location.pathname);
+      inp.focus();
+    }
+
     function hide() { ['skel', 'card', 'notfound'].forEach(id => document.getElementById(id).classList.remove('show')); }
     function show(id) { document.getElementById(id).classList.add('show'); }
 
