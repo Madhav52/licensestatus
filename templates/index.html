@@ -13,6 +13,9 @@
   <meta name="robots" content="index, follow" />
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#C0392B" />
+  {% if recaptcha_site_key %}
+  <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}" async defer></script>
+  {% endif %}
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -1184,11 +1187,8 @@
     }
 
     footer .footer-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      flex-wrap: wrap;
+      text-align: center;
+      line-height: 1.6;
     }
 
     footer .sep {
@@ -1485,7 +1485,7 @@
     <!-- OFFICE RECORDS -->
     <div class="offices" id="offices-section">
       <div class="offices-header">
-        <div class="offices-title">Office Records</div>
+        <div class="offices-title">Office Records <span id="offices-count" style="color:var(--muted);font-weight:600"></span></div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="offices-total" id="offices-total">—</div>
           <button class="office-search-trigger" id="office-search-trigger" aria-label="Search offices"
@@ -1540,9 +1540,9 @@
     <!-- FOOTER -->
     <footer>
       <div class="footer-row">
-        <span>Built using publicly available PDF records from</span>
+        <span>Built with ❤️ using Python, this platform dynamically fetches and processes publicly available PDF records from </span>
         <a href="https://dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np</a>
-        <span class="sep">·</span><span class="sep">·</span>
+        <span>to provide up-to-date information.</span>
       </div>
       <div class="disclaimer" style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">
         Copyright © 2026 Shushant Giri. All rights reserved.
@@ -1649,7 +1649,12 @@
       try { this.setSelectionRange(pos + diff, pos + diff); } catch (_) { }
       document.getElementById('inp-clear').classList.toggle('visible', fmt.length > 0);
     });
-    function clearInp() { inp.value = ''; document.getElementById('inp-clear').classList.remove('visible'); inp.focus(); }
+    function clearInp() {
+      inp.value = '';
+      document.getElementById('inp-clear').classList.remove('visible');
+      history.replaceState(null, '', location.pathname);
+      inp.focus();
+    }
 
     /* ══════════════════════════════════════
        HISTORY
@@ -1721,6 +1726,8 @@
       try {
         const d = await (await fetch('/api/offices')).json();
         all = d.offices || []; totalEl.textContent = (d.total || 0).toLocaleString() + ' total';
+        const countEl = document.getElementById('offices-count');
+        if (countEl) countEl.textContent = all.length ? '(' + all.length + ')' : '';
         if (!all.length) { grid.innerHTML = '<div class="office-empty">No office records available yet.</div>'; return; }
         render();
       } catch (_) { grid.innerHTML = '<div class="office-empty">Could not load office records.</div>'; }
@@ -1741,6 +1748,26 @@
     function escapeHtml(s) { return esc(s); }
 
     /* ══════════════════════════════════════
+       reCAPTCHA v3 — only active when server passed a site key
+    ══════════════════════════════════════ */
+    const RECAPTCHA_SITE_KEY = "{{ recaptcha_site_key|default('', true) }}";
+
+    function getCaptchaToken(action) {
+      if (!RECAPTCHA_SITE_KEY || typeof grecaptcha === 'undefined') {
+        return Promise.resolve('');
+      }
+      return new Promise(resolve => {
+        try {
+          grecaptcha.ready(() => {
+            grecaptcha.execute(RECAPTCHA_SITE_KEY, { action })
+              .then(t => resolve(t || ''))
+              .catch(() => resolve(''));
+          });
+        } catch (_) { resolve(''); }
+      });
+    }
+
+    /* ══════════════════════════════════════
        CHECK
     ══════════════════════════════════════ */
     async function check() {
@@ -1749,10 +1776,29 @@
       hide(); show('skel');
       document.getElementById('btn').disabled = true;
       try {
-        const resp = await fetch('/api/check?license=' + encodeURIComponent(v));
+        const captchaToken = await getCaptchaToken('check');
+        const headers = captchaToken ? { 'X-Captcha-Token': captchaToken } : {};
+        const resp = await fetch('/api/check?license=' + encodeURIComponent(v), { headers });
         const d = await resp.json();
-        const cached = resp.headers.get('X-Cache-Hit') === 'true' || d.offline;
+        if (resp.status === 403 && d.code === 'captcha') {
+          hide(); document.getElementById('btn').disabled = false; haptic('error');
+          toast('Could not verify request. Please refresh the page and try again.');
+          return;
+        }
+        const cacheHit = resp.headers.get('X-Cache-Hit') === 'true';
+        // Service worker returns {offline:true} only when there's no cached
+        // copy of this license. Treat that as offline rather than "not found".
+        if (d.offline && !cacheHit && !d.found) {
+          hide(); document.getElementById('btn').disabled = false; haptic('error');
+          document.getElementById('offline-banner').classList.add('show');
+          toast('You appear to be offline. Connect to the internet to check this license.');
+          return;
+        }
+        const cached = cacheHit || d.offline;
         hide(); document.getElementById('btn').disabled = false;
+        if (cached && !navigator.onLine) {
+          document.getElementById('offline-banner').classList.add('show');
+        }
         if (d.found) {
           haptic('found'); saveH(v);
           history.replaceState(null, '', `${location.origin}${location.pathname}?license=${encodeURIComponent(v)}`);

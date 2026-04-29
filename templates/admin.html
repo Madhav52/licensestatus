@@ -730,7 +730,7 @@
     /* SOURCES */
     .sources-header {
       display: grid;
-      grid-template-columns: 2fr 3fr 1.5fr 1fr 80px 40px;
+      grid-template-columns: 28px 2fr 3fr 1.5fr 70px 1fr 80px 40px;
       gap: 12px;
       padding: 8px 16px;
       background: var(--off);
@@ -748,7 +748,7 @@
 
     .source-row {
       display: grid;
-      grid-template-columns: 2fr 3fr 1.5fr 1fr 80px 40px;
+      grid-template-columns: 28px 2fr 3fr 1.5fr 70px 1fr 80px 40px;
       gap: 12px;
       align-items: center;
       padding: 14px 16px;
@@ -763,6 +763,46 @@
     .source-row:hover {
       border-color: var(--blue3);
       box-shadow: 0 2px 12px rgba(37, 99, 235, 0.08);
+    }
+
+    .src-handle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      cursor: grab;
+      user-select: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .src-handle:hover {
+      background: var(--off);
+      color: var(--navy);
+    }
+
+    .src-handle:active,
+    .source-row.dragging .src-handle {
+      cursor: grabbing;
+    }
+
+    .src-handle svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .source-row.dragging {
+      opacity: 0.45;
+    }
+
+    .source-row.drag-over-top {
+      box-shadow: 0 -2px 0 0 var(--blue) inset;
+    }
+
+    .source-row.drag-over-bottom {
+      box-shadow: 0 2px 0 0 var(--blue) inset;
     }
 
     .src-name {
@@ -787,6 +827,14 @@
       font-size: 12px;
       color: var(--navy);
       font-weight: 600;
+    }
+
+    .src-order {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      font-family: 'DM Mono', monospace;
+      text-align: center;
     }
 
     .src-records {
@@ -932,7 +980,7 @@
 
     .add-form-row {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr 110px auto;
       gap: 10px;
     }
 
@@ -1894,6 +1942,46 @@
             </div>
           </div>
         </div>
+
+        <div class="card" style="margin-top:16px;">
+          <div class="card-head">
+            <span class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              User Search History
+            </span>
+            <span id="searchlog-count" style="font-size:11px;color:var(--muted);font-weight:600"></span>
+          </div>
+          <div class="card-body">
+            <div class="search-bar">
+              <input id="searchlog-q" type="text" placeholder="Filter by query, license, or name…"
+                autocomplete="off" oninput="debounceSearchLog()" />
+              <button onclick="loadSearchLog()">Refresh</button>
+              <button onclick="clearSearchLog()"
+                style="background:var(--red);color:#fff;border-color:var(--red);">Clear All</button>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time (UTC)</th>
+                    <th>Query</th>
+                    <th>Result</th>
+                    <th>License No.</th>
+                    <th>Name</th>
+                  </tr>
+                </thead>
+                <tbody id="searchlog-tbody">
+                  <tr>
+                    <td colspan="5" class="td-empty">Loading…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ══ SOURCES PAGE ══ -->
@@ -1912,9 +2000,11 @@
           </div>
           <div class="card-body">
             <div class="sources-header">
+              <div class="src-hd"></div>
               <div class="src-hd">Office Name</div>
               <div class="src-hd">PDF URL</div>
               <div class="src-hd">District</div>
+              <div class="src-hd">Order</div>
               <div class="src-hd">Records</div>
               <div class="src-hd">Status</div>
               <div class="src-hd"></div>
@@ -1948,6 +2038,10 @@
                 <div class="fg">
                   <label>PDF URL</label>
                   <input id="new-url" type="text" placeholder="https://giwmscdnone.gov.np/media/pdf_upload/..." />
+                </div>
+                <div class="fg">
+                  <label>Order</label>
+                  <input id="new-order" type="number" min="1" step="1" placeholder="end" />
                 </div>
                 <button class="add-btn" onclick="addSource()">+ Add Source</button>
               </div>
@@ -2190,7 +2284,10 @@
       if (btn) btn.classList.add('active');
       document.getElementById('topbar-title').textContent = PAGE_TITLES[name] || name;
       if (name === 'sources') loadSources();
-      if (name === 'records') setTimeout(() => document.getElementById('rec-q').focus(), 100);
+      if (name === 'records') {
+        setTimeout(() => document.getElementById('rec-q').focus(), 100);
+        loadSearchLog();
+      }
       if (name === 'dashboard') loadBreakdown();
       if (name === 'sync') updateSyncStatusTable();
       document.querySelectorAll('.src-dropdown.show').forEach(d => d.classList.remove('show'));
@@ -2243,18 +2340,22 @@
         // FIX: use `/${AP}/api/urls` — not /admin/api/urls
         const d = await (await fetch(`/${AP}/api/urls`)).json();
         const urls = d.urls || {};
+        // Rebuild sourceState in the order returned by the API so the rendered
+        // list reflects the configured `order` field. Preserve the runtime-only
+        // flags (cached/records) for names we already knew about.
+        const next = {};
         Object.entries(urls).forEach(([name, entry]) => {
           const url = typeof entry === 'string' ? entry : (entry.url || '');
           const district = typeof entry === 'object' ? (entry.district || '') : '';
-          if (!sourceState[name]) {
-            sourceState[name] = { url, district, cached: false, records: 0 };
-          } else {
-            sourceState[name].url = url;
-            sourceState[name].district = district;
-          }
+          const prev = sourceState[name] || { cached: false, records: 0 };
+          next[name] = {
+            url, district,
+            cached: !!prev.cached,
+            records: prev.records || 0,
+          };
         });
-        // Remove sources no longer in config
-        Object.keys(sourceState).forEach(k => { if (!urls[k]) delete sourceState[k]; });
+        Object.keys(sourceState).forEach(k => delete sourceState[k]);
+        Object.entries(next).forEach(([k, v]) => { sourceState[k] = v; });
 
         const n = Object.keys(sourceState).length;
         ['kpi-offices', 'nb-sources', 'src-count'].forEach(id => {
@@ -2338,13 +2439,21 @@
           ? s.records.toLocaleString()
           : '<span style="color:var(--muted)">—</span>';
 
-        return `<div class="source-row" id="src-row-${i}">
+        return `<div class="source-row" id="src-row-${i}" draggable="true" data-name="${escHtml(name)}">
+          <div class="src-handle" title="Drag to reorder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="4" y1="8" x2="20" y2="8"/>
+              <line x1="4" y1="12" x2="20" y2="12"/>
+              <line x1="4" y1="16" x2="20" y2="16"/>
+            </svg>
+          </div>
           <div class="src-name">
             <span style="width:26px;height:26px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;">${i + 1}</span>
             ${escHtml(name)}
           </div>
           <div class="src-url" title="${escHtml(s.url)}">${escHtml(s.url)}</div>
           <div class="src-district">${escHtml(s.district || '—')}</div>
+          <div class="src-order">${i + 1}</div>
           <div class="src-records">${recordsHtml}</div>
           <div>${statusHtml}</div>
           <div class="src-menu-wrap">
@@ -2376,6 +2485,19 @@
                   <path d="M3.51 15a9 9 0 1 0 .49-4.01"/>
                 </svg>
                 Force Re-download
+              </button>
+              <div class="src-dd-sep"></div>
+              <button class="src-dd-item" data-action="move-up" data-name="${escHtml(name)}" ${i === 0 ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <polyline points="18 15 12 9 6 15"/>
+                </svg>
+                Move Up
+              </button>
+              <button class="src-dd-item" data-action="move-down" data-name="${escHtml(name)}" ${i === keys.length - 1 ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+                Move Down
               </button>
               <div class="src-dd-sep"></div>
               <button class="src-dd-item danger" data-action="delete" data-name="${escHtml(name)}">
@@ -2423,6 +2545,8 @@
           renderSources();
           toast('↻ ' + name + ' marked for re-download');
           addActivity('Marked ' + name + ' for re-download', 'amber', '↻');
+        } else if (action === 'move-up' || action === 'move-down') {
+          moveSource(name, action === 'move-up' ? -1 : 1);
         } else if (action === 'delete') {
           pendingDelSource = name;
           document.getElementById('del-source-name').textContent = name;
@@ -2431,6 +2555,117 @@
         return;
       }
     });
+
+    // ── DRAG-AND-DROP REORDERING (desktop) ───────────────────────────────────────
+    // The up/down dropdown items still cover keyboard / touch.
+    let dragSrcName = null;
+
+    (function wireDragDrop() {
+      const list = document.getElementById('sources-list');
+      if (!list) return;
+
+      list.addEventListener('dragstart', e => {
+        const row = e.target.closest('.source-row');
+        if (!row) return;
+        dragSrcName = row.dataset.name;
+        row.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', dragSrcName); } catch (_) { }
+      });
+
+      list.addEventListener('dragend', e => {
+        const row = e.target.closest('.source-row');
+        if (row) row.classList.remove('dragging');
+        list.querySelectorAll('.drag-over-top, .drag-over-bottom')
+          .forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
+        dragSrcName = null;
+      });
+
+      list.addEventListener('dragover', e => {
+        const row = e.target.closest('.source-row');
+        if (!row || !dragSrcName) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const rect = row.getBoundingClientRect();
+        const before = (e.clientY - rect.top) < rect.height / 2;
+        list.querySelectorAll('.drag-over-top, .drag-over-bottom')
+          .forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
+        row.classList.add(before ? 'drag-over-top' : 'drag-over-bottom');
+      });
+
+      list.addEventListener('dragleave', e => {
+        const row = e.target.closest('.source-row');
+        if (row) row.classList.remove('drag-over-top', 'drag-over-bottom');
+      });
+
+      list.addEventListener('drop', e => {
+        const row = e.target.closest('.source-row');
+        if (!row || !dragSrcName) return;
+        e.preventDefault();
+        const targetName = row.dataset.name;
+        const rect = row.getBoundingClientRect();
+        const before = (e.clientY - rect.top) < rect.height / 2;
+        row.classList.remove('drag-over-top', 'drag-over-bottom');
+        if (targetName === dragSrcName) return;
+        const src = dragSrcName; dragSrcName = null;
+        applyDrop(src, targetName, before);
+      });
+    })();
+
+    async function applyDrop(src, target, before) {
+      const keys = Object.keys(sourceState);
+      const fromIdx = keys.indexOf(src);
+      if (fromIdx < 0) return;
+      keys.splice(fromIdx, 1);
+      let toIdx = keys.indexOf(target);
+      if (toIdx < 0) toIdx = keys.length;
+      if (!before) toIdx += 1;
+      keys.splice(toIdx, 0, src);
+      reorderSourceState(keys);
+      renderSources();
+      await persistOrder(keys, `Moved ${src} → position ${toIdx + 1}`);
+    }
+
+    function reorderSourceState(keys) {
+      const reordered = {};
+      keys.forEach(k => { if (sourceState[k]) reordered[k] = sourceState[k]; });
+      Object.keys(sourceState).forEach(k => delete sourceState[k]);
+      Object.entries(reordered).forEach(([k, v]) => { sourceState[k] = v; });
+    }
+
+    async function persistOrder(keys, successMsg) {
+      try {
+        const r = await (await fetch(`/${AP}/api/urls/reorder`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ names: keys })
+        })).json();
+        if (!r.ok) {
+          toast(r.error || 'Failed to save order', 'err');
+          await loadSources();
+          return false;
+        }
+        toast(successMsg);
+        addActivity(successMsg, 'blue', '↕');
+        loadBreakdown();
+        return true;
+      } catch (_) {
+        toast('Network error — reverting order', 'err');
+        await loadSources();
+        return false;
+      }
+    }
+
+    async function moveSource(name, direction) {
+      const keys = Object.keys(sourceState);
+      const i = keys.indexOf(name);
+      const j = i + direction;
+      if (i < 0 || j < 0 || j >= keys.length) return;
+      [keys[i], keys[j]] = [keys[j], keys[i]];
+      reorderSourceState(keys);
+      renderSources();
+      await persistOrder(keys, 'Moved ' + name + ' ' + (direction < 0 ? 'up' : 'down'));
+    }
 
     async function confirmDelSource() {
       const name = pendingDelSource;
@@ -2460,33 +2695,49 @@
       const name = document.getElementById('new-name').value.trim();
       const district = document.getElementById('new-district').value.trim();
       const url = document.getElementById('new-url').value.trim();
+      const orderRaw = document.getElementById('new-order').value.trim();
       if (!name || !url) { toast('Enter office name and URL', 'warn'); return; }
       if (!url.startsWith('http')) { toast('URL must start with https://', 'err'); return; }
       if (sourceState[name]) { toast('Source "' + name + '" already exists', 'warn'); return; }
 
+      const body = { name, url, district };
+      if (orderRaw !== '') {
+        const n = parseInt(orderRaw, 10);
+        if (!Number.isFinite(n) || n < 1) {
+          toast('Order must be a positive number (or empty for end)', 'warn');
+          return;
+        }
+        body.order = n;
+      }
+
+      const clearForm = () => {
+        document.getElementById('new-name').value = '';
+        document.getElementById('new-district').value = '';
+        document.getElementById('new-url').value = '';
+        document.getElementById('new-order').value = '';
+      };
+
       try {
-        // FIX: use `/${AP}/api/urls`
         const r = await (await fetch(`/${AP}/api/urls`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, district })
+          body: JSON.stringify(body)
         })).json();
         if (r.ok) {
-          sourceState[name] = { url, district, cached: false, records: 0 };
-          document.getElementById('new-name').value = '';
-          document.getElementById('new-district').value = '';
-          document.getElementById('new-url').value = '';
-          renderSources();
+          clearForm();
+          // Reload from server: inserting in the middle reorders other rows,
+          // so we can't just append locally.
+          await loadSources();
           loadStats();
-          toast('✓ Source added: ' + name + (district ? ' (' + district + ')' : ''));
-          addActivity('Added PDF source: ' + name + (district ? ' · ' + district : ''), 'blue', '🔗');
+          loadBreakdown();
+          const where = body.order ? ' at position ' + body.order : '';
+          toast('✓ Source added: ' + name + where + (district ? ' (' + district + ')' : ''));
+          addActivity('Added PDF source: ' + name + where + (district ? ' · ' + district : ''), 'blue', '🔗');
         } else toast(r.error || 'Failed to add source', 'err');
       } catch (_) {
         // Demo fallback if server unreachable
         sourceState[name] = { url, district, cached: false, records: 0 };
-        document.getElementById('new-name').value = '';
-        document.getElementById('new-district').value = '';
-        document.getElementById('new-url').value = '';
+        clearForm();
         renderSources();
         toast('✓ Source added: ' + name);
         addActivity('Added PDF source: ' + name, 'blue', '🔗');
@@ -2525,6 +2776,67 @@
           </tr>`).join('');
       } catch (_) {
         tbody.innerHTML = '<tr><td colspan="6" class="td-empty">❌ Error fetching results</td></tr>';
+      }
+    }
+
+    // ── USER SEARCH LOG ───────────────────────────────────────────────────────────
+    let slTimer;
+    function debounceSearchLog() { clearTimeout(slTimer); slTimer = setTimeout(loadSearchLog, 380); }
+
+    async function loadSearchLog() {
+      const tbody = document.getElementById('searchlog-tbody');
+      const countEl = document.getElementById('searchlog-count');
+      const q = (document.getElementById('searchlog-q')?.value || '').trim();
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="5" class="td-empty">Loading…</td></tr>';
+      try {
+        const url = `/${AP}/api/search-log?limit=200` + (q ? '&q=' + encodeURIComponent(q) : '');
+        const d = await (await fetch(url)).json();
+        const rows = d.rows || [];
+        const total = d.total || 0;
+        if (countEl) {
+          countEl.textContent = q
+            ? rows.length + ' of ' + total.toLocaleString() + ' match'
+            : total.toLocaleString() + ' searches logged';
+        }
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="td-empty">'
+            + (q ? 'No matches for "' + escHtml(q) + '"' : 'No searches yet — share the public page to start collecting data')
+            + '</td></tr>';
+          return;
+        }
+        tbody.innerHTML = rows.map(r => {
+          const dt = r.created_at ? new Date(r.created_at) : null;
+          const when = dt && !isNaN(dt) ? dt.toLocaleString() : (r.created_at || '—');
+          const result = r.found
+            ? '<span style="color:var(--green);font-weight:700">✓ Found</span>'
+            : '<span style="color:var(--red);font-weight:700">✗ Not found</span>';
+          return `<tr>
+            <td class="td-mono" style="white-space:nowrap">${escHtml(when)}</td>
+            <td class="td-mono">${escHtml(r.query || '—')}</td>
+            <td>${result}</td>
+            <td class="td-mono">${escHtml(r.license_no || '—')}</td>
+            <td class="td-name">${escHtml(r.name || '—')}</td>
+          </tr>`;
+        }).join('');
+      } catch (_) {
+        tbody.innerHTML = '<tr><td colspan="5" class="td-empty">❌ Error loading search log</td></tr>';
+      }
+    }
+
+    async function clearSearchLog() {
+      if (!confirm('Clear all user search history? This cannot be undone.')) return;
+      try {
+        const r = await (await fetch(`/${AP}/api/search-log/clear`, { method: 'POST' })).json();
+        if (r.ok) {
+          toast('Cleared ' + (r.deleted || 0).toLocaleString() + ' search entries');
+          addActivity('Cleared user search log (' + (r.deleted || 0) + ' entries)', 'amber', '🗑️');
+          loadSearchLog();
+        } else {
+          toast(r.error || 'Failed to clear log', 'err');
+        }
+      } catch (_) {
+        toast('Network error', 'err');
       }
     }
 
@@ -2582,31 +2894,86 @@
       }
 
       try {
-        // FIX: use `/${AP}/api/sync`
         const r = await fetch(`/${AP}/api/sync`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ skip_cached: cached, download: toDownload })
         });
-        const d = await r.json();
-        ico.classList.remove('spinning');
-        if (badge) badge.textContent = d.ok ? 'DONE' : 'ERROR';
+        const start = await r.json();
 
-        if (d.ok) {
-          toDownload.forEach(n => { if (sourceState[n]) sourceState[n].cached = true; });
-          log('> PDFs downloaded: ' + (d.pdfs_downloaded || 0), 'ok');
-          log('> PDFs skipped (cached): ' + (d.pdfs_skipped || cached.length), 'warn');
-          log('> Records imported: ' + (d.records_imported || 0).toLocaleString(), 'ok');
-          log('> Sync completed successfully', 'ok');
-          toast('Synced ' + (d.records_imported || 0).toLocaleString() + ' records');
-          addActivity('Sync done — ' + (d.records_imported || 0).toLocaleString() + ' records imported, ' + (d.pdfs_skipped || 0) + ' PDFs cached', 'green', '✅');
-          loadStats();
-          loadBreakdown();
-          renderSources();
-        } else {
-          log('> Error: ' + (d.error || 'Sync failed'), 'err');
-          toast(d.error || 'Sync failed', 'err');
+        if (!start.ok) {
+          ico.classList.remove('spinning');
+          if (badge) badge.textContent = 'ERROR';
+          log('> Error: ' + (start.error || 'Could not start sync'), 'err');
+          toast(start.error || 'Sync failed', 'err');
+          return;
         }
+
+        log('> Background sync started (job ' + start.job_id + ')', 'ok');
+        log('> Polling for progress…');
+
+        // Poll /api/sync/status until the job finishes. Server-side parsing
+        // is page-batched, so a 600-page PDF no longer holds the worker
+        // hostage — the request that started this sync already returned.
+        let lastLogLen = 0;
+        const poll = async () => {
+          let job;
+          try {
+            const sr = await fetch(`/${AP}/api/sync/status`);
+            const sd = await sr.json();
+            job = sd.job || {};
+          } catch (e) {
+            log('> Status poll failed: ' + e.message, 'warn');
+            setTimeout(poll, 2500);
+            return;
+          }
+
+          const logs = job.log || [];
+          for (let i = lastLogLen; i < logs.length; i++) {
+            const ent = logs[i];
+            log('> ' + ent.msg, ent.level || 'info');
+          }
+          lastLogLen = logs.length;
+
+          if (job.status === 'running') {
+            const pct = job.total_pages
+              ? Math.round(100 * (job.current_page || 0) / job.total_pages)
+              : 0;
+            const phase = (job.current_phase || '').toUpperCase();
+            const office = job.current_office || '';
+            const where = job.office_total
+              ? ` ${job.office_index || 0}/${job.office_total}`
+              : '';
+            const pageInfo = (job.current_phase === 'parsing' && job.total_pages)
+              ? ` p${job.current_page}/${job.total_pages} (${pct}%)`
+              : '';
+            if (badge) badge.textContent = `${phase || 'RUNNING'}${where} ${office}${pageInfo}`.trim();
+            setTimeout(poll, 1500);
+            return;
+          }
+
+          ico.classList.remove('spinning');
+
+          if (job.status === 'done') {
+            if (badge) badge.textContent = 'DONE';
+            toDownload.forEach(n => { if (sourceState[n]) sourceState[n].cached = true; });
+            log('> PDFs downloaded: ' + (job.pdfs_downloaded || 0), 'ok');
+            log('> PDFs skipped (cached): ' + (job.pdfs_skipped || cached.length), 'warn');
+            log('> Records imported: ' + (job.records_imported || 0).toLocaleString(), 'ok');
+            log('> Sync completed successfully', 'ok');
+            toast('Synced ' + (job.records_imported || 0).toLocaleString() + ' records');
+            addActivity('Sync done — ' + (job.records_imported || 0).toLocaleString() + ' records imported, ' + (job.pdfs_skipped || 0) + ' PDFs cached', 'green', '✅');
+            loadStats();
+            loadBreakdown();
+            renderSources();
+          } else {
+            if (badge) badge.textContent = 'ERROR';
+            log('> Error: ' + (job.error || 'Sync failed'), 'err');
+            toast(job.error || 'Sync failed', 'err');
+          }
+        };
+
+        setTimeout(poll, 800);
       } catch (e) {
         ico.classList.remove('spinning');
         if (badge) badge.textContent = 'ERROR';

@@ -1,30 +1,42 @@
 {
-  "Okhaldhunga": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Okhaldhunga%20Printed%20License%20Details_bbdvdfy.pdf",
-    "district": "Okhaldhunga"
-  },
-  "Gaur": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Gaur%20Printed%20License%20Detail_1vfpinc.pdf",
-    "district": "Rautahat"
-  },
-  "Nawalparasi": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Printed%20Nawalparasi%20License%208410_hunzizw.pdf",
-    "district": "Nawalparasi"
-  },
-  "Rajbiraj": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Rajbiraj%20Saptari%20Printed%20License%20Details_b3eba9b.pdf",
-    "district": "Saptari"
-  },
-  "Chaujahari": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Chaurjahari%20Printed%20license%20Details_fkufqt2.pdf",
-    "district": "Rukum"
+  "Chabahil": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Chabahil%20Printed%20License%20Card%20List_5siwppy.pdf",
+    "district": "Kathmandu",
+    "order": 0
   },
   "Gaighat": {
     "url": "https://giwmscdnone.gov.np/media/pdf_upload/Udaypur%20Printed%20License_wtv1gzm.pdf",
-    "district": "Udayapur"
+    "district": "Udayapur",
+    "order": 1
+  },
+  "Chaujahari": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Chaurjahari%20Printed%20license%20Details_fkufqt2.pdf",
+    "district": "Rukum",
+    "order": 3
+  },
+  "Gaur": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Gaur%20Printed%20License%20Detail_1vfpinc.pdf",
+    "district": "Rautahat",
+    "order": 2
   },
   "Malangwa": {
     "url": "https://giwmscdnone.gov.np/media/pdf_upload/Sarlahi%20Printed%20License_fy594ef.pdf",
-    "district": "Sarlahi"
+    "district": "Sarlahi",
+    "order": 4
+  },
+  "Nawalparasi": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Printed%20Nawalparasi%20License%208410_hunzizw.pdf",
+    "district": "Nawalparasi",
+    "order": 5
+  },
+  "Okhaldhunga": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Okhaldhunga%20Printed%20License%20Details_bbdvdfy.pdf",
+    "district": "Okhaldhunga",
+    "order": 6
+  },
+  "Rajbiraj": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Rajbiraj%20Saptari%20Printed%20License%20Details_b3eba9b.pdf",
+    "district": "Saptari",
+    "order": 7
   }
 }
