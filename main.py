@@ -69,7 +69,6 @@ SECRET_KEY = os.environ.get("SECRET_KEY",     "dotm-secret-change-me-2081")
 # ══════════════════════════════════════════════════════════════════
 def _keepalive_loop():
     """Ping own /healthz every 10 min so Render never spins down."""
-    # Wait 90 s after startup before first ping
     time.sleep(90)
     url = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
     if not url:
@@ -83,13 +82,13 @@ def _keepalive_loop():
                 log.debug("Keepalive OK (%d)", r.status)
         except Exception as e:
             log.debug("Keepalive ping failed: %s", e)
-        time.sleep(600)   # 10 minutes
+        time.sleep(600)
 
 
 def start_keepalive():
     """Start the background keepalive thread (only on Render)."""
     if not os.environ.get("RENDER"):
-        return   # Local dev — no need
+        return
     t = threading.Thread(target=_keepalive_loop, daemon=True)
     t.start()
 
@@ -423,7 +422,32 @@ def _ensure_db():
 
 
 # ══════════════════════════════════════════════════════════════════
-#   PUBLIC ROUTES  — only index.html visible to everyone
+#   PWA — Service Worker & Manifest
+#   These MUST be served from root (/) — not /static/ — for PWA
+#   to work correctly in all browsers.
+# ══════════════════════════════════════════════════════════════════
+@app.route("/sw.js")
+def service_worker():
+    """Serve the service worker from root with no-cache headers."""
+    response = app.send_static_file("sw.js")
+    response.headers["Content-Type"] = "application/javascript"
+    # SW must never be cached — browser needs the latest version always
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Service-Worker-Allowed"] = "/"
+    return response
+
+
+@app.route("/manifest.json")
+def manifest():
+    """Serve the PWA manifest from root."""
+    response = app.send_static_file("manifest.json")
+    response.headers["Content-Type"] = "application/manifest+json"
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
+
+
+# ══════════════════════════════════════════════════════════════════
+#   PUBLIC ROUTES
 # ══════════════════════════════════════════════════════════════════
 @app.route("/")
 def index():
@@ -478,7 +502,7 @@ def admin_decoy(subpath):
 
 
 # ══════════════════════════════════════════════════════════════════
-#   ADMIN AUTH  (/dotm-admin — hidden from public)
+#   ADMIN AUTH
 # ══════════════════════════════════════════════════════════════════
 @app.route("/dotm-admin/login", methods=["GET"])
 def admin_login():
@@ -586,7 +610,6 @@ def admin_sync():
         district = entry.get("district", "") if isinstance(entry, dict) else ""
         tmp_pdf = _temp_pdf_path(office)
 
-        # Skip if DB already has records for this office
         try:
             with get_conn() as conn:
                 existing = conn.execute(
@@ -605,7 +628,6 @@ def admin_sync():
             })
             continue
 
-        # Download
         try:
             log.info("Downloading [%s]: %s", office, url[:80])
             req = Request(url, headers=headers)
@@ -625,7 +647,6 @@ def admin_sync():
             })
             continue
 
-        # Parse → DB → delete temp
         try:
             n = parse_and_store(tmp_pdf, district=district,
                                 office_override=office)
@@ -773,7 +794,7 @@ def server_error(e):
 # ══════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
     init_db()
-    start_keepalive()   # ← keeps Render awake, ignored on local dev
+    start_keepalive()
 
     port = int(os.environ.get("PORT",  5000))
     debug = os.environ.get("DEBUG", "0") == "1"
