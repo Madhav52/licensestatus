@@ -11,41 +11,30 @@
     content="Nepal driving license, DOTM print status, license check Nepal, driving license printed, DOTM Nepal, license tracker" />
   <meta name="author" content="Shushant Giri" />
   <meta name="robots" content="index, follow" />
-
-  <!-- ═══ PWA: manifest + theme ═══ -->
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#663399" />
+  <meta name="theme-color" content="#C0392B" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="LicenseStatus" />
-  <!-- Apple touch icons (add these files in /static/icons/) -->
   <link rel="apple-touch-icon" sizes="152x152" href="/static/icons/icon-152.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="/static/icons/icon-192.png" />
-
   <link rel="canonical" href="https://license-status-checker.onrender.com/" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://license-status-checker.onrender.com/" />
   <meta property="og:title" content="License Status Nepal — DOTM Print Tracker" />
-  <meta property="og:description"
-    content="Check your Nepal driving license print status instantly. Enter your license number to verify if it has been printed by DOTM. Free, fast, and powered by official DOTM records." />
+  <meta property="og:description" content="Check your Nepal driving license print status instantly." />
   <meta property="og:image" content="https://license-status-checker.onrender.com/static/thumbnail.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="License Status Nepal – Check your DOTM driving license print status" />
   <meta property="og:site_name" content="LicenseStatus Nepal" />
   <meta property="og:locale" content="en_US" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:url" content="https://license-status-checker.onrender.com/" />
   <meta name="twitter:title" content="License Status Nepal — DOTM Print Tracker" />
-  <meta name="twitter:description"
-    content="Check your Nepal driving license print status instantly. Enter your license number to verify if it has been printed by DOTM. Free, fast, and powered by official DOTM records." />
   <meta name="twitter:image" content="https://license-status-checker.onrender.com/static/thumbnail.png" />
-  <meta name="twitter:image:alt" content="License Status Nepal – Check your DOTM driving license print status" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='4' y='10' width='56' height='40' rx='7' fill='%23C0392B'/><rect x='4' y='10' width='56' height='14' rx='7' fill='%23A93226'/><rect x='4' y='17' width='56' height='7' fill='%23A93226'/><rect x='10' y='28' width='13' height='16' rx='3' fill='%23fff' opacity='.9'/><rect x='27' y='29' width='22' height='3' rx='1.5' fill='%23fff' opacity='.9'/><rect x='27' y='35' width='17' height='2.5' rx='1.25' fill='%23fff' opacity='.65'/><rect x='27' y='40' width='20' height='2.5' rx='1.25' fill='%23fff' opacity='.5'/><circle cx='50' cy='45' r='10' fill='%2327AE60'/><path d='M46 45.5l2.8 2.8 5.5-5.8' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+
   <style>
     *,
     *::before,
@@ -55,6 +44,7 @@
       padding: 0;
     }
 
+    /* ══ LIGHT MODE ══ */
     :root {
       --red: #C0392B;
       --red2: #E74C3C;
@@ -66,6 +56,37 @@
       --border: #E8ECF0;
       --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
       --radius: 16px;
+      --skel-a: #eee;
+      --skel-b: #f5f5f5;
+      --clear-hover: #f0f0f0;
+    }
+
+    /* ══ DARK MODE ══ */
+    html[data-theme="dark"] {
+      --bg: #0F1117;
+      --white: #1A1D27;
+      --text: #EAEDF5;
+      --muted: #5A6478;
+      --border: #252938;
+      --shadow: 0 4px 28px rgba(0, 0, 0, 0.4);
+      --skel-a: #1C2030;
+      --skel-b: #232640;
+      --clear-hover: #252938;
+    }
+
+    /* Smooth transition for theme swap */
+    *,
+    *::before,
+    *::after {
+      transition: background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease;
+    }
+
+    /* But NOT on animations or transforms */
+    .skel-line,
+    .live-pill-dot,
+    .badge-dot,
+    #toast {
+      transition: none !important;
     }
 
     html,
@@ -93,6 +114,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
     }
 
     .logo {
@@ -112,12 +134,6 @@
       box-shadow: 0 2px 8px rgba(192, 57, 43, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
       flex-shrink: 0;
       overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .logo:hover .logo-card {
-      transform: translateY(-1px) rotate(-1deg);
-      box-shadow: 0 5px 16px rgba(192, 57, 43, 0.4);
     }
 
     .logo-card::before {
@@ -161,6 +177,53 @@
       margin-top: 1px;
     }
 
+    /* Topbar right group */
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── DARK TOGGLE ── */
+    .dark-toggle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: border-color 0.18s, color 0.18s, transform 0.25s !important;
+    }
+
+    .dark-toggle:hover {
+      border-color: var(--red);
+      color: var(--red);
+      transform: rotate(22deg);
+    }
+
+    .dark-toggle .icon-sun {
+      display: none;
+    }
+
+    .dark-toggle .icon-moon {
+      display: block;
+    }
+
+    html[data-theme="dark"] .dark-toggle .icon-sun {
+      display: block;
+    }
+
+    html[data-theme="dark"] .dark-toggle .icon-moon {
+      display: none;
+    }
+
+    /* ── LIVE PILL ── */
     .live-pill {
       display: flex;
       align-items: center;
@@ -182,14 +245,14 @@
       animation: blink 2s infinite;
     }
 
-    /* ── PWA INSTALL BANNER ── */
+    /* ── INSTALL BANNER ── */
     .install-banner {
       width: 100%;
       max-width: 560px;
       display: none;
       align-items: center;
       gap: 12px;
-      background: linear-gradient(135deg, #FDF2F1 0%, #fff 100%);
+      background: var(--white);
       border: 1px solid rgba(192, 57, 43, 0.2);
       border-radius: 14px;
       padding: 14px 16px;
@@ -247,7 +310,6 @@
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
-      transition: background 0.15s;
     }
 
     .install-btn:hover {
@@ -262,7 +324,6 @@
       font-size: 18px;
       line-height: 1;
       padding: 4px;
-      transition: color 0.15s;
     }
 
     .install-dismiss:hover {
@@ -287,6 +348,12 @@
       animation: up 0.3s ease;
     }
 
+    html[data-theme="dark"] .offline-banner {
+      background: #221E0A;
+      border-color: #6B5400;
+      color: #D4A017;
+    }
+
     .offline-banner.show {
       display: flex;
     }
@@ -294,10 +361,6 @@
     .offline-icon {
       font-size: 16px;
       flex-shrink: 0;
-    }
-
-    .offline-banner b {
-      font-weight: 700;
     }
 
     /* ── HERO ── */
@@ -344,12 +407,11 @@
       align-items: center;
       gap: 8px;
       border: 1.5px solid var(--border);
-      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .search-card:focus-within {
       border-color: var(--red);
-      box-shadow: 0 0 0 4px rgba(192, 57, 43, 0.08), var(--shadow);
+      box-shadow: 0 0 0 4px rgba(192, 57, 43, 0.1), var(--shadow);
     }
 
     .search-icon {
@@ -372,7 +434,8 @@
     }
 
     #inp::placeholder {
-      color: #BEC5D0;
+      color: var(--muted);
+      opacity: 0.5;
       font-weight: 400;
     }
 
@@ -387,7 +450,6 @@
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
       white-space: nowrap;
     }
 
@@ -413,12 +475,11 @@
       padding: 6px;
       border-radius: 50%;
       flex-shrink: 0;
-      transition: background 0.15s, color 0.15s;
       line-height: 0;
     }
 
     .inp-clear:hover {
-      background: #f0f0f0;
+      background: var(--clear-hover);
       color: var(--text);
     }
 
@@ -435,7 +496,15 @@
       color: var(--muted);
     }
 
-    /* ── SEARCH HISTORY ── */
+    kbd {
+      background: var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 11px;
+      font-family: inherit;
+    }
+
+    /* ── HISTORY ── */
     .history-wrap {
       width: 100%;
       max-width: 560px;
@@ -470,7 +539,6 @@
       font-weight: 600;
       color: var(--text);
       cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
       font-family: 'Courier New', monospace;
     }
 
@@ -487,14 +555,13 @@
       font-size: 14px;
       line-height: 1;
       padding: 0 0 0 2px;
-      transition: color 0.15s;
     }
 
     .history-chip-del:hover {
       color: var(--red);
     }
 
-    /* ── SHARE BUTTON ── */
+    /* ── SHARE BTN ── */
     .share-btn {
       display: inline-flex;
       align-items: center;
@@ -508,7 +575,6 @@
       font-weight: 600;
       color: var(--muted);
       cursor: pointer;
-      transition: border-color 0.15s, color 0.15s, background 0.15s;
       flex-shrink: 0;
       white-space: nowrap;
     }
@@ -516,7 +582,7 @@
     .share-btn:hover {
       border-color: var(--green);
       color: var(--green);
-      background: rgba(39, 174, 96, 0.05);
+      background: rgba(39, 174, 96, 0.06);
     }
 
     /* ── RESULT ── */
@@ -540,7 +606,7 @@
 
     .skel-line {
       border-radius: 6px;
-      background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+      background: linear-gradient(90deg, var(--skel-a) 25%, var(--skel-b) 50%, var(--skel-a) 75%);
       background-size: 400% 100%;
       animation: shimmer 1.2s infinite;
       margin-bottom: 12px;
@@ -548,23 +614,23 @@
 
     .skel-line:nth-child(1) {
       height: 18px;
-      width: 60%;
+      width: 60%
     }
 
     .skel-line:nth-child(2) {
       height: 14px;
-      width: 85%;
+      width: 85%
     }
 
     .skel-line:nth-child(3) {
       height: 14px;
-      width: 70%;
+      width: 70%
     }
 
     .skel-line:nth-child(4) {
       height: 14px;
       width: 50%;
-      margin-bottom: 0;
+      margin-bottom: 0
     }
 
     .result-card {
@@ -592,7 +658,6 @@
       background: var(--red);
     }
 
-    /* ── FIX: card-top always on one line ── */
     .card-top {
       padding: 18px 22px 14px;
       border-bottom: 1px solid var(--border);
@@ -625,6 +690,14 @@
     .badge-red {
       background: #FDEDEC;
       color: var(--red);
+    }
+
+    html[data-theme="dark"] .badge-green {
+      background: rgba(39, 174, 96, 0.14);
+    }
+
+    html[data-theme="dark"] .badge-red {
+      background: rgba(192, 57, 43, 0.14);
     }
 
     .badge-dot {
@@ -700,6 +773,29 @@
       color: var(--red);
     }
 
+    .cache-notice {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: #FEF3CD;
+      border: 1px solid #F5C518;
+      border-radius: 0 0 var(--radius) var(--radius);
+      padding: 8px 22px;
+      font-size: 11px;
+      color: #7A5800;
+      font-weight: 500;
+    }
+
+    html[data-theme="dark"] .cache-notice {
+      background: #221E0A;
+      border-color: #6B5400;
+      color: #D4A017;
+    }
+
+    .cache-notice.show {
+      display: flex;
+    }
+
     .card-footer {
       padding: 12px 22px;
       border-top: 1px solid var(--border);
@@ -716,24 +812,6 @@
       border-radius: 50%;
       background: var(--green);
       flex-shrink: 0;
-    }
-
-    /* ── CACHE NOTICE (shown when API returned cached data) ── */
-    .cache-notice {
-      display: none;
-      align-items: center;
-      gap: 6px;
-      background: #FEF3CD;
-      border: 1px solid #F5C518;
-      border-radius: 0 0 var(--radius) var(--radius);
-      padding: 8px 22px;
-      font-size: 11px;
-      color: #7A5800;
-      font-weight: 500;
-    }
-
-    .cache-notice.show {
-      display: flex;
     }
 
     .not-found {
@@ -762,6 +840,10 @@
       font-size: 22px;
     }
 
+    html[data-theme="dark"] .nf-icon {
+      background: rgba(192, 57, 43, 0.14);
+    }
+
     .not-found h3 {
       font-size: 18px;
       font-weight: 700;
@@ -786,7 +868,6 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
     }
 
     .retry-btn:hover {
@@ -840,7 +921,6 @@
       padding: 0 4px;
       gap: 10px;
       flex-wrap: wrap;
-      position: relative;
     }
 
     .offices-title {
@@ -870,20 +950,14 @@
       font-size: 12px;
       font-weight: 600;
       color: var(--muted);
-      transition: border-color 0.18s, color 0.18s, background 0.18s;
       flex-shrink: 0;
     }
 
-    .office-search-trigger:hover {
-      border-color: var(--red);
-      color: var(--red);
-      background: #FDF2F1;
-    }
-
+    .office-search-trigger:hover,
     .office-search-trigger.active {
       border-color: var(--red);
       color: var(--red);
-      background: #FDF2F1;
+      background: rgba(192, 57, 43, 0.06);
     }
 
     .office-search-wrap {
@@ -891,7 +965,7 @@
       max-height: 0;
       opacity: 0;
       margin-bottom: 0;
-      transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease, margin-bottom 0.28s ease;
+      transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease, margin-bottom 0.28s ease !important;
     }
 
     .office-search-wrap.open {
@@ -908,7 +982,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      transition: border-color 0.2s;
     }
 
     .office-search-inner:focus-within {
@@ -936,7 +1009,8 @@
     }
 
     #office-inp::placeholder {
-      color: #BEC5D0;
+      color: var(--muted);
+      opacity: 0.5;
       font-weight: 400;
     }
 
@@ -948,12 +1022,11 @@
       cursor: pointer;
       padding: 4px;
       border-radius: 50%;
-      transition: background 0.15s, color 0.15s;
       flex-shrink: 0;
     }
 
     .office-search-clear:hover {
-      background: #f0f0f0;
+      background: var(--clear-hover);
       color: var(--text);
     }
 
@@ -989,13 +1062,12 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 14px;
-      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
     }
 
     .office-card:hover {
       border-color: var(--red);
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
     }
 
     .office-card-name {
@@ -1058,7 +1130,6 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: border-color 0.18s, color 0.18s, background 0.18s;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -1067,15 +1138,11 @@
     .show-more-btn:hover {
       border-color: var(--red);
       color: var(--red);
-      background: #FDF2F1;
+      background: rgba(192, 57, 43, 0.05);
     }
 
     /* ── MOBILE ── */
     @media (max-width:600px) {
-      .office-search-wrap {
-        display: block;
-      }
-
       .office-grid {
         display: flex !important;
         flex-direction: row !important;
@@ -1133,7 +1200,6 @@
       color: var(--muted);
       text-decoration: none;
       text-underline-offset: 3px;
-      transition: color 0.15s;
     }
 
     footer a:hover {
@@ -1144,7 +1210,8 @@
     footer .disclaimer {
       margin-top: 6px;
       font-size: 10.5px;
-      color: #B0BAC9;
+      color: var(--muted);
+      opacity: 0.7;
     }
 
     /* ── TOAST ── */
@@ -1154,15 +1221,15 @@
       left: 50%;
       transform: translateX(-50%) translateY(70px);
       background: var(--text);
-      color: #fff;
+      color: var(--bg);
       padding: 11px 20px;
       border-radius: 100px;
       font-size: 13px;
       font-weight: 500;
       white-space: nowrap;
       z-index: 999;
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     }
 
     #toast.show {
@@ -1229,12 +1296,12 @@
 <body>
   <div class="page">
 
-    <!-- PWA INSTALL BANNER -->
+    <!-- INSTALL BANNER -->
     <div class="install-banner" id="install-banner">
       <div class="install-banner-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"
           stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+          <rect x="5" y="2" width="14" height="20" rx="2" />
           <line x1="12" y1="18" x2="12.01" y2="18" />
         </svg>
       </div>
@@ -1243,8 +1310,8 @@
         <div class="install-banner-sub">Add to home screen — works offline too</div>
       </div>
       <div class="install-banner-actions">
-        <button class="install-btn" id="install-btn" onclick="triggerInstall()">Install</button>
-        <button class="install-dismiss" onclick="dismissInstall()" aria-label="Dismiss">×</button>
+        <button class="install-btn" onclick="triggerInstall()">Install</button>
+        <button class="install-dismiss" onclick="dismissInstall()">×</button>
       </div>
     </div>
 
@@ -1274,9 +1341,34 @@
           <div class="logo-tagline">Nepal · DOTM Print Tracker</div>
         </div>
       </div>
-      <div class="live-pill">
-        <div class="live-pill-dot"></div>
-        Live Data
+
+      <div class="topbar-right">
+        <!-- Dark mode toggle -->
+        <button class="dark-toggle" onclick="toggleDark()" aria-label="Toggle dark mode">
+          <!-- Moon icon — visible in light mode -->
+          <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <!-- Sun icon — visible in dark mode -->
+          <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
+
+        <div class="live-pill">
+          <div class="live-pill-dot"></div>
+          Live Data
+        </div>
       </div>
     </div>
 
@@ -1307,9 +1399,8 @@
         </button>
         <button class="search-btn" id="btn" onclick="check()">Check</button>
       </div>
-      <p class="hint">Press Enter to search &nbsp;·&nbsp; Format: 07-01-XXXXXXXX &nbsp;·&nbsp; <kbd
-          style="background:var(--border);border-radius:4px;padding:1px 5px;font-size:11px;font-family:inherit;">⌘K</kbd>
-        to focus</p>
+      <p class="hint">Press Enter to search &nbsp;·&nbsp; Format: 07-01-XXXXXXXX &nbsp;·&nbsp; <kbd>⌘K</kbd> to focus
+      </p>
     </div>
 
     <!-- SEARCH HISTORY -->
@@ -1326,6 +1417,7 @@
         <div class="skel-line"></div>
         <div class="skel-line"></div>
       </div>
+
       <div class="result-card" id="card">
         <div class="card-stripe stripe-green" id="cstripe"></div>
         <div class="card-top">
@@ -1367,14 +1459,13 @@
             </div>
           </div>
         </div>
-        <div class="cache-notice" id="cache-notice">
-          ⚠️ Showing cached result — connect to internet for live data
-        </div>
+        <div class="cache-notice" id="cache-notice">⚠️ Showing cached result — connect to internet for live data</div>
         <div class="card-footer">
           <div class="footer-dot"></div>
           Data sourced from official DOTM Nepal PDF records &nbsp;·&nbsp; <span id="cupdated"></span>
         </div>
       </div>
+
       <div class="not-found" id="notfound">
         <div class="nf-icon">🔍</div>
         <h3>License Not Found</h3>
@@ -1420,7 +1511,7 @@
           </span>
           <input id="office-inp" type="text" placeholder="Search by office or district…" autocomplete="off"
             autocorrect="off" spellcheck="false" />
-          <button class="office-search-clear" id="office-clear" onclick="clearOfficeSearch()" aria-label="Clear search">
+          <button class="office-search-clear" id="office-clear" onclick="clearOfficeSearch()" aria-label="Clear">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
               stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -1451,10 +1542,9 @@
       <div class="footer-row">
         <span>Built using publicly available PDF records from</span>
         <a href="https://dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np</a>
-        <span class="sep">·</span>
-        <span class="sep">·</span>
+        <span class="sep">·</span><span class="sep">·</span>
       </div>
-      <div class="disclaimer" style="margin-top:10px;border-top:1px solid #E8ECF0;padding-top:10px;">
+      <div class="disclaimer" style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">
         Copyright © 2026 Shushant Giri. All rights reserved.
       </div>
     </footer>
@@ -1464,187 +1554,137 @@
 
   <script>
     /* ══════════════════════════════════════
-       PWA — Register Service Worker
+       DARK MODE — runs before paint to avoid flash
+    ══════════════════════════════════════ */
+    (function () {
+      const saved = localStorage.getItem('theme');
+      const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const dark = saved ? saved === 'dark' : sysDark;
+      if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+
+    function toggleDark() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    /* Follow system preference only if user hasn't manually picked */
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem('theme'))
+        document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+    });
+
+    /* ══════════════════════════════════════
+       PWA
     ══════════════════════════════════════ */
     let deferredInstallPrompt = null;
-
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('[PWA] SW registered:', reg.scope))
-          .catch(err => console.warn('[PWA] SW failed:', err));
+          .then(r => console.log('[PWA] SW:', r.scope))
+          .catch(e => console.warn('[PWA]', e));
       });
     }
-
-    /* Capture install prompt */
     window.addEventListener('beforeinstallprompt', e => {
-      e.preventDefault();
-      deferredInstallPrompt = e;
-      /* Show banner only if user hasn't dismissed before */
-      if (!localStorage.getItem('installDismissed')) {
+      e.preventDefault(); deferredInstallPrompt = e;
+      if (!localStorage.getItem('installDismissed'))
         document.getElementById('install-banner').classList.add('show');
-      }
     });
-
-    /* User installed via OS */
     window.addEventListener('appinstalled', () => {
       document.getElementById('install-banner').classList.remove('show');
       deferredInstallPrompt = null;
-      toast('✅ App installed! Open from your home screen.');
+      toast('✅ App installed!');
     });
-
     function triggerInstall() {
       if (!deferredInstallPrompt) return;
       deferredInstallPrompt.prompt();
-      deferredInstallPrompt.userChoice.then(choice => {
-        if (choice.outcome === 'accepted') {
-          toast('Installing…');
-        }
+      deferredInstallPrompt.userChoice.then(c => {
+        if (c.outcome === 'accepted') toast('Installing…');
         deferredInstallPrompt = null;
         document.getElementById('install-banner').classList.remove('show');
       });
     }
-
     function dismissInstall() {
       document.getElementById('install-banner').classList.remove('show');
       localStorage.setItem('installDismissed', '1');
     }
 
     /* ══════════════════════════════════════
-       OFFLINE DETECTION
+       OFFLINE
     ══════════════════════════════════════ */
     function updateOnlineStatus() {
       document.getElementById('offline-banner').classList.toggle('show', !navigator.onLine);
     }
-
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus();
 
     /* ══════════════════════════════════════
-       HAPTIC FEEDBACK
-       navigator.vibrate() — Android only
-       Patterns: found = short pulse, not-found = double tap, error = long
+       HAPTIC
     ══════════════════════════════════════ */
     function haptic(type) {
       if (!navigator.vibrate) return;
-      const patterns = {
-        found: [60],           /* single short pulse — success */
-        notfound: [80, 60, 80],   /* double tap — not found */
-        error: [200],          /* long buzz — connection error */
-        tap: [20],           /* micro tap — button press */
-      };
-      navigator.vibrate(patterns[type] || [30]);
+      const p = { found: [60], notfound: [80, 60, 80], error: [200], tap: [20] };
+      if (p[type]) navigator.vibrate(p[type]);
     }
 
     /* ══════════════════════════════════════
-       INPUT SETUP
+       INPUT
     ══════════════════════════════════════ */
     const inp = document.getElementById('inp');
     inp.focus();
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
-
-    /* ⌘K / Ctrl+K to focus search */
     document.addEventListener('keydown', e => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        inp.focus();
-        inp.select();
-      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); inp.focus(); inp.select(); }
     });
-
-    /* ── FIXED auto-format: cursor never jumps ── */
     inp.addEventListener('input', function () {
       const pos = this.selectionStart;
-      let raw = this.value.replace(/\D/g, '').slice(0, 12);
-      let fmt = raw;
+      let raw = this.value.replace(/\D/g, '').slice(0, 12), fmt = raw;
       if (raw.length > 2) fmt = raw.slice(0, 2) + '-' + raw.slice(2);
       if (raw.length > 4) fmt = raw.slice(0, 2) + '-' + raw.slice(2, 4) + '-' + raw.slice(4);
       if (fmt === this.value) return;
-      const oldLen = this.value.length;
+      const diff = fmt.length - this.value.length;
       this.value = fmt;
-      const added = fmt.length - oldLen;
-      try { this.setSelectionRange(pos + added, pos + added); } catch (_) { }
+      try { this.setSelectionRange(pos + diff, pos + diff); } catch (_) { }
       document.getElementById('inp-clear').classList.toggle('visible', fmt.length > 0);
     });
-
-    function clearInp() {
-      inp.value = '';
-      document.getElementById('inp-clear').classList.remove('visible');
-      inp.focus();
-    }
+    function clearInp() { inp.value = ''; document.getElementById('inp-clear').classList.remove('visible'); inp.focus(); }
 
     /* ══════════════════════════════════════
-       SEARCH HISTORY (localStorage, max 5)
+       HISTORY
     ══════════════════════════════════════ */
-    const HISTORY_KEY = 'licenseHistory';
-
-    function getHistory() {
-      try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch (_) { return []; }
-    }
-
-    function saveHistory(num) {
-      let h = getHistory().filter(n => n !== num);
-      h.unshift(num); h = h.slice(0, 5);
-      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch (_) { }
-      renderHistory();
-    }
-
-    function deleteHistory(num) {
-      const h = getHistory().filter(n => n !== num);
-      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch (_) { }
-      renderHistory();
-    }
-
-    function renderHistory() {
-      const wrap = document.getElementById('history-wrap');
-      const container = document.getElementById('history-chips');
-      const h = getHistory();
+    const HK = 'licenseHistory';
+    function getH() { try { return JSON.parse(localStorage.getItem(HK)) || []; } catch (_) { return []; } }
+    function saveH(n) { let h = getH().filter(x => x !== n); h.unshift(n); h = h.slice(0, 5); try { localStorage.setItem(HK, JSON.stringify(h)); } catch (_) { } renderH(); }
+    function delH(n) { let h = getH().filter(x => x !== n); try { localStorage.setItem(HK, JSON.stringify(h)); } catch (_) { } renderH(); }
+    function renderH() {
+      const wrap = document.getElementById('history-wrap'), cont = document.getElementById('history-chips'), h = getH();
       if (!h.length) { wrap.classList.remove('show'); return; }
       wrap.classList.add('show');
-      container.innerHTML = h.map(num => `
-        <span class="history-chip" onclick="fillAndCheck('${escapeHtml(num)}')">
-          ${escapeHtml(num)}
-          <button class="history-chip-del" title="Remove" onclick="event.stopPropagation();deleteHistory('${escapeHtml(num)}')">&times;</button>
-        </span>`).join('');
+      cont.innerHTML = h.map(n => `<span class="history-chip" onclick="fillCheck('${esc(n)}')">${esc(n)}<button class="history-chip-del" onclick="event.stopPropagation();delH('${esc(n)}')">&times;</button></span>`).join('');
     }
-
-    function fillAndCheck(num) { inp.value = num; check(); }
+    function fillCheck(n) { inp.value = n; document.getElementById('inp-clear').classList.add('visible'); check(); }
 
     /* ══════════════════════════════════════
-       SHARE RESULT
+       SHARE
     ══════════════════════════════════════ */
     function shareResult() {
       haptic('tap');
-      const name = document.getElementById('cname').textContent;
-      const no = document.getElementById('cno').textContent;
-      const date = document.getElementById('cdate').textContent;
+      const name = document.getElementById('cname').textContent, no = document.getElementById('cno').textContent, date = document.getElementById('cdate').textContent;
       const url = `${location.origin}${location.pathname}?license=${encodeURIComponent(no)}`;
       const text = `✅ ${name}'s driving license (${no}) has been printed by DOTM Nepal on ${date}.\n\nCheck yours: ${url}`;
-      if (navigator.share) {
-        navigator.share({ title: 'License Print Status — Nepal', text, url }).catch(() => { });
-      } else {
-        navigator.clipboard.writeText(url)
-          .then(() => toast('Link copied! Opening it will auto-search this license.'))
-          .catch(() => toast('Could not copy link'));
-      }
+      if (navigator.share) navigator.share({ title: 'License Print Status — Nepal', text, url }).catch(() => { });
+      else navigator.clipboard.writeText(url).then(() => toast('Link copied!')).catch(() => toast('Could not copy'));
     }
 
     /* ══════════════════════════════════════
        INIT
     ══════════════════════════════════════ */
     window.addEventListener('DOMContentLoaded', async () => {
-      renderHistory();
-
-      /* Auto-search from URL param */
-      const urlParams = new URLSearchParams(location.search);
-      const licenseParam = urlParams.get('license');
-      if (licenseParam) {
-        inp.value = licenseParam;
-        document.getElementById('inp-clear').classList.add('visible');
-        check();
-      }
-
+      renderH();
+      const lp = new URLSearchParams(location.search).get('license');
+      if (lp) { inp.value = lp; document.getElementById('inp-clear').classList.add('visible'); check(); }
       try {
         const d = await (await fetch('/api/stats')).json();
         document.getElementById('srec').textContent = (d.total_records || 0).toLocaleString();
@@ -1654,112 +1694,54 @@
     });
 
     /* ══════════════════════════════════════
-       OFFICE RECORDS
+       OFFICES
     ══════════════════════════════════════ */
     async function loadOffices() {
-      const grid = document.getElementById('office-grid');
-      const totalEl = document.getElementById('offices-total');
-      const wrapBtn = document.getElementById('show-more-wrap');
-      const btn = document.getElementById('show-more-btn');
-      const icon = document.getElementById('show-more-icon');
-      const officeInp = document.getElementById('office-inp');
-      const clearBtn = document.getElementById('office-clear');
-      const noResults = document.getElementById('office-no-results');
-      const INITIAL = 3;
-
-      let allOffices = [], expanded = false, filterQuery = '';
-
-      function isMobile() { return window.innerWidth <= 600; }
-
-      function cardHTML(o) {
-        return `<div class="office-card">
-          <div class="office-card-name">${escapeHtml(o.office)}</div>
-          ${o.district ? `<div class="office-card-district">${escapeHtml(o.district)}</div>` : ''}
-          <div><span class="office-card-count">${(o.count || 0).toLocaleString()}</span><span class="office-card-count-label">records</span></div>
-        </div>`;
-      }
-
+      const grid = document.getElementById('office-grid'), totalEl = document.getElementById('offices-total'),
+        wrapBtn = document.getElementById('show-more-wrap'), btn = document.getElementById('show-more-btn'),
+        icon = document.getElementById('show-more-icon'), offInp = document.getElementById('office-inp'),
+        clrBtn = document.getElementById('office-clear'), noRes = document.getElementById('office-no-results');
+      const INIT = 3; let all = [], expanded = false, q = '';
+      const mobile = () => window.innerWidth <= 600;
+      const cardHTML = o => `<div class="office-card"><div class="office-card-name">${esc(o.office)}</div>${o.district ? `<div class="office-card-district">${esc(o.district)}</div>` : ''}<div><span class="office-card-count">${(o.count || 0).toLocaleString()}</span><span class="office-card-count-label">records</span></div></div>`;
       function render() {
-        const filtered = filterQuery
-          ? allOffices.filter(o =>
-            (o.office || '').toLowerCase().includes(filterQuery) ||
-            (o.district || '').toLowerCase().includes(filterQuery))
-          : allOffices;
-
-        noResults.classList.toggle('show', !!filterQuery && filtered.length === 0);
-
-        if (isMobile()) {
-          grid.innerHTML = filtered.map(cardHTML).join('');
-          wrapBtn.style.display = 'none';
-        } else {
-          const visible = filterQuery ? filtered : (expanded ? allOffices : allOffices.slice(0, INITIAL));
-          grid.innerHTML = visible.map(cardHTML).join('');
-          if (!filterQuery && allOffices.length > INITIAL) {
-            const remaining = allOffices.length - INITIAL;
-            btn.childNodes[0].textContent = expanded ? 'Show less ' : `Show ${remaining} more `;
-            icon.innerHTML = expanded
-              ? '<polyline points="18 15 12 9 6 15"/>'
-              : '<polyline points="6 9 12 15 18 9"/>';
-            wrapBtn.style.display = 'block';
-          } else {
-            wrapBtn.style.display = 'none';
-          }
+        const f = q ? all.filter(o => (o.office || '').toLowerCase().includes(q) || (o.district || '').toLowerCase().includes(q)) : all;
+        noRes.classList.toggle('show', !!q && f.length === 0);
+        if (mobile()) { grid.innerHTML = f.map(cardHTML).join(''); wrapBtn.style.display = 'none'; }
+        else {
+          const vis = q ? f : (expanded ? all : all.slice(0, INIT));
+          grid.innerHTML = vis.map(cardHTML).join('');
+          if (!q && all.length > INIT) { const r = all.length - INIT; btn.childNodes[0].textContent = expanded ? 'Show less ' : `Show ${r} more `; icon.innerHTML = expanded ? '<polyline points="18 15 12 9 6 15"/>' : '<polyline points="6 9 12 15 18 9"/>'; wrapBtn.style.display = 'block'; }
+          else wrapBtn.style.display = 'none';
         }
       }
-
       btn.addEventListener('click', () => { expanded = !expanded; render(); });
-
-      officeInp.addEventListener('input', () => {
-        filterQuery = officeInp.value.trim().toLowerCase();
-        clearBtn.classList.toggle('visible', filterQuery.length > 0);
-        render();
-      });
-
-      let resizeTimer;
-      window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 120); });
-
+      offInp.addEventListener('input', () => { q = offInp.value.trim().toLowerCase(); clrBtn.classList.toggle('visible', q.length > 0); render(); });
+      let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 120); });
       try {
         const d = await (await fetch('/api/offices')).json();
-        allOffices = d.offices || [];
-        totalEl.textContent = (d.total || 0).toLocaleString() + ' total';
-        if (!allOffices.length) {
-          grid.innerHTML = '<div class="office-empty">No office records available yet.</div>';
-          return;
-        }
+        all = d.offices || []; totalEl.textContent = (d.total || 0).toLocaleString() + ' total';
+        if (!all.length) { grid.innerHTML = '<div class="office-empty">No office records available yet.</div>'; return; }
         render();
-      } catch (_) {
-        grid.innerHTML = '<div class="office-empty">Could not load office records.</div>';
-      }
+      } catch (_) { grid.innerHTML = '<div class="office-empty">Could not load office records.</div>'; }
     }
 
     function toggleOfficeSearch() {
-      const wrap = document.getElementById('office-search-wrap');
-      const trigger = document.getElementById('office-search-trigger');
-      const officeInp = document.getElementById('office-inp');
-      const isOpen = wrap.classList.contains('open');
-      if (isOpen) {
-        wrap.classList.remove('open'); trigger.classList.remove('active'); clearOfficeSearch();
-      } else {
-        wrap.classList.add('open'); trigger.classList.add('active');
-        setTimeout(() => officeInp.focus(), 200);
-      }
+      const wrap = document.getElementById('office-search-wrap'), trigger = document.getElementById('office-search-trigger'), oi = document.getElementById('office-inp');
+      const open = wrap.classList.contains('open');
+      if (open) { wrap.classList.remove('open'); trigger.classList.remove('active'); clearOfficeSearch(); }
+      else { wrap.classList.add('open'); trigger.classList.add('active'); setTimeout(() => oi.focus(), 200); }
     }
-
     function clearOfficeSearch() {
-      const officeInp = document.getElementById('office-inp');
-      const clearBtn = document.getElementById('office-clear');
-      officeInp.value = '';
-      officeInp.dispatchEvent(new Event('input'));
-      clearBtn.classList.remove('visible');
+      const oi = document.getElementById('office-inp'), cb = document.getElementById('office-clear');
+      oi.value = ''; oi.dispatchEvent(new Event('input')); cb.classList.remove('visible');
     }
 
-    function escapeHtml(str) {
-      return String(str || '').replace(/[&<>"']/g, c =>
-        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    }
+    function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+    function escapeHtml(s) { return esc(s); }
 
     /* ══════════════════════════════════════
-       CHECK LICENSE
+       CHECK
     ══════════════════════════════════════ */
     async function check() {
       const v = inp.value.trim();
@@ -1769,23 +1751,12 @@
       try {
         const resp = await fetch('/api/check?license=' + encodeURIComponent(v));
         const d = await resp.json();
-        const isCached = resp.headers.get('X-Cache-Hit') === 'true' || d.offline;
-
-        hide();
-        document.getElementById('btn').disabled = false;
-
+        const cached = resp.headers.get('X-Cache-Hit') === 'true' || d.offline;
+        hide(); document.getElementById('btn').disabled = false;
         if (d.found) {
-          /* ── Haptic: success pulse ── */
-          haptic('found');
-
-          saveHistory(v);
-
-          /* Update URL so sharing / back button works */
+          haptic('found'); saveH(v);
           history.replaceState(null, '', `${location.origin}${location.pathname}?license=${encodeURIComponent(v)}`);
-
-          /* Save to localStorage for offline.html to display */
           try { localStorage.setItem('lastResult', JSON.stringify(d)); } catch (_) { }
-
           document.getElementById('cstripe').className = 'card-stripe stripe-green';
           document.getElementById('badge').className = 'badge badge-green';
           document.getElementById('badge').innerHTML = '<span class="badge-dot"></span> PRINTED';
@@ -1798,44 +1769,34 @@
           document.getElementById('ctime').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           document.getElementById('cupdated').textContent = 'Synced ' + (d.last_updated || '—');
           document.getElementById('share-btn').style.display = 'inline-flex';
-          document.getElementById('cache-notice').classList.toggle('show', !!isCached);
+          document.getElementById('cache-notice').classList.toggle('show', !!cached);
+          document.title = '✅ Printed — LicenseStatus Nepal';
           show('card');
           document.getElementById('card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
         } else {
-          /* ── Haptic: not found double tap ── */
           haptic('notfound');
           document.getElementById('cstripe').className = 'card-stripe stripe-red';
           document.getElementById('share-btn').style.display = 'none';
           document.getElementById('cache-notice').classList.remove('show');
+          document.title = '❌ Not Found — LicenseStatus Nepal';
           show('notfound');
         }
       } catch (_) {
-        hide();
-        document.getElementById('btn').disabled = false;
-        /* ── Haptic: error long buzz ── */
-        haptic('error');
-        toast('Connection error. Please try again.');
+        hide(); document.getElementById('btn').disabled = false; haptic('error');
+        if (!navigator.onLine) document.getElementById('offline-banner').classList.add('show');
+        else toast('Connection error. Please try again.');
       }
     }
 
     function reset() {
-      hide();
-      inp.value = '';
-      document.getElementById('inp-clear').classList.remove('visible');
+      hide(); inp.value = ''; document.getElementById('inp-clear').classList.remove('visible');
       history.replaceState(null, '', location.pathname);
+      document.title = 'License Status Nepal — DOTM Print Tracker';
       inp.focus();
     }
-
     function hide() { ['skel', 'card', 'notfound'].forEach(id => document.getElementById(id).classList.remove('show')); }
     function show(id) { document.getElementById(id).classList.add('show'); }
-
-    function toast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2800);
-    }
+    function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
   </script>
 </body>
 
