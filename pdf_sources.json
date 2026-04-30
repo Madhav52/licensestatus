@@ -4,34 +4,29 @@
     "district": "Kathmandu",
     "order": 0
   },
-  "Gaighat": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Udaypur%20Printed%20License_wtv1gzm.pdf",
-    "district": "Udayapur",
-    "order": 2
-  },
-  "Chaujahari": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Chaurjahari%20Printed%20license%20Details_fkufqt2.pdf",
-    "district": "Rukum",
-    "order": 3
-  },
-  "Gaur": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Gaur%20Printed%20License%20Detail_1vfpinc.pdf",
-    "district": "Rautahat",
-    "order": 4
+  "Thulobharyang": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Thulobharyang%20Printed%20License_1kxpnum.pdf",
+    "district": "Kathmandu",
+    "order": 1
   },
   "Itahari": {
     "url": "https://giwmscdnone.gov.np/media/pdf_upload/Itahari%20License%20Printed%20List_tcijo0d.pdf",
     "district": "Sunsari",
-    "order": 1
+    "order": 3
   },
-  "Malangwa": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Sarlahi%20Printed%20License_fy594ef.pdf",
-    "district": "Sarlahi",
+  "Gaighat": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Udaypur%20Printed%20License_wtv1gzm.pdf",
+    "district": "Udayapur",
+    "order": 4
+  },
+  "Chaujahari": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Chaurjahari%20Printed%20license%20Details_fkufqt2.pdf",
+    "district": "Rukum",
     "order": 5
   },
-  "Nawalparasi": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Printed%20Nawalparasi%20License%208410_hunzizw.pdf",
-    "district": "Nawalparasi",
+  "Gaur": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Gaur%20Printed%20License%20Detail_1vfpinc.pdf",
+    "district": "Rautahat",
     "order": 6
   },
   "Okhaldhunga": {
@@ -39,19 +34,84 @@
     "district": "Okhaldhunga",
     "order": 7
   },
+  "Malangwa": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Sarlahi%20Printed%20License_fy594ef.pdf",
+    "district": "Sarlahi",
+    "order": 8
+  },
+  "Parasi": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Printed%20Nawalparasi%20License%208410_hunzizw.pdf",
+    "district": "Nawalparasi",
+    "order": 9
+  },
   "Radhe Radhe": {
     "url": "https://giwmscdnone.gov.np/media/pdf_upload/Radhe%20radhe%20Printed%20License%20175598_kmfke54.pdf",
     "district": "Bhaktapur",
-    "order": 8
+    "order": 2
   },
   "Rajbiraj": {
     "url": "https://giwmscdnone.gov.np/media/pdf_upload/Rajbiraj%20Saptari%20Printed%20License%20Details_b3eba9b.pdf",
     "district": "Saptari",
-    "order": 9
-  },
-  "Thulobharyang": {
-    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Thulobharyang%20Printed%20License_1kxpnum.pdf",
-    "district": "Kathmandu",
     "order": 10
+  },
+  "Dadeldhura": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Dadeldhura%20printed%20cards_ucuh9p5.pdf",
+    "district": "Dadeldhura",
+    "order": 11
+  },
+  "Dipayal": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Dipayal%20Printed%20License%20Details_r9fpbfq.pdf",
+    "district": "Doti",
+    "order": 12
+  },
+  "Dhankuta": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Dhankuta%20Printed%20Driving%20License%20Details%203322_oofcphz.pdf",
+    "district": "Dhankuta",
+    "order": 13
+  },
+  "Dumre": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Dumre%20Printed%20License_tinmagk.pdf",
+    "district": "Tanahun",
+    "order": 14
+  },
+  "Kawasoti": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Printed%20Kawasoti%20License%2018522_9u7qdwx.pdf",
+    "district": "Nawalpur",
+    "order": 15
+  },
+  "Jhapa": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Jhapa%20Printed%20License%20Card%20Details_venpvfa.pdf",
+    "district": "Jhapa",
+    "order": 16
+  },
+  "Ilam": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Ilam%20Printed%20license%20details%204386_pvksvcs.pdf",
+    "district": "Ilam",
+    "order": 17
+  },
+  "Surkhet": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Surkhet%20License%20Details%202709_33wipwq.pdf",
+    "district": "Surkhet",
+    "order": 18
+  },
+  "Jumla": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Jumla%20Printed%20License%20Details%201043_tqshfqg.pdf",
+    "district": "Jumla",
+    "order": 19
+  },
+  "Banepa": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Banepa%20Office%20Printed%20License%20Details%207067_ixwizke.pdf",
+    "district": "Kavrepalanchok",
+    "order": 20
+  },
+  "Khurkot": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Khurkot%20Printed%20Cards%201924_vwazvpk.pdf",
+    "district": "Parbat",
+    "order": 21
+  },
+  "Palpa": {
+    "url": "https://giwmscdnone.gov.np/media/pdf_upload/Palpa%20Printed%20License%20Card%20Details%207368_ttjijz9.pdf",
+    "district": "Palpa",
+    "order": 22
   }
 }
