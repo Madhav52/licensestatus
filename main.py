@@ -179,17 +179,20 @@ def upsert_licenses(records: list) -> int:
     if not records:
         return 0
 
+    # On conflict, only overwrite a field when the incoming row actually has
+    # a value. This prevents a re-parse with one or two empty cells from
+    # blanking out columns that were filled in by a previous import.
     sql = """
         INSERT INTO licenses
             (license_no, name, category, office, print_date, district, last_updated)
         VALUES
             (:license_no, :name, :category, :office, :print_date, :district, :last_updated)
         ON CONFLICT(license_no) DO UPDATE SET
-            name         = excluded.name,
-            category     = excluded.category,
-            office       = excluded.office,
-            print_date   = excluded.print_date,
-            district     = excluded.district,
+            name         = CASE WHEN excluded.name       <> '' THEN excluded.name       ELSE name       END,
+            category     = CASE WHEN excluded.category   <> '' THEN excluded.category   ELSE category   END,
+            office       = CASE WHEN excluded.office     <> '' THEN excluded.office     ELSE office     END,
+            print_date   = CASE WHEN excluded.print_date <> '' THEN excluded.print_date ELSE print_date END,
+            district     = CASE WHEN excluded.district   <> '' THEN excluded.district   ELSE district   END,
             last_updated = excluded.last_updated
     """
 
@@ -200,7 +203,7 @@ def upsert_licenses(records: list) -> int:
         r.setdefault("category",     "")
         r.setdefault("office",       "")
         r.setdefault("print_date",   "")
-        r.setdefault("name",         "UNKNOWN")
+        r.setdefault("name",         "")
 
     with get_conn() as conn:
         conn.executemany(sql, records)
@@ -355,7 +358,12 @@ def _find_header_row(table, max_check: int = 4):
 
 
 def _parse_table_row(row, cols: dict):
-    """Convert one table row → license record dict, or None if invalid."""
+    """Convert one table row → license record dict, or None if invalid.
+
+    license_no is the only required field (it is the unique key). Rows with a
+    valid license_no but a missing/short name are still kept — losing the
+    record entirely just because the name cell didn't parse cleanly was a
+    common cause of "data missing after import"."""
     def get(key: str) -> str:
         i = cols.get(key)
         if i is None or i >= len(row):
@@ -367,8 +375,6 @@ def _parse_table_row(row, cols: dict):
         return None
 
     name = re.sub(r'\s+', ' ', get("name")).upper().strip()
-    if len(name) < 2:
-        return None
 
     return {
         "license_no": license_no,
@@ -534,8 +540,11 @@ def parse_and_store(pdf_path, district: str = "", office_override: str = "",
 
     log.info("Parser strategy: %s · raw rows: %d", strategy, len(raw))
 
-    # Dedupe by license_no, apply overrides, set defaults.
+    # Dedupe by license_no, merging fields so a partial duplicate (e.g. a row
+    # split across page boundaries, or a re-extracted row with one cell blank)
+    # cannot wipe out the complete copy. Non-empty values from either copy win.
     deduped: dict = {}
+    MERGE_FIELDS = ("name", "category", "office", "district", "print_date")
     for r in raw:
         key = (r.get("license_no") or "").upper()
         if not key:
@@ -547,7 +556,17 @@ def parse_and_store(pdf_path, district: str = "", office_override: str = "",
             r["district"] = district
         else:
             r.setdefault("district", "")
-        deduped[key] = r
+
+        prev = deduped.get(key)
+        if prev is None:
+            deduped[key] = r
+            continue
+        for field in MERGE_FIELDS:
+            new_val = (r.get(field) or "").strip()
+            old_val = (prev.get(field) or "").strip()
+            if new_val and not old_val:
+                prev[field] = new_val
+        prev["last_updated"] = today
 
     # Upsert in batches.
     items = list(deduped.values())
@@ -763,11 +782,15 @@ def service_worker():
 @app.route("/manifest.json")
 def manifest():
     from flask import send_from_directory
-    return send_from_directory(
+    response = send_from_directory(
         os.path.join(BASE_DIR, "static"),
         "manifest.json",
         mimetype="application/json"
     )
+    # Long cache — manifest only changes when the app is redeployed and the
+    # SW will replay it from precache while offline anyway.
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -839,25 +862,50 @@ def api_check():
 
 @app.route("/api/stats")
 def api_stats():
-    return jsonify(get_stats())
+    response = jsonify(get_stats())
+    # Short cache — offline-installed PWAs serve this from the SW cache when
+    # the device has no connectivity. 60s is enough to absorb idle traffic
+    # without making the stats line feel stale.
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=600"
+    return response
 
 
 @app.route("/api/offices")
 def api_offices():
     rows  = get_office_breakdown()
     total = sum(r["count"] for r in rows)
-    return jsonify({"offices": rows, "total": total})
+    response = jsonify({"offices": rows, "total": total})
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=600"
+    return response
 
 # Add Bulk Sync API
 @app.route("/api/licenses")
 def api_all_licenses():
     """
-    Returns all licenses (or paginated) for offline sync.
-    WARNING: Use limit in production if DB is huge.
+    Returns all licenses (paginated) for offline sync into IndexedDB.
+    Carries a strong ETag derived from the DB's last_updated stamp + the
+    requested page bounds, so the service worker can revalidate the page
+    cheaply on every visit (304 Not Modified when nothing changed).
     """
     try:
-        limit = int(request.args.get("limit", 5000))
-        offset = int(request.args.get("offset", 0))
+        limit  = max(1, min(int(request.args.get("limit",  5000) or 5000), 10000))
+        offset = max(0, int(request.args.get("offset", 0) or 0))
+
+        with get_conn() as conn:
+            meta_row = conn.execute(
+                "SELECT value FROM meta WHERE key='last_updated'"
+            ).fetchone()
+            db_version = meta_row[0] if meta_row else ""
+
+        etag_seed = f"{db_version}|{limit}|{offset}"
+        etag = '"' + hashlib.md5(etag_seed.encode("utf-8")).hexdigest() + '"'
+
+        if request.headers.get("If-None-Match") == etag:
+            resp = Response(status=304)
+            resp.headers["ETag"] = etag
+            resp.headers["Cache-Control"] = "private, max-age=0, must-revalidate"
+            resp.headers["X-DB-Version"] = db_version
+            return resp
 
         with get_conn() as conn:
             rows = conn.execute("""
@@ -868,23 +916,34 @@ def api_all_licenses():
             """, (limit, offset)).fetchall()
 
         response = jsonify({
-            "data": [dict(r) for r in rows],
-            "limit": limit,
-            "offset": offset,
-            "count": len(rows)
+            "data":    [dict(r) for r in rows],
+            "limit":   limit,
+            "offset":  offset,
+            "count":   len(rows),
+            "version": db_version,
         })
-        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        # Force revalidation each time, but allow the cached body to be
+        # served as 304 → the SW + browser keep the body locally.
+        response.headers["Cache-Control"] = "private, max-age=0, must-revalidate"
+        response.headers["ETag"]          = etag
+        response.headers["X-DB-Version"]  = db_version
         return response
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# This avoids downloading everything every time.
+
+# Lightweight version probe — used by the client to decide whether the
+# offline IndexedDB cache needs to be re-synced. Must NOT be cached, or the
+# probe defeats itself.
 @app.route("/api/last-updated")
 def api_last_updated():
     stats = get_stats()
-    return jsonify({
+    response = jsonify({
         "last_updated": stats.get("last_updated")
     })
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"]        = "no-cache"
+    return response
 # Add Search API Without Captcha for internal use (e.g. admin dashboard) — rate-limited    
 @app.route("/api/search-lite")
 def api_search_lite():

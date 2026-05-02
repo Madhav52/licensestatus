@@ -274,12 +274,22 @@
       color: var(--green);
     }
 
+    .live-pill.offline {
+      background: rgba(192, 57, 43, 0.08);
+      border-color: rgba(192, 57, 43, 0.25);
+      color: var(--red);
+    }
+
     .live-pill-dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
       background: var(--green);
       animation: blink 2s infinite;
+    }
+
+    .live-pill.offline .live-pill-dot {
+      background: var(--red);
     }
 
     /* ── INSTALL BANNER ── */
@@ -912,6 +922,17 @@
       color: var(--red);
     }
 
+    .card-actions {
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .card-actions .retry-btn {
+      width: 100%;
+      max-width: 320px;
+    }
+
     /* ── STATS ── */
     .stats {
       width: 100%;
@@ -1404,9 +1425,9 @@
           </svg>
         </button>
 
-        <div class="live-pill">
+        <div class="live-pill" id="live-pill">
           <div class="live-pill-dot"></div>
-          <span data-i18n="liveData">Live Data</span>
+          <span id="live-pill-text">Live Data</span>
         </div>
       </div>
     </div>
@@ -1498,8 +1519,11 @@
               <div class="info-box-value" id="cdistrict"></div>
             </div>
           </div>
+          <div class="card-actions">
+            <button onclick="reset()" class="retry-btn" data-i18n="checkAnother">Check Another License</button>
+          </div>
         </div>
-        <div class="cache-notice" id="cache-notice" data-i18n="cacheNotice">⚠️ Showing cached result — connect to internet for live data</div>
+        <div class="cache-notice" id="cache-notice" data-i18n="cacheNotice">⚠️ Showing offline result — connect to internet for live data</div>
         <div class="card-footer">
           <div class="footer-dot"></div>
           <span data-i18n="footerData">Data sourced from official DOTM Nepal PDF records</span> &nbsp;·&nbsp; <span id="cupdated"></span>
@@ -1631,6 +1655,7 @@
     const I18N = {
       en: {
         liveData: 'Live Data',
+        offlineData: 'Offline Data',
         installApp: 'Install LicenseStatus App',
         installSub: 'Add to home screen — works offline too',
         install: 'Install',
@@ -1652,12 +1677,13 @@
         office: 'Office',
         printDate: 'Print Date',
         district: 'District',
-        cacheNotice: '⚠️ Showing cached result — connect to internet for live data',
+        cacheNotice: '⚠️ Showing offline result — connect to internet for live data',
         footerData: 'Data sourced from official DOTM Nepal PDF records',
         synced: 'Synced',
         notFoundTitle: 'License Print Record Not Found!',
         notFoundDesc: 'No printed record was found for this license number. Your license may not have been printed yet, or the number entered may be incorrect.',
         tryAgain: 'Try Again',
+        checkAnother: 'Check Another License',
         recordsIndexed: 'records indexed',
         updated: 'Updated:',
         instant: 'Instant',
@@ -1690,6 +1716,7 @@
       },
       ne: {
         liveData: 'लाइभ डाटा',
+        offlineData: 'अफलाइन डाटा',
         installApp: 'लाइसेन्सस्ट्याटस एप स्थापना गर्नुहोस्',
         installSub: 'होम स्क्रिनमा थप्नुहोस् — अफलाइन पनि काम गर्छ',
         install: 'स्थापना',
@@ -1711,12 +1738,13 @@
         office: 'कार्यालय',
         printDate: 'छापिएको मिति',
         district: 'जिल्ला',
-        cacheNotice: '⚠️ क्यास गरिएको परिणाम देखाइँदैछ — लाइभ डाटाको लागि इन्टरनेटमा जोडिनुहोस्',
+        cacheNotice: '⚠️ अफलाइन परिणाम देखाइँदैछ — लाइभ डाटाको लागि इन्टरनेटमा जोडिनुहोस्',
         footerData: 'आधिकारिक यातायात व्यवस्था विभाग नेपालको PDF रेकर्डबाट लिइएको',
         synced: 'अद्यावधिक',
         notFoundTitle: 'लाइसेन्स प्रिन्ट रेकर्ड फेला परेन!',
         notFoundDesc: 'यो लाइसेन्स नम्बरको लागि कुनै छापिएको रेकर्ड फेला परेन। तपाईंको लाइसेन्स अहिलेसम्म छापिएको नहुन सक्छ, वा प्रविष्ट गरिएको नम्बर गलत हुन सक्छ।',
         tryAgain: 'फेरि प्रयास गर्नुहोस्',
+        checkAnother: 'अर्को लाइसेन्स जाँच्नुहोस्',
         recordsIndexed: 'रेकर्ड अनुक्रमित',
         updated: 'अद्यावधिक:',
         instant: 'तत्काल',
@@ -1829,6 +1857,7 @@
       refreshStatsLang();
       refreshResultLang();
       if (typeof rerenderOffices === 'function') rerenderOffices();
+      if (typeof updateOnlineStatus === 'function') updateOnlineStatus();
 
       // Document title (preserve found / notfound state if visible)
       const cardVisible = document.getElementById('card')?.classList.contains('show');
@@ -1910,7 +1939,12 @@
        OFFLINE
     ══════════════════════════════════════ */
     function updateOnlineStatus() {
-      document.getElementById('offline-banner').classList.toggle('show', !navigator.onLine);
+      const offline = !navigator.onLine;
+      document.getElementById('offline-banner').classList.toggle('show', offline);
+      const pill = document.getElementById('live-pill');
+      const txt  = document.getElementById('live-pill-text');
+      if (pill) pill.classList.toggle('offline', offline);
+      if (txt)  txt.textContent = t(offline ? 'offlineData' : 'liveData');
     }
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
@@ -1969,6 +2003,151 @@
     function fillCheck(n) { inp.value = n; document.getElementById('inp-clear').classList.add('visible'); check(); }
 
     /* ══════════════════════════════════════
+       OFFLINE CACHE  —  IndexedDB
+       ──────────────────────────────────────
+       Mirrors the server's full license list into IndexedDB so a license
+       lookup keeps working even when the device has no network and the
+       reCAPTCHA script can't load. The sync runs once per page load and
+       short-circuits when /api/last-updated reports the same version we
+       already have locally, so it costs ~one HTTP HEAD-sized request on
+       repeat visits.
+    ══════════════════════════════════════ */
+    const ODB = {
+      NAME: 'licensestatus-db',
+      VERSION: 1,
+      STORE: 'licenses',
+      VKEY: 'dbVersion',
+      _dbPromise: null,
+      _supported: 'indexedDB' in window,
+
+      open() {
+        if (!this._supported) return Promise.reject(new Error('no-idb'));
+        if (this._dbPromise) return this._dbPromise;
+        this._dbPromise = new Promise((resolve, reject) => {
+          const req = indexedDB.open(this.NAME, this.VERSION);
+          req.onupgradeneeded = e => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(this.STORE)) {
+              db.createObjectStore(this.STORE, { keyPath: 'license_no' });
+            }
+          };
+          req.onsuccess = e => resolve(e.target.result);
+          req.onerror = e => reject(e.target.error);
+        });
+        return this._dbPromise;
+      },
+
+      async get(license_no) {
+        if (!this._supported) return null;
+        try {
+          const db = await this.open();
+          return await new Promise((resolve, reject) => {
+            const tx = db.transaction(this.STORE, 'readonly');
+            const r  = tx.objectStore(this.STORE).get(license_no);
+            r.onsuccess = () => resolve(r.result || null);
+            r.onerror   = () => reject(r.error);
+          });
+        } catch (_) { return null; }
+      },
+
+      async putAll(records) {
+        if (!this._supported || !records || !records.length) return 0;
+        const db = await this.open();
+        return new Promise((resolve, reject) => {
+          const tx    = db.transaction(this.STORE, 'readwrite');
+          const store = tx.objectStore(this.STORE);
+          for (const r of records) {
+            if (!r || !r.license_no) continue;
+            store.put({ ...r, license_no: String(r.license_no).toUpperCase() });
+          }
+          tx.oncomplete = () => resolve(records.length);
+          tx.onerror    = () => reject(tx.error);
+          tx.onabort    = () => reject(tx.error);
+        });
+      },
+
+      async count() {
+        if (!this._supported) return 0;
+        try {
+          const db = await this.open();
+          return await new Promise((resolve, reject) => {
+            const tx = db.transaction(this.STORE, 'readonly');
+            const r  = tx.objectStore(this.STORE).count();
+            r.onsuccess = () => resolve(r.result || 0);
+            r.onerror   = () => reject(r.error);
+          });
+        } catch (_) { return 0; }
+      },
+    };
+
+    let __syncRunning = false;
+    async function bulkSync(opts = {}) {
+      if (!ODB._supported || __syncRunning) return;
+      if (!navigator.onLine && !opts.force) return;
+      __syncRunning = true;
+      try {
+        let serverVersion = null;
+        try {
+          const r = await fetch('/api/last-updated', { cache: 'no-store' });
+          if (r && r.ok) {
+            const j = await r.json();
+            serverVersion = j && j.last_updated;
+          }
+        } catch (_) { return; }
+        if (!serverVersion) return;
+
+        const localVersion = (() => { try { return localStorage.getItem(ODB.VKEY); } catch (_) { return null; } })();
+        const localCount   = await ODB.count();
+        if (localVersion === serverVersion && localCount > 0 && !opts.force) return;
+
+        // Page through /api/licenses. The SW caches each page (ETagged), so
+        // re-syncs are cheap when nothing's changed.
+        const PAGE = 5000;
+        let offset = 0;
+        for (;;) {
+          let resp;
+          try { resp = await fetch(`/api/licenses?limit=${PAGE}&offset=${offset}`); }
+          catch (_) { return; }
+          if (!resp || !resp.ok) return;
+          let body;
+          try { body = await resp.json(); } catch (_) { return; }
+          const data = (body && body.data) || [];
+          if (data.length === 0) break;
+          await ODB.putAll(data);
+          if (data.length < PAGE) break;
+          offset += PAGE;
+        }
+        try { localStorage.setItem(ODB.VKEY, serverVersion); } catch (_) { }
+      } finally {
+        __syncRunning = false;
+      }
+    }
+
+    /* Normalise a user-typed license number to the canonical key used in
+       both the server's DB and IndexedDB. */
+    function normLicense(s) {
+      return String(s || '').trim().toUpperCase().replace(/\s+/g, '');
+    }
+
+    /* Try the local cache. Returns the same shape the API would return. */
+    async function localLookup(licenseRaw) {
+      const key = normLicense(licenseRaw);
+      const row = await ODB.get(key);
+      if (!row) return { found: false, offline: true, _local: true };
+      return {
+        found:        true,
+        license_no:   row.license_no,
+        name:         row.name,
+        category:     row.category,
+        office:       row.office,
+        print_date:   row.print_date,
+        district:     row.district,
+        last_updated: row.last_updated,
+        _local:       true,
+      };
+    }
+
+    /* ══════════════════════════════════════
        SHARE
     ══════════════════════════════════════ */
     function shareResult() {
@@ -1997,7 +2176,14 @@
         document.getElementById('sup').textContent = toLocalNum(d.last_updated || '—');
       } catch (_) { }
       loadOffices();
+
+      // Kick off the bulk-license sync in the background so subsequent
+      // searches work offline. Doesn't block first paint.
+      setTimeout(() => { bulkSync().catch(() => { }); }, 800);
     });
+
+    // Re-sync as soon as connectivity returns.
+    window.addEventListener('online', () => { bulkSync().catch(() => { }); });
 
     /* ══════════════════════════════════════
        OFFICES
@@ -2093,67 +2279,112 @@
 
     /* ══════════════════════════════════════
        CHECK
+       ──────────────────────────────────────
+       Online:  network → captcha → /api/check (canonical answer)
+                On any failure (network drop / captcha 403 / 5xx) we fall
+                back to the IndexedDB lookup before giving up.
+       Offline: skip captcha entirely and answer straight from IndexedDB.
+                The reCAPTCHA gate is only meaningful when the request can
+                actually leave the device, so requiring it offline would
+                just lock users out of data they've already cached.
     ══════════════════════════════════════ */
+    function renderResult(d, { fromCache } = {}) {
+      hide();
+      document.getElementById('btn').disabled = false;
+      if (fromCache && !navigator.onLine) {
+        document.getElementById('offline-banner').classList.add('show');
+      }
+      if (d.found) {
+        haptic('found'); saveH(inp.value.trim());
+        LAST_RESULT = d;
+        history.replaceState(null, '', `${location.origin}${location.pathname}?license=${encodeURIComponent(inp.value.trim())}`);
+        try { localStorage.setItem('lastResult', JSON.stringify(d)); } catch (_) { }
+        document.getElementById('cstripe').className = 'card-stripe stripe-green';
+        document.getElementById('badge').className = 'badge badge-green';
+        document.getElementById('badge').innerHTML = `<span class="badge-dot"></span> <span id="badge-text">${esc(t('printed'))}</span>`;
+        document.getElementById('cname').textContent = d.name || '—';
+        document.getElementById('cno').textContent = toLocalNum(d.license_no || '—');
+        document.getElementById('ccat').textContent = d.category || '—';
+        document.getElementById('coffice').textContent = tOffice(d.office) || '—';
+        document.getElementById('cdate').textContent = toLocalNum(d.print_date || '—');
+        document.getElementById('cdistrict').textContent = tDistrict(d.district) || '—';
+        document.getElementById('ctime').textContent = toLocalNum(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        document.getElementById('cupdated').textContent = t('synced') + ' ' + toLocalNum(d.last_updated || '—');
+        document.getElementById('share-btn').style.display = 'inline-flex';
+        document.getElementById('cache-notice').classList.toggle('show', !!fromCache);
+        document.title = t('docTitleFound');
+        show('card');
+        document.getElementById('card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        haptic('notfound');
+        LAST_RESULT = null;
+        document.getElementById('cstripe').className = 'card-stripe stripe-red';
+        document.getElementById('share-btn').style.display = 'none';
+        document.getElementById('cache-notice').classList.remove('show');
+        document.title = t('docTitleNotFound');
+        show('notfound');
+      }
+    }
+
     async function check() {
       const v = inp.value.trim();
       if (!v) { toast(t('enterLicense')); haptic('tap'); return; }
       hide(); show('skel');
       document.getElementById('btn').disabled = true;
+
+      // ─── Offline branch: IndexedDB only, no reCAPTCHA ───
+      if (!navigator.onLine) {
+        document.getElementById('offline-banner').classList.add('show');
+        const local = await localLookup(v);
+        renderResult(local, { fromCache: true });
+        return;
+      }
+
+      // ─── Online branch: try the live API first ───
       try {
         const captchaToken = await getCaptchaToken('check');
         const headers = captchaToken ? { 'X-Captcha-Token': captchaToken } : {};
         const resp = await fetch('/api/check?license=' + encodeURIComponent(v), { headers });
         const d = await resp.json();
+
+        // Captcha rejected — server thinks we're a bot. Fall back to the
+        // local cache so the user still sees their license.
         if (resp.status === 403 && d.code === 'captcha') {
-          hide(); document.getElementById('btn').disabled = false; haptic('error');
-          toast(t('captchaError'));
+          const local = await localLookup(v);
+          if (local.found) {
+            renderResult(local, { fromCache: true });
+          } else {
+            hide(); document.getElementById('btn').disabled = false; haptic('error');
+            toast(t('captchaError'));
+          }
           return;
         }
+
         const cacheHit = resp.headers.get('X-Cache-Hit') === 'true';
         // Service worker returns {offline:true} only when there's no cached
-        // copy of this license. Treat that as offline rather than "not found".
+        // copy. Try IndexedDB before giving up.
         if (d.offline && !cacheHit && !d.found) {
-          hide(); document.getElementById('btn').disabled = false; haptic('error');
-          document.getElementById('offline-banner').classList.add('show');
-          toast(t('offlineCheckErr'));
+          const local = await localLookup(v);
+          if (local.found) {
+            renderResult(local, { fromCache: true });
+          } else {
+            hide(); document.getElementById('btn').disabled = false; haptic('error');
+            document.getElementById('offline-banner').classList.add('show');
+            toast(t('offlineCheckErr'));
+          }
           return;
         }
+
         const cached = cacheHit || d.offline;
-        hide(); document.getElementById('btn').disabled = false;
-        if (cached && !navigator.onLine) {
-          document.getElementById('offline-banner').classList.add('show');
-        }
-        if (d.found) {
-          haptic('found'); saveH(v);
-          LAST_RESULT = d;
-          history.replaceState(null, '', `${location.origin}${location.pathname}?license=${encodeURIComponent(v)}`);
-          try { localStorage.setItem('lastResult', JSON.stringify(d)); } catch (_) { }
-          document.getElementById('cstripe').className = 'card-stripe stripe-green';
-          document.getElementById('badge').className = 'badge badge-green';
-          document.getElementById('badge').innerHTML = `<span class="badge-dot"></span> <span id="badge-text">${esc(t('printed'))}</span>`;
-          document.getElementById('cname').textContent = d.name || '—';
-          document.getElementById('cno').textContent = toLocalNum(d.license_no || '—');
-          document.getElementById('ccat').textContent = d.category || '—';
-          document.getElementById('coffice').textContent = tOffice(d.office) || '—';
-          document.getElementById('cdate').textContent = toLocalNum(d.print_date || '—');
-          document.getElementById('cdistrict').textContent = tDistrict(d.district) || '—';
-          document.getElementById('ctime').textContent = toLocalNum(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-          document.getElementById('cupdated').textContent = t('synced') + ' ' + toLocalNum(d.last_updated || '—');
-          document.getElementById('share-btn').style.display = 'inline-flex';
-          document.getElementById('cache-notice').classList.toggle('show', !!cached);
-          document.title = t('docTitleFound');
-          show('card');
-          document.getElementById('card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } else {
-          haptic('notfound');
-          LAST_RESULT = null;
-          document.getElementById('cstripe').className = 'card-stripe stripe-red';
-          document.getElementById('share-btn').style.display = 'none';
-          document.getElementById('cache-notice').classList.remove('show');
-          document.title = t('docTitleNotFound');
-          show('notfound');
-        }
+        renderResult(d, { fromCache: cached });
       } catch (_) {
+        // Network error mid-flight — try the local cache before erroring.
+        const local = await localLookup(v);
+        if (local.found) {
+          if (!navigator.onLine) document.getElementById('offline-banner').classList.add('show');
+          renderResult(local, { fromCache: true });
+          return;
+        }
         hide(); document.getElementById('btn').disabled = false; haptic('error');
         if (!navigator.onLine) document.getElementById('offline-banner').classList.add('show');
         else toast(t('connectionErr'));

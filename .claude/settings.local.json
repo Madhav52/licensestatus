@@ -22,7 +22,8 @@
       "Bash(powershell.exe -Command \"Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -s 2; Get-Process python -ErrorAction SilentlyContinue | Format-Table Id, StartTime\")",
       "Bash(rm -rf __pycache__)",
       "Bash(curl -s -c /tmp/c.txt -X POST -d 'username=shushantgiri@admin.com&password=License@123!@#' http://localhost:5099/dotm-admin/login -o /dev/null -w \"login=%{http_code}\\\\n\")",
-      "Bash(curl -s -b /tmp/c.txt -X POST -H 'Content-Type: application/json' -d '{\"names\": __TRACKED_VAR__}' http://localhost:5099/dotm-admin/api/urls/reorder)"
+      "Bash(curl -s -b /tmp/c.txt -X POST -H 'Content-Type: application/json' -d '{\"names\": __TRACKED_VAR__}' http://localhost:5099/dotm-admin/api/urls/reorder)",
+      "Bash(C:/Users/hp/AppData/Local/Programs/Python/Python310/python.exe *)"
     ]
   }
 }
