@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>License Status Nepal — DOTM Print Tracker</title>
+  <title>License Print Status Nepal — DOTM Print Tracker</title>
   <meta name="description"
     content="Check your Nepal driving license print status instantly. Enter your license number to verify if it has been printed by DOTM. Free, fast, and powered by official DOTM records." />
   <meta name="keywords"
@@ -19,22 +19,22 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="LicenseStatus" />
+  <meta name="apple-mobile-web-app-title" content="License Print Status Nepal" />
   <link rel="apple-touch-icon" sizes="152x152" href="/static/icons/icon-152.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="/static/icons/icon-192.png" />
   <link rel="canonical" href="https://licensestatus.online/" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://licensestatus.online/" />
-  <meta property="og:title" content="License Status Nepal — DOTM Print Tracker" />
+  <meta property="og:title" content="License Print Status Nepal — DOTM Print Tracker" />
   <meta property="og:description" content="Check your Nepal driving license print status instantly." />
   <meta property="og:image" content="https://licensestatus.online/static/thumbnail.png" />
-  <meta property="og:site_name" content="LicenseStatus Nepal" />
+  <meta property="og:site_name" content="License Print Status Nepal" />
   <meta property="og:locale" content="en_US" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="License Status Nepal — DOTM Print Tracker" />
+  <meta name="twitter:title" content="License Print Status Nepal — DOTM Print Tracker" />
   <meta name="twitter:image" content="https://licensestatus.online/static/thumbnail.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='4' y='10' width='56' height='40' rx='7' fill='%23C0392B'/><rect x='4' y='10' width='56' height='14' rx='7' fill='%23A93226'/><rect x='4' y='17' width='56' height='7' fill='%23A93226'/><rect x='10' y='28' width='13' height='16' rx='3' fill='%23fff' opacity='.9'/><rect x='27' y='29' width='22' height='3' rx='1.5' fill='%23fff' opacity='.9'/><rect x='27' y='35' width='17' height='2.5' rx='1.25' fill='%23fff' opacity='.65'/><rect x='27' y='40' width='20' height='2.5' rx='1.25' fill='%23fff' opacity='.5'/><circle cx='50' cy='45' r='10' fill='%2327AE60'/><path d='M46 45.5l2.8 2.8 5.5-5.8' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 
@@ -99,6 +99,11 @@
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
+    }
+
+    html[lang="ne"],
+    html[lang="ne"] body {
+      font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
     }
 
     .page {
@@ -186,6 +191,35 @@
       align-items: center;
       gap: 8px;
       flex-shrink: 0;
+    }
+
+    /* ── LANG TOGGLE ── */
+    .lang-toggle {
+      height: 34px;
+      border-radius: 17px;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      padding: 0 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: border-color 0.18s, color 0.18s !important;
+    }
+
+    .lang-toggle:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    html[lang="ne"] .lang-toggle {
+      font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
     }
 
     /* ── DARK TOGGLE ── */
@@ -1306,11 +1340,11 @@
         </svg>
       </div>
       <div class="install-banner-text">
-        <div class="install-banner-title">Install LicenseStatus App</div>
-        <div class="install-banner-sub">Add to home screen — works offline too</div>
+        <div class="install-banner-title" data-i18n="installApp">Install LicenseStatus App</div>
+        <div class="install-banner-sub" data-i18n="installSub">Add to home screen — works offline too</div>
       </div>
       <div class="install-banner-actions">
-        <button class="install-btn" onclick="triggerInstall()">Install</button>
+        <button class="install-btn" onclick="triggerInstall()" data-i18n="install">Install</button>
         <button class="install-dismiss" onclick="dismissInstall()">×</button>
       </div>
     </div>
@@ -1318,7 +1352,7 @@
     <!-- OFFLINE BANNER -->
     <div class="offline-banner" id="offline-banner">
       <span class="offline-icon">⚡</span>
-      <span><b>You're offline.</b> Showing cached results where available.</span>
+      <span><b data-i18n="offline">You're offline.</b> <span data-i18n="offlineSub">Showing cached results where available.</span></span>
     </div>
 
     <!-- TOP BAR -->
@@ -1338,11 +1372,16 @@
         </div>
         <div class="logo-text">
           <div class="logo-name">License<span class="r">Status</span></div>
-          <div class="logo-tagline">Nepal · DOTM Print Tracker</div>
+          <div class="logo-tagline" data-i18n="tagline">Nepal · DOTM Print Tracker</div>
         </div>
       </div>
 
       <div class="topbar-right">
+        <!-- Language toggle -->
+        <button class="lang-toggle" onclick="toggleLang()" aria-label="Switch language" title="Switch language">
+          <span id="lang-label">EN</span>
+        </button>
+
         <!-- Dark mode toggle -->
         <button class="dark-toggle" onclick="toggleDark()" aria-label="Toggle dark mode">
           <!-- Moon icon — visible in light mode -->
@@ -1367,15 +1406,15 @@
 
         <div class="live-pill">
           <div class="live-pill-dot"></div>
-          Live Data
+          <span data-i18n="liveData">Live Data</span>
         </div>
       </div>
     </div>
 
     <!-- HERO -->
     <div class="hero">
-      <h1>Check Your<br><span>Print</span> Status</h1>
-      <p>Enter your license number to instantly verify<br>if your driving license has been printed by DOTM.</p>
+      <h1 data-i18n-html="heroH1">Check Your<br><span>Print</span> Status</h1>
+      <p data-i18n-html="heroP">Enter your license number to instantly verify<br>if your driving license has been printed by DOTM.</p>
     </div>
 
     <!-- SEARCH -->
@@ -1388,7 +1427,7 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </span>
-        <input id="inp" type="text" placeholder="e.g. 07-01-00012345" autocomplete="off" autocorrect="off"
+        <input id="inp" type="text" placeholder="e.g. 07-01-00012345" data-i18n-placeholder="searchPlaceholder" autocomplete="off" autocorrect="off"
           spellcheck="false" autofocus />
         <button class="inp-clear" id="inp-clear" aria-label="Clear" onclick="clearInp()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -1397,15 +1436,16 @@
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
-        <button class="search-btn" id="btn" onclick="check()">Check</button>
+        <button class="search-btn" id="btn" onclick="check()" data-i18n="check">Check</button>
       </div>
-      <p class="hint">Press Enter to search &nbsp;·&nbsp; Format: 07-01-XXXXXXXX &nbsp;·&nbsp; <kbd>⌘K</kbd> to focus
+      <p class="hint" data-i18n-html="hint">Press Enter to search &nbsp;·&nbsp; Format: 07-01-XXXXXXXX &nbsp;·&nbsp; No login required
+        &nbsp;·&nbsp; 100% free & secure
       </p>
     </div>
 
     <!-- SEARCH HISTORY -->
     <div class="history-wrap" id="history-wrap">
-      <span class="history-label">Recent:</span>
+      <span class="history-label" data-i18n="recent">Recent:</span>
       <div id="history-chips" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
     </div>
 
@@ -1421,7 +1461,7 @@
       <div class="result-card" id="card">
         <div class="card-stripe stripe-green" id="cstripe"></div>
         <div class="card-top">
-          <span class="badge badge-green" id="badge"><span class="badge-dot"></span> PRINTED</span>
+          <span class="badge badge-green" id="badge"><span class="badge-dot"></span> <span id="badge-text" data-i18n="printed">PRINTED</span></span>
           <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
             <button class="share-btn" id="share-btn" onclick="shareResult()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
@@ -1432,7 +1472,7 @@
                 <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
                 <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
               </svg>
-              Share
+              <span data-i18n="share">Share</span>
             </button>
             <span class="card-time" id="ctime"></span>
           </div>
@@ -1442,50 +1482,50 @@
           <div class="license-num" id="cno"></div>
           <div class="info-row">
             <div class="info-box cat">
-              <div class="info-box-label">Category</div>
+              <div class="info-box-label" data-i18n="category">Category</div>
               <div class="info-box-value" id="ccat"></div>
             </div>
             <div class="info-box">
-              <div class="info-box-label">Office</div>
+              <div class="info-box-label" data-i18n="office">Office</div>
               <div class="info-box-value" id="coffice"></div>
             </div>
             <div class="info-box">
-              <div class="info-box-label">Print Date</div>
+              <div class="info-box-label" data-i18n="printDate">Print Date</div>
               <div class="info-box-value" id="cdate"></div>
             </div>
             <div class="info-box">
-              <div class="info-box-label">District</div>
+              <div class="info-box-label" data-i18n="district">District</div>
               <div class="info-box-value" id="cdistrict"></div>
             </div>
           </div>
         </div>
-        <div class="cache-notice" id="cache-notice">⚠️ Showing cached result — connect to internet for live data</div>
+        <div class="cache-notice" id="cache-notice" data-i18n="cacheNotice">⚠️ Showing cached result — connect to internet for live data</div>
         <div class="card-footer">
           <div class="footer-dot"></div>
-          Data sourced from official DOTM Nepal PDF records &nbsp;·&nbsp; <span id="cupdated"></span>
+          <span data-i18n="footerData">Data sourced from official DOTM Nepal PDF records</span> &nbsp;·&nbsp; <span id="cupdated"></span>
         </div>
       </div>
 
       <div class="not-found" id="notfound">
         <div class="nf-icon">🔍</div>
-        <h3>License Not Found</h3>
-        <p>No printed record was found for this license number. Your license may not have been printed yet, or the
+        <h3 data-i18n="notFoundTitle">License Print Record Not Found!</h3>
+        <p data-i18n="notFoundDesc">No printed record was found for this license number. Your license may not have been printed yet, or the
           number entered may be incorrect.</p>
-        <button class="retry-btn" onclick="reset()">Try Again</button>
+        <button class="retry-btn" onclick="reset()" data-i18n="tryAgain">Try Again</button>
       </div>
     </div>
 
     <!-- STATS -->
     <div class="stats">
-      <div class="stat">📋 <strong id="srec">—</strong> records indexed</div>
-      <div class="stat">🕐 Updated: <strong id="sup">—</strong></div>
-      <div class="stat">⚡ <strong>&lt;1ms</strong> search</div>
+      <div class="stat">📋 <strong id="srec">—</strong> <span data-i18n="recordsIndexed">records indexed</span></div>
+      <div class="stat">🕐 <span data-i18n="updated">Updated:</span> <strong id="sup">—</strong></div>
+      <div class="stat">⚡ <strong data-i18n="instant">Instant</strong> <span data-i18n="searchWord">search</span></div>
     </div>
 
     <!-- OFFICE RECORDS -->
     <div class="offices" id="offices-section">
       <div class="offices-header">
-        <div class="offices-title">Office Records <span id="offices-count"
+        <div class="offices-title"><span data-i18n="officeRecords">Office Records</span> <span id="offices-count"
             style="color:var(--muted);font-weight:600"></span></div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="offices-total" id="offices-total">—</div>
@@ -1496,7 +1536,7 @@
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            Search
+            <span data-i18n="searchBtn">Search</span>
           </button>
         </div>
       </div>
@@ -1510,7 +1550,7 @@
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
           </span>
-          <input id="office-inp" type="text" placeholder="Search by office or district…" autocomplete="off"
+          <input id="office-inp" type="text" placeholder="Search by office or district…" data-i18n-placeholder="officeSearchPlaceholder" autocomplete="off"
             autocorrect="off" spellcheck="false" />
           <button class="office-search-clear" id="office-clear" onclick="clearOfficeSearch()" aria-label="Clear">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -1523,13 +1563,13 @@
       </div>
 
       <div class="office-grid" id="office-grid">
-        <div class="office-empty">Loading offices…</div>
+        <div class="office-empty" data-i18n="loadingOffices">Loading offices…</div>
       </div>
-      <div class="office-no-results" id="office-no-results">No offices match your search.</div>
+      <div class="office-no-results" id="office-no-results" data-i18n="noOfficeMatch">No offices match your search.</div>
 
       <div class="show-more-wrap" id="show-more-wrap" style="display:none;">
         <button class="show-more-btn" id="show-more-btn">
-          Show more
+          <span id="show-more-text">Show more</span>
           <svg id="show-more-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="6 9 12 15 18 9" />
@@ -1540,21 +1580,29 @@
 
     <!-- FOOTER -->
     <footer>
-      <div class="footer-row">
-        <span>Built with ❤️ using Python, this platform dynamically fetches and processes publicly available PDF records
-          from </span>
-        <a href="https://dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np</a>
-        <span>to provide up-to-date information.</span>
+      <div class="footer-row" data-i18n-html="footerBody">
+        Built with ❤️ using Python, This service is not affiliated with DOTM Nepal. Data is sourced from publicly available PDF records from <a href="https://dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np</a> to provide up-to-date information.
       </div>
-      <div class="disclaimer" style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">
+      <div class="disclaimer" style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px;" data-i18n="footerCopyright">
         Copyright © 2026 Shushant Giri. All rights reserved.
       </div>
     </footer>
   </div>
 
   <div id="toast"></div>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "License Print Status Nepal",
+      "url": "https://licensestatus.online",
+      "applicationCategory": "Utility",
+      "operatingSystem": "All"
+    }
+  </script>
 
   <script>
+
     /* ══════════════════════════════════════
        DARK MODE — runs before paint to avoid flash
     ══════════════════════════════════════ */
@@ -1578,6 +1626,252 @@
     });
 
     /* ══════════════════════════════════════
+       i18n  —  English / Nepali
+    ══════════════════════════════════════ */
+    const I18N = {
+      en: {
+        liveData: 'Live Data',
+        installApp: 'Install LicenseStatus App',
+        installSub: 'Add to home screen — works offline too',
+        install: 'Install',
+        installing: 'Installing…',
+        appInstalled: '✅ App installed!',
+        offline: "You're offline.",
+        offlineSub: 'Showing cached results where available.',
+        tagline: 'Nepal · DOTM Print Tracker',
+        heroH1: 'Check Your<br><span>Print</span> Status',
+        heroP: 'Enter your license number to instantly verify<br>if your driving license has been printed by DOTM.',
+        searchPlaceholder: 'e.g. 07-01-00012345',
+        check: 'Check',
+        hint: 'Press Enter to search &nbsp;·&nbsp; Format: 07-01-XXXXXXXX &nbsp;·&nbsp; No login required &nbsp;·&nbsp; 100% free &amp; secure',
+        recent: 'Recent:',
+        printed: 'PRINTED',
+        notPrinted: 'NOT PRINTED',
+        share: 'Share',
+        category: 'Category',
+        office: 'Office',
+        printDate: 'Print Date',
+        district: 'District',
+        cacheNotice: '⚠️ Showing cached result — connect to internet for live data',
+        footerData: 'Data sourced from official DOTM Nepal PDF records',
+        synced: 'Synced',
+        notFoundTitle: 'License Print Record Not Found!',
+        notFoundDesc: 'No printed record was found for this license number. Your license may not have been printed yet, or the number entered may be incorrect.',
+        tryAgain: 'Try Again',
+        recordsIndexed: 'records indexed',
+        updated: 'Updated:',
+        instant: 'Instant',
+        searchWord: 'search',
+        officeRecords: 'Office Records',
+        total: 'total',
+        searchBtn: 'Search',
+        officeSearchPlaceholder: 'Search by office or district…',
+        noOfficeMatch: 'No offices match your search.',
+        loadingOffices: 'Loading offices…',
+        noOfficeAvail: 'No office records available yet.',
+        couldNotLoadOffices: 'Could not load office records.',
+        showMore: 'Show more',
+        showLess: 'Show less',
+        showNMore: n => `Show ${n} more `,
+        records: 'records',
+        enterLicense: 'Please enter a license number',
+        captchaError: 'Could not verify request. Please refresh the page and try again.',
+        offlineCheckErr: 'You appear to be offline. Connect to the internet to check this license.',
+        connectionErr: 'Connection error. Please try again.',
+        linkCopied: 'Link copied!',
+        couldNotCopy: 'Could not copy',
+        docTitle: 'License Status Nepal — DOTM Print Tracker',
+        docTitleFound: '✅ Printed — LicenseStatus Nepal',
+        docTitleNotFound: '❌ Not Found — LicenseStatus Nepal',
+        footerBody: 'Built with ❤️ using Python, This service is not affiliated with DOTM Nepal. Data is sourced from publicly available PDF records from <a href="https://dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np</a> to provide up-to-date information.',
+        footerCopyright: 'Copyright © 2026 Shushant Giri. All rights reserved.',
+        shareText: (name, no, date, url) => `✅ License Printed! ${name}'s license (${no}) is printed on ${date}. Check yours instantly: \n ${url}`,
+        shareTitle: 'License Print Status — Nepal',
+      },
+      ne: {
+        liveData: 'लाइभ डाटा',
+        installApp: 'लाइसेन्सस्ट्याटस एप स्थापना गर्नुहोस्',
+        installSub: 'होम स्क्रिनमा थप्नुहोस् — अफलाइन पनि काम गर्छ',
+        install: 'स्थापना',
+        installing: 'स्थापना हुँदैछ…',
+        appInstalled: '✅ एप स्थापना भयो!',
+        offline: 'तपाईं अफलाइन हुनुहुन्छ।',
+        offlineSub: 'उपलब्ध भएको ठाउँमा क्यास गरिएको परिणाम देखाइँदैछ।',
+        tagline: 'नेपाल · यातायात व्यवस्था विभाग प्रिन्ट ट्रयाकर',
+        heroH1: 'आफ्नो<br><span>प्रिन्ट</span> स्थिति हेर्नुहोस्',
+        heroP: 'चालक अनुमतिपत्र छापिएको छ कि छैन भनी तत्काल पुष्टि गर्न<br>आफ्नो लाइसेन्स नम्बर प्रविष्ट गर्नुहोस्।',
+        searchPlaceholder: 'उदाहरण: ०७-०१-०००१२३४५',
+        check: 'जाँच्नुहोस्',
+        hint: 'खोज्न Enter थिच्नुहोस् &nbsp;·&nbsp; ढाँचा: ०७-०१-XXXXXXXX &nbsp;·&nbsp; लगइन आवश्यक छैन &nbsp;·&nbsp; १००% निःशुल्क र सुरक्षित',
+        recent: 'हालैको:',
+        printed: 'छापिएको',
+        notPrinted: 'छापिएको छैन',
+        share: 'सेयर गर्नुहोस्',
+        category: 'श्रेणी',
+        office: 'कार्यालय',
+        printDate: 'छापिएको मिति',
+        district: 'जिल्ला',
+        cacheNotice: '⚠️ क्यास गरिएको परिणाम देखाइँदैछ — लाइभ डाटाको लागि इन्टरनेटमा जोडिनुहोस्',
+        footerData: 'आधिकारिक यातायात व्यवस्था विभाग नेपालको PDF रेकर्डबाट लिइएको',
+        synced: 'अद्यावधिक',
+        notFoundTitle: 'लाइसेन्स प्रिन्ट रेकर्ड फेला परेन!',
+        notFoundDesc: 'यो लाइसेन्स नम्बरको लागि कुनै छापिएको रेकर्ड फेला परेन। तपाईंको लाइसेन्स अहिलेसम्म छापिएको नहुन सक्छ, वा प्रविष्ट गरिएको नम्बर गलत हुन सक्छ।',
+        tryAgain: 'फेरि प्रयास गर्नुहोस्',
+        recordsIndexed: 'रेकर्ड अनुक्रमित',
+        updated: 'अद्यावधिक:',
+        instant: 'तत्काल',
+        searchWord: 'खोज',
+        officeRecords: 'कार्यालय रेकर्ड',
+        total: 'कुल',
+        searchBtn: 'खोज्नुहोस्',
+        officeSearchPlaceholder: 'कार्यालय वा जिल्ला अनुसार खोज्नुहोस्…',
+        noOfficeMatch: 'तपाईंको खोजसँग मेल खाने कुनै कार्यालय छैन।',
+        loadingOffices: 'कार्यालयहरू लोड गर्दै…',
+        noOfficeAvail: 'अहिलेसम्म कुनै कार्यालय रेकर्ड उपलब्ध छैन।',
+        couldNotLoadOffices: 'कार्यालय रेकर्ड लोड गर्न सकिएन।',
+        showMore: 'थप हेर्नुहोस्',
+        showLess: 'कम हेर्नुहोस्',
+        showNMore: n => `थप ${n} हेर्नुहोस् `,
+        records: 'रेकर्ड',
+        enterLicense: 'कृपया लाइसेन्स नम्बर प्रविष्ट गर्नुहोस्',
+        captchaError: 'अनुरोध प्रमाणित गर्न सकिएन। कृपया पृष्ठ रिफ्रेस गरेर पुनः प्रयास गर्नुहोस्।',
+        offlineCheckErr: 'तपाईं अफलाइन हुनुहुन्छ। यो लाइसेन्स जाँच्न इन्टरनेटमा जोडिनुहोस्।',
+        connectionErr: 'जडान त्रुटि। कृपया पुनः प्रयास गर्नुहोस्।',
+        linkCopied: 'लिङ्क प्रतिलिपि भयो!',
+        couldNotCopy: 'प्रतिलिपि गर्न सकिएन',
+        docTitle: 'लाइसेन्स स्थिति नेपाल — यातायात व्यवस्था विभाग प्रिन्ट ट्रयाकर',
+        docTitleFound: '✅ छापिएको — लाइसेन्सस्ट्याटस नेपाल',
+        docTitleNotFound: '❌ फेला परेन — लाइसेन्सस्ट्याटस नेपाल',
+        footerBody: 'Python प्रयोग गरी निर्माण गरिएको यो सेवा यातायात व्यवस्था विभाग नेपाल सँग प्रत्यक्ष रूपमा सम्बद्ध छैन। यसमा प्रयोग गरिएको डाटा DOTM Nepal (<a href="https://dotm.gov.np" target="_blank" rel="noopener">dotm.gov.np</a>) मा सार्वजनिक रूपमा उपलब्ध PDF रेकर्डहरूबाट संकलन गरिएको हो, जसले प्रयोगकर्तालाई सम्भव भएसम्म अद्यावधिक जानकारी प्रदान गर्ने लक्ष्य राखेको छ।',
+        footerCopyright: 'सर्वाधिकार © २०२६ शुशान्त गिरी। सबै अधिकार सुरक्षित।',
+        shareText: (name, no, date, url) => `✅ लाइसेन्स छापियो! ${name} को लाइसेन्स (${no}) मिति ${date} मा छापिएको छ। आफ्नो तत्काल जाँच्नुहोस्: \n ${url}`,
+        shareTitle: 'लाइसेन्स प्रिन्ट स्थिति — नेपाल',
+      }
+    };
+
+    /* Office name (English → Nepali) */
+    const OFFICE_MAP_NE = {
+      'Chabahil': 'चाबहिल', 'Thulobharyang': 'ठूलो भर्याङ', 'Radhe Radhe': 'राधे राधे',
+      'Itahari': 'इटहरी', 'Gaighat': 'गाइघाट', 'Chaujahari': 'चौजहारी', 'Gaur': 'गौर',
+      'Okhaldhunga': 'ओखलढुङ्गा', 'Malangwa': 'मलङ्गवा', 'Parasi': 'परासी',
+      'Rajbiraj': 'राजविराज', 'Dadeldhura': 'डडेल्धुरा', 'Dipayal': 'दिपायल',
+      'Dhankuta': 'धनकुटा', 'Dumre': 'डुम्रे', 'Kawasoti': 'कावासोती', 'Jhapa': 'झापा',
+      'Ilam': 'इलाम', 'Surkhet': 'सुर्खेत', 'Jumla': 'जुम्ला', 'Banepa': 'बनेपा',
+      'Khurkot': 'खुर्कोट', 'Palpa': 'पाल्पा', 'Bharatpur': 'भरतपुर',
+    };
+
+    /* District (English → Nepali) */
+    const DISTRICT_MAP_NE = {
+      'Kathmandu': 'काठमाडौं', 'Bhaktapur': 'भक्तपुर', 'Lalitpur': 'ललितपुर',
+      'Sunsari': 'सुनसरी', 'Udayapur': 'उदयपुर', 'Rukum': 'रुकुम', 'Rautahat': 'रौतहट',
+      'Okhaldhunga': 'ओखलढुङ्गा', 'Sarlahi': 'सर्लाही', 'Nawalparasi': 'नवलपरासी',
+      'Saptari': 'सप्तरी', 'Dadeldhura': 'डडेल्धुरा', 'Doti': 'डोटी', 'Dhankuta': 'धनकुटा',
+      'Tanahun': 'तनहुँ', 'Nawalpur': 'नवलपुर', 'Jhapa': 'झापा', 'Ilam': 'इलाम',
+      'Surkhet': 'सुर्खेत', 'Jumla': 'जुम्ला', 'Kavrepalanchok': 'काभ्रेपलाञ्चोक',
+      'Parbat': 'पर्बत', 'Palpa': 'पाल्पा', 'Chitwan': 'चितवन',
+    };
+
+    let LANG = (function () {
+      const saved = localStorage.getItem('lang');
+      if (saved === 'en' || saved === 'ne') return saved;
+      const nav = (navigator.language || '').toLowerCase();
+      return nav.startsWith('ne') ? 'ne' : 'en';
+    })();
+
+    function t(k) {
+      return (I18N[LANG] && I18N[LANG][k] !== undefined) ? I18N[LANG][k] : (I18N.en[k] || k);
+    }
+
+    /* Convert ASCII digits to Devanagari when in Nepali. Leaves other chars alone. */
+    function toLocalNum(s) {
+      if (s == null) return '';
+      if (LANG !== 'ne') return String(s);
+      const ne = '०१२३४५६७८९';
+      return String(s).replace(/[0-9]/g, d => ne[d]);
+    }
+
+    /* Translate office name; falls back to original if no mapping. */
+    function tOffice(name) {
+      if (!name) return '';
+      if (LANG !== 'ne') return name;
+      return OFFICE_MAP_NE[name] || name;
+    }
+
+    /* Translate district name; falls back to original if no mapping. */
+    function tDistrict(name) {
+      if (!name) return '';
+      if (LANG !== 'ne') return name;
+      return DISTRICT_MAP_NE[name] || name;
+    }
+
+    function applyLang() {
+      document.documentElement.setAttribute('lang', LANG);
+      const label = document.getElementById('lang-label');
+      if (label) label.textContent = LANG === 'ne' ? 'ने' : 'EN';
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const val = t(key);
+        if (typeof val === 'string') el.textContent = val;
+      });
+      document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        const key = el.getAttribute('data-i18n-html');
+        const val = t(key);
+        if (typeof val === 'string') el.innerHTML = val;
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        el.setAttribute('placeholder', t(key));
+      });
+
+      // Re-render any dynamic UI that already painted
+      if (typeof renderH === 'function') renderH();
+      refreshStatsLang();
+      refreshResultLang();
+      if (typeof rerenderOffices === 'function') rerenderOffices();
+
+      // Document title (preserve found / notfound state if visible)
+      const cardVisible = document.getElementById('card')?.classList.contains('show');
+      const nfVisible = document.getElementById('notfound')?.classList.contains('show');
+      if (cardVisible) document.title = t('docTitleFound');
+      else if (nfVisible) document.title = t('docTitleNotFound');
+      else document.title = t('docTitle');
+    }
+
+    function toggleLang() {
+      LANG = LANG === 'en' ? 'ne' : 'en';
+      try { localStorage.setItem('lang', LANG); } catch (_) { }
+      applyLang();
+    }
+
+    /* Re-localise stats counts + last-updated date when language flips */
+    let LAST_STATS = null;
+    function refreshStatsLang() {
+      if (!LAST_STATS) return;
+      const srec = document.getElementById('srec');
+      const sup = document.getElementById('sup');
+      if (srec) srec.textContent = toLocalNum((LAST_STATS.total_records || 0).toLocaleString('en-US'));
+      if (sup) sup.textContent = toLocalNum(LAST_STATS.last_updated || '—');
+    }
+
+    /* Re-localise the visible result card if the user toggles after a search */
+    let LAST_RESULT = null;
+    function refreshResultLang() {
+      const card = document.getElementById('card');
+      if (!card || !card.classList.contains('show') || !LAST_RESULT) return;
+      const d = LAST_RESULT;
+      document.getElementById('badge-text').textContent = t('printed');
+      document.getElementById('cname').textContent = d.name || '—';
+      document.getElementById('cno').textContent = toLocalNum(d.license_no || '—');
+      document.getElementById('ccat').textContent = d.category || '—';
+      document.getElementById('coffice').textContent = tOffice(d.office) || '—';
+      document.getElementById('cdate').textContent = toLocalNum(d.print_date || '—');
+      document.getElementById('cdistrict').textContent = tDistrict(d.district) || '—';
+      document.getElementById('cupdated').textContent =
+        t('synced') + ' ' + toLocalNum(d.last_updated || '—');
+    }
+
+    /* ══════════════════════════════════════
        PWA
     ══════════════════════════════════════ */
     let deferredInstallPrompt = null;
@@ -1596,13 +1890,13 @@
     window.addEventListener('appinstalled', () => {
       document.getElementById('install-banner').classList.remove('show');
       deferredInstallPrompt = null;
-      toast('✅ App installed!');
+      toast(t('appInstalled'));
     });
     function triggerInstall() {
       if (!deferredInstallPrompt) return;
       deferredInstallPrompt.prompt();
       deferredInstallPrompt.userChoice.then(c => {
-        if (c.outcome === 'accepted') toast('Installing…');
+        if (c.outcome === 'accepted') toast(t('installing'));
         deferredInstallPrompt = null;
         document.getElementById('install-banner').classList.remove('show');
       });
@@ -1637,6 +1931,7 @@
     const inp = document.getElementById('inp');
     inp.focus();
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+
     document.addEventListener('keydown', e => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); inp.focus(); inp.select(); }
     });
@@ -1669,7 +1964,7 @@
       const wrap = document.getElementById('history-wrap'), cont = document.getElementById('history-chips'), h = getH();
       if (!h.length) { wrap.classList.remove('show'); return; }
       wrap.classList.add('show');
-      cont.innerHTML = h.map(n => `<span class="history-chip" onclick="fillCheck('${esc(n)}')">${esc(n)}<button class="history-chip-del" onclick="event.stopPropagation();delH('${esc(n)}')">&times;</button></span>`).join('');
+      cont.innerHTML = h.map(n => `<span class="history-chip" onclick="fillCheck('${esc(n)}')">${esc(toLocalNum(n))}<button class="history-chip-del" onclick="event.stopPropagation();delH('${esc(n)}')">&times;</button></span>`).join('');
     }
     function fillCheck(n) { inp.value = n; document.getElementById('inp-clear').classList.add('visible'); check(); }
 
@@ -1679,23 +1974,27 @@
     function shareResult() {
       haptic('tap');
       const name = document.getElementById('cname').textContent, no = document.getElementById('cno').textContent, date = document.getElementById('cdate').textContent;
-      const url = `${location.origin}${location.pathname}?license=${encodeURIComponent(no)}`;
-      const text = `✅ ${name}'s driving license (${no}) has been printed by DOTM Nepal on ${date}.\n\nCheck yours: ${url}`;
-      if (navigator.share) navigator.share({ title: 'License Print Status — Nepal', text, url }).catch(() => { });
-      else navigator.clipboard.writeText(url).then(() => toast('Link copied!')).catch(() => toast('Could not copy'));
+      // Always share the URL using the original (Latin-digit) license number so the link works
+      const shareNo = (LAST_RESULT && LAST_RESULT.license_no) || no;
+      const url = `${location.origin}${location.pathname}?license=${encodeURIComponent(shareNo)}`;
+      const text = t('shareText')(name, no, date, url);
+      if (navigator.share) navigator.share({ title: t('shareTitle'), text, url }).catch(() => { });
+      else navigator.clipboard.writeText(url).then(() => toast(t('linkCopied'))).catch(() => toast(t('couldNotCopy')));
     }
 
     /* ══════════════════════════════════════
        INIT
     ══════════════════════════════════════ */
     window.addEventListener('DOMContentLoaded', async () => {
+      applyLang();
       renderH();
       const lp = new URLSearchParams(location.search).get('license');
       if (lp) { inp.value = lp; document.getElementById('inp-clear').classList.add('visible'); check(); }
       try {
         const d = await (await fetch('/api/stats')).json();
-        document.getElementById('srec').textContent = (d.total_records || 0).toLocaleString();
-        document.getElementById('sup').textContent = d.last_updated || '—';
+        LAST_STATS = d;
+        document.getElementById('srec').textContent = toLocalNum((d.total_records || 0).toLocaleString('en-US'));
+        document.getElementById('sup').textContent = toLocalNum(d.last_updated || '—');
       } catch (_) { }
       loadOffices();
     });
@@ -1703,36 +2002,59 @@
     /* ══════════════════════════════════════
        OFFICES
     ══════════════════════════════════════ */
+    let __officesRender = null;
+    function rerenderOffices() { if (__officesRender) __officesRender(true); }
+
     async function loadOffices() {
       const grid = document.getElementById('office-grid'), totalEl = document.getElementById('offices-total'),
         wrapBtn = document.getElementById('show-more-wrap'), btn = document.getElementById('show-more-btn'),
         icon = document.getElementById('show-more-icon'), offInp = document.getElementById('office-inp'),
         clrBtn = document.getElementById('office-clear'), noRes = document.getElementById('office-no-results');
-      const INIT = 3; let all = [], expanded = false, q = '';
+      const INIT = 3; let all = [], expanded = false, q = '', totalCount = 0;
       const mobile = () => window.innerWidth <= 600;
-      const cardHTML = o => `<div class="office-card"><div class="office-card-name">${esc(o.office)}</div>${o.district ? `<div class="office-card-district">${esc(o.district)}</div>` : ''}<div><span class="office-card-count">${(o.count || 0).toLocaleString()}</span><span class="office-card-count-label">records</span></div></div>`;
-      function render() {
-        const f = q ? all.filter(o => (o.office || '').toLowerCase().includes(q) || (o.district || '').toLowerCase().includes(q)) : all;
+      const cardHTML = o => `<div class="office-card"><div class="office-card-name">${esc(tOffice(o.office))}</div>${o.district ? `<div class="office-card-district">${esc(tDistrict(o.district))}</div>` : ''}<div><span class="office-card-count">${esc(toLocalNum((o.count || 0).toLocaleString('en-US')))}</span><span class="office-card-count-label">${esc(t('records'))}</span></div></div>`;
+      function render(fromLangSwitch) {
+        if (fromLangSwitch) {
+          totalEl.textContent = toLocalNum(totalCount.toLocaleString('en-US')) + ' ' + t('total');
+          const countEl = document.getElementById('offices-count');
+          if (countEl) countEl.textContent = all.length ? '(' + toLocalNum(all.length) + ')' : '';
+        }
+        // Search matches against both original and translated text so the input
+        // works regardless of which language the user types in.
+        const f = q ? all.filter(o => {
+          const en = ((o.office || '') + ' ' + (o.district || '')).toLowerCase();
+          const ne = (tOffice(o.office) + ' ' + tDistrict(o.district)).toLowerCase();
+          return en.includes(q) || ne.includes(q);
+        }) : all;
         noRes.classList.toggle('show', !!q && f.length === 0);
         if (mobile()) { grid.innerHTML = f.map(cardHTML).join(''); wrapBtn.style.display = 'none'; }
         else {
           const vis = q ? f : (expanded ? all : all.slice(0, INIT));
           grid.innerHTML = vis.map(cardHTML).join('');
-          if (!q && all.length > INIT) { const r = all.length - INIT; btn.childNodes[0].textContent = expanded ? 'Show less ' : `Show ${r} more `; icon.innerHTML = expanded ? '<polyline points="18 15 12 9 6 15"/>' : '<polyline points="6 9 12 15 18 9"/>'; wrapBtn.style.display = 'block'; }
+          if (!q && all.length > INIT) {
+            const r = all.length - INIT;
+            const txt = document.getElementById('show-more-text');
+            if (txt) txt.textContent = expanded ? t('showLess') : t('showNMore')(toLocalNum(r));
+            icon.innerHTML = expanded ? '<polyline points="18 15 12 9 6 15"/>' : '<polyline points="6 9 12 15 18 9"/>';
+            wrapBtn.style.display = 'block';
+          }
           else wrapBtn.style.display = 'none';
         }
       }
+      __officesRender = render;
       btn.addEventListener('click', () => { expanded = !expanded; render(); });
       offInp.addEventListener('input', () => { q = offInp.value.trim().toLowerCase(); clrBtn.classList.toggle('visible', q.length > 0); render(); });
       let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 120); });
       try {
         const d = await (await fetch('/api/offices')).json();
-        all = d.offices || []; totalEl.textContent = (d.total || 0).toLocaleString() + ' total';
+        all = d.offices || [];
+        totalCount = d.total || 0;
+        totalEl.textContent = toLocalNum(totalCount.toLocaleString('en-US')) + ' ' + t('total');
         const countEl = document.getElementById('offices-count');
-        if (countEl) countEl.textContent = all.length ? '(' + all.length + ')' : '';
-        if (!all.length) { grid.innerHTML = '<div class="office-empty">No office records available yet.</div>'; return; }
+        if (countEl) countEl.textContent = all.length ? '(' + toLocalNum(all.length) + ')' : '';
+        if (!all.length) { grid.innerHTML = `<div class="office-empty">${esc(t('noOfficeAvail'))}</div>`; return; }
         render();
-      } catch (_) { grid.innerHTML = '<div class="office-empty">Could not load office records.</div>'; }
+      } catch (_) { grid.innerHTML = `<div class="office-empty">${esc(t('couldNotLoadOffices'))}</div>`; }
     }
 
     function toggleOfficeSearch() {
@@ -1774,7 +2096,7 @@
     ══════════════════════════════════════ */
     async function check() {
       const v = inp.value.trim();
-      if (!v) { toast('Please enter a license number'); haptic('tap'); return; }
+      if (!v) { toast(t('enterLicense')); haptic('tap'); return; }
       hide(); show('skel');
       document.getElementById('btn').disabled = true;
       try {
@@ -1784,7 +2106,7 @@
         const d = await resp.json();
         if (resp.status === 403 && d.code === 'captcha') {
           hide(); document.getElementById('btn').disabled = false; haptic('error');
-          toast('Could not verify request. Please refresh the page and try again.');
+          toast(t('captchaError'));
           return;
         }
         const cacheHit = resp.headers.get('X-Cache-Hit') === 'true';
@@ -1793,7 +2115,7 @@
         if (d.offline && !cacheHit && !d.found) {
           hide(); document.getElementById('btn').disabled = false; haptic('error');
           document.getElementById('offline-banner').classList.add('show');
-          toast('You appear to be offline. Connect to the internet to check this license.');
+          toast(t('offlineCheckErr'));
           return;
         }
         const cached = cacheHit || d.offline;
@@ -1803,43 +2125,46 @@
         }
         if (d.found) {
           haptic('found'); saveH(v);
+          LAST_RESULT = d;
           history.replaceState(null, '', `${location.origin}${location.pathname}?license=${encodeURIComponent(v)}`);
           try { localStorage.setItem('lastResult', JSON.stringify(d)); } catch (_) { }
           document.getElementById('cstripe').className = 'card-stripe stripe-green';
           document.getElementById('badge').className = 'badge badge-green';
-          document.getElementById('badge').innerHTML = '<span class="badge-dot"></span> PRINTED';
+          document.getElementById('badge').innerHTML = `<span class="badge-dot"></span> <span id="badge-text">${esc(t('printed'))}</span>`;
           document.getElementById('cname').textContent = d.name || '—';
-          document.getElementById('cno').textContent = d.license_no || '—';
+          document.getElementById('cno').textContent = toLocalNum(d.license_no || '—');
           document.getElementById('ccat').textContent = d.category || '—';
-          document.getElementById('coffice').textContent = d.office || '—';
-          document.getElementById('cdate').textContent = d.print_date || '—';
-          document.getElementById('cdistrict').textContent = d.district || '—';
-          document.getElementById('ctime').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          document.getElementById('cupdated').textContent = 'Synced ' + (d.last_updated || '—');
+          document.getElementById('coffice').textContent = tOffice(d.office) || '—';
+          document.getElementById('cdate').textContent = toLocalNum(d.print_date || '—');
+          document.getElementById('cdistrict').textContent = tDistrict(d.district) || '—';
+          document.getElementById('ctime').textContent = toLocalNum(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+          document.getElementById('cupdated').textContent = t('synced') + ' ' + toLocalNum(d.last_updated || '—');
           document.getElementById('share-btn').style.display = 'inline-flex';
           document.getElementById('cache-notice').classList.toggle('show', !!cached);
-          document.title = '✅ Printed — LicenseStatus Nepal';
+          document.title = t('docTitleFound');
           show('card');
           document.getElementById('card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
           haptic('notfound');
+          LAST_RESULT = null;
           document.getElementById('cstripe').className = 'card-stripe stripe-red';
           document.getElementById('share-btn').style.display = 'none';
           document.getElementById('cache-notice').classList.remove('show');
-          document.title = '❌ Not Found — LicenseStatus Nepal';
+          document.title = t('docTitleNotFound');
           show('notfound');
         }
       } catch (_) {
         hide(); document.getElementById('btn').disabled = false; haptic('error');
         if (!navigator.onLine) document.getElementById('offline-banner').classList.add('show');
-        else toast('Connection error. Please try again.');
+        else toast(t('connectionErr'));
       }
     }
 
     function reset() {
       hide(); inp.value = ''; document.getElementById('inp-clear').classList.remove('visible');
       history.replaceState(null, '', location.pathname);
-      document.title = 'License Status Nepal — DOTM Print Tracker';
+      LAST_RESULT = null;
+      document.title = t('docTitle');
       inp.focus();
     }
     function hide() { ['skel', 'card', 'notfound'].forEach(id => document.getElementById(id).classList.remove('show')); }

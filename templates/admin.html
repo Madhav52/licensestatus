@@ -783,11 +783,6 @@
       color: var(--navy);
     }
 
-    .src-handle:active,
-    .source-row.dragging .src-handle {
-      cursor: grabbing;
-    }
-
     .src-handle svg {
       width: 14px;
       height: 14px;
@@ -862,6 +857,11 @@
     .src-status.cached {
       background: #EFF6FF;
       color: var(--blue2);
+    }
+
+    .src-status.upload {
+      background: var(--amberl);
+      color: #92400E;
     }
 
     /* Three dot menu */
@@ -1037,6 +1037,331 @@
     .add-btn:hover {
       box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
       transform: translateY(-1px);
+    }
+
+    /* PDF UPLOAD UI */
+    .upload-section {
+      margin-bottom: 16px;
+    }
+
+    .upload-section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .upload-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surf);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 12px;
+      width: fit-content;
+    }
+
+    .upload-tab {
+      padding: 6px 14px;
+      border-radius: 7px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .upload-tab.active {
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    }
+
+    .upload-tab:not(.active):hover {
+      background: var(--off);
+      color: var(--navy);
+    }
+
+    .upload-panel {
+      display: none;
+    }
+
+    .upload-panel.active {
+      display: block;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed var(--line);
+      border-radius: 12px;
+      background: var(--surf);
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .dropzone:hover,
+    .dropzone.drag-active {
+      border-color: var(--blue2);
+      background: #EFF6FF;
+    }
+
+    .dropzone.drag-active {
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .dropzone-icon {
+      width: 44px;
+      height: 44px;
+      background: #EFF6FF;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      transition: background 0.2s;
+    }
+
+    .dropzone:hover .dropzone-icon,
+    .dropzone.drag-active .dropzone-icon {
+      background: rgba(37, 99, 235, 0.15);
+    }
+
+    .dropzone-icon svg {
+      width: 22px;
+      height: 22px;
+      color: var(--blue2);
+    }
+
+    .dropzone-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .dropzone-sub {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .dropzone-sub span {
+      color: var(--blue2);
+      font-weight: 600;
+    }
+
+    /* File queue */
+    .file-queue {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--surf);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      animation: fadein 0.2s ease both;
+    }
+
+    .file-item-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--redl);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+
+    .file-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-item-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--navy);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-item-meta {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .file-item-prog {
+      flex-shrink: 0;
+      width: 100px;
+    }
+
+    .file-item-status {
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .file-item-status.pending {
+      color: var(--muted);
+    }
+
+    .file-item-status.uploading {
+      color: var(--blue2);
+    }
+
+    .file-item-status.done {
+      color: var(--green);
+    }
+
+    .file-item-status.error {
+      color: var(--red);
+    }
+
+    .file-item-remove {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .file-item-remove:hover {
+      background: var(--redl);
+      color: var(--red);
+    }
+
+    /* Upload actions bar */
+    .upload-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      gap: 8px;
+    }
+
+    .upload-count {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .upload-submit-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      transition: all 0.15s;
+    }
+
+    .upload-submit-btn:hover {
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .upload-submit-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .upload-submit-btn svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .upload-clear-btn {
+      background: transparent;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .upload-clear-btn:hover {
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--redl);
+    }
+
+    /* Divider */
+    .form-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .form-divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .form-divider-text {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
     }
 
     /* SEARCH / TABLE */
@@ -1238,73 +1563,6 @@
       animation: blink 1s infinite;
       vertical-align: middle;
       margin-left: 2px;
-    }
-
-    /* GITHUB FORM */
-    .gh-form {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .gh-field label {
-      display: block;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    .gh-field input {
-      width: 100%;
-      background: var(--off);
-      border: 1.5px solid var(--line);
-      border-radius: 10px;
-      padding: 11px 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--navy);
-      outline: none;
-      transition: all 0.2s;
-    }
-
-    .gh-field input:focus {
-      border-color: var(--blue2);
-      background: #fff;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.07);
-    }
-
-    .gh-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .gh-status {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .gh-status.show {
-      display: flex;
-    }
-
-    .gh-status.ok {
-      background: var(--greenl);
-      color: var(--green);
-    }
-
-    .gh-status.err {
-      background: var(--redl);
-      color: var(--red);
     }
 
     /* PROGRESS */
@@ -1592,6 +1850,11 @@
       color: var(--red);
     }
 
+    .pill-upload {
+      background: var(--amberl);
+      color: #92400E;
+    }
+
     @keyframes pulse {
 
       0%,
@@ -1630,12 +1893,7 @@
 
 <body>
 
-  <!-- ╔══════════════════════════════════════════════════════════════╗
-       ║  SECRET PATH INJECTION — Jinja2 renders the real slug here  ║
-       ║  so ALL fetch() calls below use the correct admin prefix.   ║
-       ╚══════════════════════════════════════════════════════════════╝ -->
   <script>
-    // Hardcoded admin path
     const AP = "dotm-admin";
   </script>
 
@@ -1655,7 +1913,6 @@
         <span class="sb-online-count" id="sb-records">—</span>
       </div>
     </div>
-
     <nav class="sb-nav">
       <div class="sb-label">Overview</div>
       <button class="nav-item active" onclick="goto('dashboard',this)">
@@ -1667,7 +1924,6 @@
         </svg>
         Dashboard
       </button>
-
       <div class="sb-label">Data</div>
       <button class="nav-item" onclick="goto('records',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -1687,7 +1943,6 @@
         PDF Sources
         <span class="nav-badge" id="nb-sources">—</span>
       </button>
-
       <div class="sb-label">Operations</div>
       <button class="nav-item" onclick="goto('sync',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -1696,13 +1951,6 @@
           <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
         </svg>
         Sync &amp; Import
-      </button>
-      <button class="nav-item" onclick="goto('github',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path
-            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-        </svg>
-        GitHub Push
       </button>
       <button class="nav-item" onclick="exportCSV()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -1713,7 +1961,6 @@
         Export CSV
       </button>
     </nav>
-
     <div class="sb-footer">
       <div class="sb-user">
         <div class="sb-avatar">A</div>
@@ -1722,7 +1969,6 @@
           <div class="sb-user-role">Super Administrator</div>
         </div>
       </div>
-      <!-- FIX: action uses the JS AP variable injected by Flask -->
       <form id="logout-form" method="POST">
         <button class="logout-btn" type="submit">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -1738,8 +1984,6 @@
 
   <!-- MAIN -->
   <div class="main">
-
-    <!-- Topbar -->
     <div class="topbar">
       <div class="topbar-left">
         <span class="topbar-crumb">DOTM</span>
@@ -1775,16 +2019,14 @@
         <div class="kpi-grid">
           <div class="kpi c-green">
             <div class="kpi-top">
-              <div class="kpi-icon ig">📋</div>
-              <span class="kpi-badge live">● LIVE</span>
+              <div class="kpi-icon ig">📋</div><span class="kpi-badge live">● LIVE</span>
             </div>
             <div class="kpi-value" id="kpi-total">—</div>
             <div class="kpi-label">Total License Records</div>
           </div>
           <div class="kpi c-blue">
             <div class="kpi-top">
-              <div class="kpi-icon ib">🏢</div>
-              <span class="kpi-badge info">Configured</span>
+              <div class="kpi-icon ib">🏢</div><span class="kpi-badge info">Configured</span>
             </div>
             <div class="kpi-value" id="kpi-offices">—</div>
             <div class="kpi-label">Office Sources</div>
@@ -1798,8 +2040,7 @@
           </div>
           <div class="kpi c-cyan">
             <div class="kpi-top">
-              <div class="kpi-icon ic">⚡</div>
-              <span class="kpi-badge up">Fast</span>
+              <div class="kpi-icon ic">⚡</div><span class="kpi-badge up">Fast</span>
             </div>
             <div class="kpi-value">&lt;1ms</div>
             <div class="kpi-label">Search Speed</div>
@@ -1956,11 +2197,11 @@
           </div>
           <div class="card-body">
             <div class="search-bar">
-              <input id="searchlog-q" type="text" placeholder="Filter by query, license, or name…"
-                autocomplete="off" oninput="debounceSearchLog()" />
+              <input id="searchlog-q" type="text" placeholder="Filter by query, license, or name…" autocomplete="off"
+                oninput="debounceSearchLog()" />
               <button onclick="loadSearchLog()">Refresh</button>
-              <button onclick="clearSearchLog()"
-                style="background:var(--red);color:#fff;border-color:var(--red);">Clear All</button>
+              <button onclick="clearSearchLog()" style="background:var(--red);color:#fff;border-color:var(--red);">Clear
+                All</button>
             </div>
             <div class="tbl-wrap">
               <table>
@@ -2002,7 +2243,7 @@
             <div class="sources-header">
               <div class="src-hd"></div>
               <div class="src-hd">Office Name</div>
-              <div class="src-hd">PDF URL</div>
+              <div class="src-hd">PDF URL / Source</div>
               <div class="src-hd">District</div>
               <div class="src-hd">Order</div>
               <div class="src-hd">Records</div>
@@ -2014,6 +2255,7 @@
                 Add one below.</div>
             </div>
 
+            <!-- ADD SOURCE FORM -->
             <div class="add-source-form">
               <div class="add-form-title">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -2024,6 +2266,76 @@
                 </svg>
                 Add New PDF Source
               </div>
+
+              <!-- PDF UPLOAD SECTION -->
+              <div class="upload-section">
+                <div class="upload-section-label">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  Upload PDF directly
+                </div>
+
+                <div class="upload-tabs">
+                  <button class="upload-tab active" id="tab-upload" onclick="switchUploadTab('upload')">📂 Upload
+                    File</button>
+                  <button class="upload-tab" id="tab-url" onclick="switchUploadTab('url')">🔗 Paste URL</button>
+                </div>
+
+                <!-- Upload File panel -->
+                <div class="upload-panel active" id="panel-upload">
+                  <div class="dropzone" id="dropzone" ondragover="dzDragOver(event)" ondragleave="dzDragLeave(event)"
+                    ondrop="dzDrop(event)">
+                    <input type="file" id="pdf-file-input" accept=".pdf,application/pdf"
+                      onchange="handleFileSelect(this.files)" />
+                    <div class="dropzone-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="12" y1="12" x2="12" y2="18" />
+                        <polyline points="9 15 12 12 15 15" />
+                      </svg>
+                    </div>
+                    <div class="dropzone-title">Drop a PDF file here</div>
+                    <div class="dropzone-sub">or <span>click to browse</span> · One PDF at a time · Fill office name &amp; district below, then upload</div>
+                  </div>
+
+                  <div class="file-queue" id="file-queue"></div>
+
+                  <div class="upload-actions" id="upload-actions" style="display:none">
+                    <span class="upload-count" id="upload-count"></span>
+                    <div style="display:flex;gap:8px">
+                      <button class="upload-clear-btn" onclick="clearFileQueue()">Clear</button>
+                      <button class="upload-submit-btn" id="upload-submit-btn" onclick="uploadPDFs()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                          stroke-linecap="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        Upload &amp; Add Source
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- URL panel -->
+                <div class="upload-panel" id="panel-url">
+                  <div style="font-size:12px;color:var(--muted);padding:6px 0 2px;">Enter the PDF URL in the Source
+                    Details form below, then click <strong>+ Add Source</strong>.</div>
+                </div>
+              </div>
+
+              <div class="form-divider">
+                <div class="form-divider-line"></div>
+                <div class="form-divider-text">Source details</div>
+                <div class="form-divider-line"></div>
+              </div>
+
               <div class="add-form-grid">
                 <div class="fg">
                   <label>Office Name</label>
@@ -2036,7 +2348,9 @@
               </div>
               <div class="add-form-row">
                 <div class="fg">
-                  <label>PDF URL</label>
+                  <label>PDF URL <span id="url-optional"
+                      style="font-weight:400;text-transform:none;letter-spacing:0;font-size:9px;color:var(--muted)">(only
+                      for URL sources — leave blank if uploading a file above)</span></label>
                   <input id="new-url" type="text" placeholder="https://giwmscdnone.gov.np/media/pdf_upload/..." />
                 </div>
                 <div class="fg">
@@ -2050,11 +2364,14 @@
         </div>
 
         <div class="info-box">
-          <strong>💡 About PDF Sources:</strong> Each source points to a DOTM office's printed license PDF. The
-          <strong>District</strong> field is stored with the source and applied to every record imported from that PDF.
-          During sync, only <strong>new</strong> PDFs are downloaded — existing cached PDFs are skipped.
-          <strong>Removing a source also deletes its cached PDF and all matching DB records.</strong> Sources are stored
-          in <code>pdf_sources.json</code>.
+          <strong>💡 About PDF Sources:</strong> Each source points to a DOTM office PDF — via URL or direct upload
+          (one PDF at a time). The <strong>District</strong> field is applied to every record imported from that PDF.
+          During sync, URL sources with existing DB records are skipped (use Force Re-download to re-fetch).
+          <strong>Uploaded PDFs are stored on disk and re-parsed on every sync</strong>, so you can refresh records
+          without re-uploading. The parser detects column headers automatically — any layout that includes
+          <em>License Number</em> and <em>License Holder Name</em> columns will work
+          (Category, Office, and Printed Date are also picked up when present).
+          <strong>Removing a source deletes its records and stored PDF.</strong>
         </div>
       </div>
 
@@ -2077,8 +2394,8 @@
                 <button class="act primary" onclick="askSync()" style="width:100%">
                   <span class="act-icon">🔄</span>
                   <span class="act-label">Download + Import All PDFs</span>
-                  <span class="act-desc">Skips cached PDFs, only downloads new ones from <span
-                      id="sync-src-count">—</span> sources</span>
+                  <span class="act-desc">Skips cached, downloads new from <span id="sync-src-count">—</span>
+                    sources</span>
                 </button>
                 <button class="act" onclick="exportCSV()" style="width:100%">
                   <span class="act-icon">📥</span>
@@ -2145,61 +2462,6 @@
         </div>
       </div>
 
-      <!-- ══ GITHUB PAGE ══ -->
-      <div class="page" id="page-github">
-        <div class="card">
-          <div class="card-head">
-            <span class="card-title">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round">
-                <path
-                  d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-              </svg>
-              GitHub Auto-Push
-            </span>
-            <div class="gh-status" id="gh-status"></div>
-          </div>
-          <div class="card-body">
-            <div class="gh-form">
-              <div class="gh-row">
-                <div class="gh-field"><label>GitHub Username</label><input id="gh-user" type="text"
-                    placeholder="your-username" /></div>
-                <div class="gh-field"><label>Repository Name</label><input id="gh-repo" type="text"
-                    placeholder="license-checker" /></div>
-              </div>
-              <div class="gh-field"><label>Personal Access Token (PAT)</label><input id="gh-token" type="password"
-                  placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" /></div>
-              <div class="gh-field"><label>Commit Message</label><input id="gh-msg" type="text"
-                  value="chore: sync latest DOTM Nepal license data" /></div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <button class="tb-btn primary" onclick="saveGHConfig()" style="flex:1;justify-content:center">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                    <polyline points="17 21 17 13 7 13 7 21" />
-                    <polyline points="7 3 7 8 15 8" />
-                  </svg>
-                  Save Configuration
-                </button>
-                <button class="tb-btn" onclick="pushToGitHub()" style="flex:1;justify-content:center">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round">
-                    <polyline points="16 18 22 12 16 6" />
-                    <polyline points="8 6 2 12 8 18" />
-                  </svg>
-                  Push to GitHub
-                </button>
-              </div>
-            </div>
-            <div class="info-box" style="margin-top:20px">
-              <strong>💡 How it works:</strong> After every successful sync, click "Push to GitHub" to commit and push
-              your updated <code>licenses.db</code> and <code>pdf_sources.json</code> to your repository. Requires a PAT
-              with <code>repo</code> scope. Token is stored locally in your browser only.
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 
@@ -2208,19 +2470,19 @@
     <div class="modal">
       <div class="modal-icon warn">🔄</div>
       <h3>Confirm Sync Operation</h3>
-      <p>This will check all configured office sources. <strong>Cached PDFs will be skipped</strong> — only new or
-        updated PDFs will be downloaded and imported.</p>
+      <p>This will check all configured office sources. URL sources with existing records will be skipped. Uploaded
+        sources are re-parsed from the stored PDF on disk.</p>
       <div class="modal-details">
         <div class="modal-detail-row"><span class="modal-detail-key">Sources</span><span class="modal-detail-val"
             id="sm-sources">—</span></div>
         <div class="modal-detail-row"><span class="modal-detail-key">Current Records</span><span
             class="modal-detail-val" id="sm-records">—</span></div>
-        <div class="modal-detail-row"><span class="modal-detail-key">Cached PDFs</span><span class="modal-detail-val"
-            id="sm-cached">—</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-key">URL Sources to Download</span><span
+            class="modal-detail-val" id="sm-todownload">—</span></div>
+        <div class="modal-detail-row"><span class="modal-detail-key">Uploaded Sources to Re-parse</span><span
+            class="modal-detail-val" id="sm-toreparse">—</span></div>
         <div class="modal-detail-row"><span class="modal-detail-key">Operation</span><span
             class="modal-detail-val">Smart Download + Parse + Import</span></div>
-        <div class="modal-detail-row"><span class="modal-detail-key">Est. Time</span><span
-            class="modal-detail-val">Varies (skips cached)</span></div>
       </div>
       <div class="modal-btns">
         <button class="m-cancel" onclick="closeSyncModal()">Cancel</button>
@@ -2248,11 +2510,11 @@
     <div class="modal">
       <div class="modal-icon">✎</div>
       <h3>Rename Office</h3>
-      <p>Renaming <strong id="rename-source-old">—</strong> will update its entry in PDF sources <strong>and rename
-        the office on every license record imported from this source</strong>.</p>
+      <p>Renaming <strong id="rename-source-old">—</strong> will update its entry in PDF sources <strong>and rename the
+          office on every license record imported from this source</strong>.</p>
       <input id="rename-source-input" type="text" placeholder="New office name"
         style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin:8px 0 4px;box-sizing:border-box;" />
-      <div class="modal-btns">
+      <div class="modal-btns" style="margin-top:16px;">
         <button class="m-cancel" onclick="closeModal('rename-source-modal')">Cancel</button>
         <button class="m-primary" onclick="confirmRenameSource()">Rename</button>
       </div>
@@ -2264,8 +2526,8 @@
     <div class="modal">
       <div class="modal-icon danger">🗑️</div>
       <h3>Remove Source?</h3>
-      <p>This will remove <strong id="del-source-name">—</strong> from PDF sources, delete its cached PDF file, and
-        <strong>permanently delete all license records imported from this source</strong>.</p>
+      <p>This will remove <strong id="del-source-name">—</strong> from PDF sources and <strong>permanently delete all
+          license records imported from this source</strong>.</p>
       <div class="modal-btns">
         <button class="m-cancel" onclick="closeModal('del-source-modal')">Cancel</button>
         <button class="m-danger" onclick="confirmDelSource()">Remove Source + Records</button>
@@ -2277,22 +2539,17 @@
   <div id="toast"></div>
 
   <script>
-    // ── AP already defined above via Jinja2 injection ─────────────────────────────
-    // All fetch() calls use `/${AP}/api/...` — never hardcoded /admin/...
-
-    // Wire up logout form action dynamically
     document.getElementById('logout-form').action = '/' + AP + '/logout';
 
-    // ── STATE ─────────────────────────────────────────────────────────────────────
+    // ── STATE ──────────────────────────────────────────────────────────
     let sourceState = {};
     let pendingDelSource = null;
     let pendingRenameSource = null;
+    // The single PDF the admin has selected for upload (one at a time).
+    let pendingUploadFile = null;
 
-    // ── NAVIGATION ────────────────────────────────────────────────────────────────
-    const PAGE_TITLES = {
-      dashboard: 'Dashboard', records: 'Browse Records',
-      sources: 'PDF Sources', sync: 'Sync & Import', github: 'GitHub Push'
-    };
+    // ── NAVIGATION ─────────────────────────────────────────────────────
+    const PAGE_TITLES = { dashboard: 'Dashboard', records: 'Browse Records', sources: 'PDF Sources', sync: 'Sync & Import' };
 
     function goto(name, btn) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2301,40 +2558,32 @@
       if (btn) btn.classList.add('active');
       document.getElementById('topbar-title').textContent = PAGE_TITLES[name] || name;
       if (name === 'sources') loadSources();
-      if (name === 'records') {
-        setTimeout(() => document.getElementById('rec-q').focus(), 100);
-        loadSearchLog();
-      }
+      if (name === 'records') { setTimeout(() => document.getElementById('rec-q').focus(), 100); loadSearchLog(); }
       if (name === 'dashboard') loadBreakdown();
       if (name === 'sync') updateSyncStatusTable();
       document.querySelectorAll('.src-dropdown.show').forEach(d => d.classList.remove('show'));
     }
 
-    // ── CLOCK ─────────────────────────────────────────────────────────────────────
+    // ── CLOCK ──────────────────────────────────────────────────────────
     function updateClock() {
       document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US',
         { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
-    setInterval(updateClock, 1000);
-    updateClock();
+    setInterval(updateClock, 1000); updateClock();
 
-    // Close dropdowns on outside click
     document.addEventListener('click', e => {
       if (!e.target.closest('.src-menu-wrap'))
         document.querySelectorAll('.src-dropdown.show').forEach(d => d.classList.remove('show'));
     });
 
-    // ── LIVE STATS (polls every 5 s) ─────────────────────────────────────────────
+    // ── LIVE STATS ─────────────────────────────────────────────────────
     function flashKpi(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.classList.add('flash');
-      setTimeout(() => el.classList.remove('flash'), 800);
+      const el = document.getElementById(id); if (!el) return;
+      el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 800);
     }
 
     async function loadStats() {
       try {
-        // /api/stats is a PUBLIC route — no secret path needed
         const d = await (await fetch('/api/stats')).json();
         const total = (d.total_records || 0).toLocaleString();
         const prev = document.getElementById('kpi-total').textContent;
@@ -2342,50 +2591,35 @@
         document.getElementById('kpi-total').textContent = total;
         document.getElementById('kpi-updated').textContent = d.last_updated || '—';
         ['sb-records', 'nb-records', 'sync-total', 'sync-stat-total'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = total;
+          const el = document.getElementById(id); if (el) el.textContent = total;
         });
         document.getElementById('sync-stat-date').textContent = d.last_updated || '—';
       } catch (_) { }
       await loadSourcesData();
     }
-
     setInterval(loadStats, 5000);
 
     async function loadSourcesData() {
       try {
-        // FIX: use `/${AP}/api/urls` — not /admin/api/urls
         const d = await (await fetch(`/${AP}/api/urls`)).json();
         const urls = d.urls || {};
-        // Rebuild sourceState in the order returned by the API so the rendered
-        // list reflects the configured `order` field. Preserve the runtime-only
-        // flags (cached/records) for names we already knew about.
         const next = {};
         Object.entries(urls).forEach(([name, entry]) => {
           const url = typeof entry === 'string' ? entry : (entry.url || '');
           const district = typeof entry === 'object' ? (entry.district || '') : '';
+          const srcType = typeof entry === 'object' ? (entry.source_type || 'url') : 'url';
           const prev = sourceState[name] || { cached: false, records: 0 };
-          next[name] = {
-            url, district,
-            cached: !!prev.cached,
-            records: prev.records || 0,
-          };
+          next[name] = { url, district, source_type: srcType, cached: !!prev.cached, records: prev.records || 0 };
         });
         Object.keys(sourceState).forEach(k => delete sourceState[k]);
         Object.entries(next).forEach(([k, v]) => { sourceState[k] = v; });
-
         const n = Object.keys(sourceState).length;
         ['kpi-offices', 'nb-sources', 'src-count'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = n;
+          const el = document.getElementById(id); if (el) el.textContent = n;
         });
         document.getElementById('sync-src-count').textContent = n;
-      } catch (_) {
-        document.getElementById('kpi-offices').textContent = Object.keys(sourceState).length || '—';
-      }
-      // Per-office record counts
+      } catch (_) { }
       try {
-        // FIX: use `/${AP}/api/breakdown`
         const d = await (await fetch(`/${AP}/api/breakdown`)).json();
         (d.rows || []).forEach(r => {
           const key = Object.keys(sourceState).find(k => k.toLowerCase() === (r.office || '').toLowerCase());
@@ -2394,15 +2628,14 @@
       } catch (_) { }
     }
 
-    // ── OFFICE BREAKDOWN ──────────────────────────────────────────────────────────
+    // ── OFFICE BREAKDOWN ───────────────────────────────────────────────
     async function loadBreakdown() {
       try {
-        // FIX: use `/${AP}/api/breakdown`
         const d = await (await fetch(`/${AP}/api/breakdown`)).json();
         const el = document.getElementById('office-breakdown');
         const rows = d.rows || [];
         if (!rows.length) {
-          el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">No records yet. Run a sync to import data.</div>';
+          el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">No records yet. Run a sync or upload a PDF to import data.</div>';
           return;
         }
         const total = rows.reduce((s, r) => s + r.count, 0);
@@ -2429,7 +2662,7 @@
       } catch (_) { }
     }
 
-    // ── SOURCES ───────────────────────────────────────────────────────────────────
+    // ── SOURCES ────────────────────────────────────────────────────────
     async function loadSources() {
       await loadSourcesData();
       renderSources();
@@ -2439,19 +2672,21 @@
       const el = document.getElementById('sources-list');
       const keys = Object.keys(sourceState);
       document.getElementById('src-count').textContent = keys.length;
-
       if (!keys.length) {
         el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:24px;text-align:center;">No sources configured yet. Add one below.</div>';
         return;
       }
-
-      // FIX: use data-* attributes + event delegation instead of inline onclick
-      // with string-escaped URLs — avoids all escaping bugs with special chars in URLs
       el.innerHTML = keys.map((name, i) => {
         const s = sourceState[name];
-        const statusHtml = s.cached
-          ? `<span class="src-status cached">● Cached</span>`
-          : `<span class="src-status active">● Active</span>`;
+        const isUpload = s.source_type === 'upload';
+        const statusHtml = isUpload
+          ? `<span class="src-status upload">📂 Uploaded</span>`
+          : s.cached
+            ? `<span class="src-status cached">● Cached</span>`
+            : `<span class="src-status active">● Active</span>`;
+        const urlDisplay = isUpload
+          ? `<em style="color:var(--muted);font-style:italic">📂 Uploaded PDF</em>`
+          : escHtml(s.url || '—');
         const recordsHtml = s.records > 0
           ? s.records.toLocaleString()
           : '<span style="color:var(--muted)">—</span>';
@@ -2459,16 +2694,14 @@
         return `<div class="source-row" id="src-row-${i}" draggable="true" data-name="${escHtml(name)}">
           <div class="src-handle" title="Drag to reorder">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <line x1="4" y1="8" x2="20" y2="8"/>
-              <line x1="4" y1="12" x2="20" y2="12"/>
-              <line x1="4" y1="16" x2="20" y2="16"/>
+              <line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="16" x2="20" y2="16"/>
             </svg>
           </div>
           <div class="src-name">
             <span style="width:26px;height:26px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;">${i + 1}</span>
             ${escHtml(name)}
           </div>
-          <div class="src-url" title="${escHtml(s.url)}">${escHtml(s.url)}</div>
+          <div class="src-url" title="${escHtml(s.url || '')}">${urlDisplay}</div>
           <div class="src-district">${escHtml(s.district || '—')}</div>
           <div class="src-order">${i + 1}</div>
           <div class="src-records">${recordsHtml}</div>
@@ -2482,54 +2715,34 @@
               </svg>
             </button>
             <div class="src-dropdown" id="dd-${i}">
-              <button class="src-dd-item" data-action="copy" data-name="${escHtml(name)}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <rect x="9" y="9" width="13" height="13" rx="2"/>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                </svg>
+              ${s.url ? `<button class="src-dd-item" data-action="copy" data-name="${escHtml(name)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                 Copy URL
               </button>
               <button class="src-dd-item" data-action="open" data-name="${escHtml(name)}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 Open PDF
-              </button>
-              <button class="src-dd-item" data-action="redownload" data-name="${escHtml(name)}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <polyline points="1 4 1 10 7 10"/>
-                  <path d="M3.51 15a9 9 0 1 0 .49-4.01"/>
-                </svg>
+              </button>` : ''}
+              ${!isUpload ? `<button class="src-dd-item" data-action="redownload" data-name="${escHtml(name)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.01"/></svg>
                 Force Re-download
-              </button>
+              </button>` : ''}
               <button class="src-dd-item" data-action="rename" data-name="${escHtml(name)}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <path d="M12 20h9"/>
-                  <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 Rename Office
               </button>
               <div class="src-dd-sep"></div>
               <button class="src-dd-item" data-action="move-up" data-name="${escHtml(name)}" ${i === 0 ? 'disabled' : ''}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <polyline points="18 15 12 9 6 15"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
                 Move Up
               </button>
               <button class="src-dd-item" data-action="move-down" data-name="${escHtml(name)}" ${i === keys.length - 1 ? 'disabled' : ''}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
                 Move Down
               </button>
               <div class="src-dd-sep"></div>
               <button class="src-dd-item danger" data-action="delete" data-name="${escHtml(name)}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                  <path d="M10 11v6"/><path d="M14 11v6"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
                 Remove Source
               </button>
             </div>
@@ -2538,9 +2751,8 @@
       }).join('');
     }
 
-    // ── EVENT DELEGATION for dropdown buttons ─────────────────────────────────────
+    // ── EVENT DELEGATION ───────────────────────────────────────────────
     document.addEventListener('click', e => {
-      // Toggle dots button
       const dotsBtn = e.target.closest('.src-dots');
       if (dotsBtn) {
         e.stopPropagation();
@@ -2549,8 +2761,6 @@
         document.getElementById(ddId)?.classList.toggle('show');
         return;
       }
-
-      // Dropdown item actions
       const item = e.target.closest('.src-dd-item[data-action]');
       if (item) {
         e.stopPropagation();
@@ -2559,16 +2769,26 @@
         const name = item.dataset.name;
         const s = sourceState[name];
         if (!s) return;
-
         if (action === 'copy') {
           navigator.clipboard.writeText(s.url).then(() => toast('✓ URL copied to clipboard'));
         } else if (action === 'open') {
           window.open(s.url, '_blank');
         } else if (action === 'redownload') {
-          sourceState[name].cached = false;
-          renderSources();
-          toast('↻ ' + name + ' marked for re-download');
-          addActivity('Marked ' + name + ' for re-download', 'amber', '↻');
+          // Clear cached PDF flag and mark for re-download on next sync
+          // by deleting existing DB records for this office via the API
+          if (!confirm(`Force re-download will delete existing records for "${name}" then re-fetch. Continue?`)) return;
+          fetch(`/${AP}/api/urls/` + encodeURIComponent(name), { method: 'DELETE' })
+            .then(r => r.json()).then(r => {
+              if (r.ok) {
+                // Re-add with same URL/district
+                const body = { name, url: s.url, district: s.district };
+                return fetch(`/${AP}/api/urls`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+              }
+            }).then(() => {
+              loadSources(); loadStats(); loadBreakdown();
+              toast('↻ ' + name + ' cleared — will re-download on next sync');
+              addActivity('Force re-download queued: ' + name, 'amber', '↻');
+            }).catch(() => toast('Failed to queue re-download', 'err'));
         } else if (action === 'move-up' || action === 'move-down') {
           moveSource(name, action === 'move-up' ? -1 : 1);
         } else if (action === 'rename') {
@@ -2583,55 +2803,38 @@
           document.getElementById('del-source-name').textContent = name;
           document.getElementById('del-source-modal').classList.add('show');
         }
-        return;
       }
     });
 
-    // ── DRAG-AND-DROP REORDERING (desktop) ───────────────────────────────────────
-    // The up/down dropdown items still cover keyboard / touch.
+    // ── DRAG AND DROP ──────────────────────────────────────────────────
     let dragSrcName = null;
-
     (function wireDragDrop() {
       const list = document.getElementById('sources-list');
       if (!list) return;
-
       list.addEventListener('dragstart', e => {
-        const row = e.target.closest('.source-row');
-        if (!row) return;
-        dragSrcName = row.dataset.name;
-        row.classList.add('dragging');
+        const row = e.target.closest('.source-row'); if (!row) return;
+        dragSrcName = row.dataset.name; row.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
         try { e.dataTransfer.setData('text/plain', dragSrcName); } catch (_) { }
       });
-
       list.addEventListener('dragend', e => {
-        const row = e.target.closest('.source-row');
-        if (row) row.classList.remove('dragging');
-        list.querySelectorAll('.drag-over-top, .drag-over-bottom')
-          .forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
+        const row = e.target.closest('.source-row'); if (row) row.classList.remove('dragging');
+        list.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
         dragSrcName = null;
       });
-
       list.addEventListener('dragover', e => {
-        const row = e.target.closest('.source-row');
-        if (!row || !dragSrcName) return;
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
+        const row = e.target.closest('.source-row'); if (!row || !dragSrcName) return;
+        e.preventDefault(); e.dataTransfer.dropEffect = 'move';
         const rect = row.getBoundingClientRect();
         const before = (e.clientY - rect.top) < rect.height / 2;
-        list.querySelectorAll('.drag-over-top, .drag-over-bottom')
-          .forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
+        list.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
         row.classList.add(before ? 'drag-over-top' : 'drag-over-bottom');
       });
-
       list.addEventListener('dragleave', e => {
-        const row = e.target.closest('.source-row');
-        if (row) row.classList.remove('drag-over-top', 'drag-over-bottom');
+        const row = e.target.closest('.source-row'); if (row) row.classList.remove('drag-over-top', 'drag-over-bottom');
       });
-
       list.addEventListener('drop', e => {
-        const row = e.target.closest('.source-row');
-        if (!row || !dragSrcName) return;
+        const row = e.target.closest('.source-row'); if (!row || !dragSrcName) return;
         e.preventDefault();
         const targetName = row.dataset.name;
         const rect = row.getBoundingClientRect();
@@ -2667,23 +2870,16 @@
     async function persistOrder(keys, successMsg) {
       try {
         const r = await (await fetch(`/${AP}/api/urls/reorder`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ names: keys })
         })).json();
-        if (!r.ok) {
-          toast(r.error || 'Failed to save order', 'err');
-          await loadSources();
-          return false;
-        }
+        if (!r.ok) { toast(r.error || 'Failed to save order', 'err'); await loadSources(); return false; }
         toast(successMsg);
         addActivity(successMsg, 'blue', '↕');
         loadBreakdown();
         return true;
       } catch (_) {
-        toast('Network error — reverting order', 'err');
-        await loadSources();
-        return false;
+        toast('Network error — reverting order', 'err'); await loadSources(); return false;
       }
     }
 
@@ -2699,117 +2895,230 @@
     }
 
     async function confirmRenameSource() {
-      const oldName = pendingRenameSource;
-      if (!oldName) return;
+      const oldName = pendingRenameSource; if (!oldName) return;
       const input = document.getElementById('rename-source-input');
       const newName = (input.value || '').trim();
       if (!newName) { toast('Enter a new office name', 'warn'); input.focus(); return; }
       if (newName === oldName) { closeModal('rename-source-modal'); pendingRenameSource = null; return; }
       if (sourceState[newName]) { toast('An office with that name already exists', 'err'); input.focus(); return; }
-
       try {
         const r = await (await fetch(`/${AP}/api/urls/` + encodeURIComponent(oldName), {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ new_name: newName })
         })).json();
         if (r.ok) {
           closeModal('rename-source-modal');
-          await loadSources();
-          loadStats();
-          loadBreakdown();
-          const updated = r.records_updated || 0;
-          toast('Renamed: ' + oldName + ' → ' + newName + (updated ? ' (' + updated + ' records updated)' : ''));
-          addActivity('Renamed source: ' + oldName + ' → ' + newName + (updated ? ' (' + updated + ' records)' : ''), 'blue', '✎');
-        } else {
-          toast(r.error || 'Failed to rename source', 'err');
-        }
-      } catch (_) {
-        toast('Network error — please try again', 'err');
-      }
+          await loadSources(); loadStats(); loadBreakdown();
+          const upd = r.records_updated || 0;
+          toast('Renamed: ' + oldName + ' → ' + newName + (upd ? ` (${upd} records updated)` : ''));
+          addActivity('Renamed source: ' + oldName + ' → ' + newName, 'blue', '✎');
+        } else { toast(r.error || 'Failed to rename source', 'err'); }
+      } catch (_) { toast('Network error — please try again', 'err'); }
       pendingRenameSource = null;
     }
 
     async function confirmDelSource() {
-      const name = pendingDelSource;
-      if (!name) return;
+      const name = pendingDelSource; if (!name) return;
       closeModal('del-source-modal');
       try {
-        // FIX: use `/${AP}/api/urls/...`
         const r = await (await fetch(`/${AP}/api/urls/` + encodeURIComponent(name), { method: 'DELETE' })).json();
         if (r.ok) {
-          delete sourceState[name];
-          renderSources();
-          loadStats();
-          loadBreakdown();
+          delete sourceState[name]; renderSources(); loadStats(); loadBreakdown();
           toast('Removed: ' + name + ' (' + (r.records_deleted || 0) + ' records deleted)');
           addActivity('Removed source + ' + (r.records_deleted || 0) + ' records: ' + name, 'amber', '🗑️');
-        } else toast(r.error || 'Failed to remove source', 'err');
+        } else { toast(r.error || 'Failed to remove source', 'err'); }
       } catch (_) {
-        delete sourceState[name];
-        renderSources();
+        delete sourceState[name]; renderSources();
         toast('Removed: ' + name);
         addActivity('Removed source: ' + name, 'amber', '🗑️');
       }
       pendingDelSource = null;
     }
 
+    // ── ADD SOURCE (URL only) ──────────────────────────────────────────
+    // For uploaded files, use the upload flow below (uploadPDF()).
     async function addSource() {
-      const name = document.getElementById('new-name').value.trim();
-      const district = document.getElementById('new-district').value.trim();
-      const url = document.getElementById('new-url').value.trim();
-      const orderRaw = document.getElementById('new-order').value.trim();
-      if (!name || !url) { toast('Enter office name and URL', 'warn'); return; }
+      const name = (document.getElementById('new-name').value || '').trim();
+      const district = (document.getElementById('new-district').value || '').trim();
+      const url = (document.getElementById('new-url').value || '').trim();
+      const orderRaw = (document.getElementById('new-order').value || '').trim();
+
+      if (!name) { toast('Enter an office name', 'warn'); document.getElementById('new-name').focus(); return; }
+      if (!url) {
+        if (pendingUploadFile) {
+          toast('Use the “Upload & Add Source” button above to upload a file', 'warn');
+        } else {
+          toast('Enter a PDF URL — or switch to the Upload File tab to upload a PDF', 'warn');
+          document.getElementById('new-url').focus();
+        }
+        return;
+      }
       if (!url.startsWith('http')) { toast('URL must start with https://', 'err'); return; }
       if (sourceState[name]) { toast('Source "' + name + '" already exists', 'warn'); return; }
 
-      const body = { name, url, district };
+      const body = { name, district, url };
       if (orderRaw !== '') {
         const n = parseInt(orderRaw, 10);
-        if (!Number.isFinite(n) || n < 1) {
-          toast('Order must be a positive number (or empty for end)', 'warn');
-          return;
-        }
+        if (!Number.isFinite(n) || n < 1) { toast('Order must be a positive number', 'warn'); return; }
         body.order = n;
       }
 
-      const clearForm = () => {
-        document.getElementById('new-name').value = '';
-        document.getElementById('new-district').value = '';
-        document.getElementById('new-url').value = '';
-        document.getElementById('new-order').value = '';
-      };
-
       try {
         const r = await (await fetch(`/${AP}/api/urls`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         })).json();
+
         if (r.ok) {
-          clearForm();
-          // Reload from server: inserting in the middle reorders other rows,
-          // so we can't just append locally.
-          await loadSources();
-          loadStats();
-          loadBreakdown();
+          clearSourceForm();
+          await loadSources(); loadStats(); loadBreakdown();
           const where = body.order ? ' at position ' + body.order : '';
-          toast('✓ Source added: ' + name + where + (district ? ' (' + district + ')' : ''));
-          addActivity('Added PDF source: ' + name + where + (district ? ' · ' + district : ''), 'blue', '🔗');
-        } else toast(r.error || 'Failed to add source', 'err');
+          toast('✓ Source added: ' + name + where);
+          addActivity('Added PDF source: ' + name + (district ? ' · ' + district : ''), 'blue', '🔗');
+        } else {
+          toast(r.error || 'Failed to add source', 'err');
+        }
       } catch (_) {
-        // Demo fallback if server unreachable
-        sourceState[name] = { url, district, cached: false, records: 0 };
-        clearForm();
-        renderSources();
-        toast('✓ Source added: ' + name);
-        addActivity('Added PDF source: ' + name, 'blue', '🔗');
+        toast('Network error — please try again', 'err');
       }
     }
 
-    // ── SEARCH ────────────────────────────────────────────────────────────────────
+    function clearSourceForm() {
+      ['new-name', 'new-district', 'new-url', 'new-order'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+      });
+      pendingUploadFile = null;
+      renderFileQueue();
+    }
+
+    // ── PDF UPLOAD ─────────────────────────────────────────────────────
+    // One file at a time. The upload POST also registers the office as a
+    // source — backend route: POST /dotm-admin/api/upload-pdf
+    // (form fields: file, name, district, order)
+
+    function switchUploadTab(tab) {
+      document.getElementById('tab-upload').classList.toggle('active', tab === 'upload');
+      document.getElementById('tab-url').classList.toggle('active', tab === 'url');
+      document.getElementById('panel-upload').classList.toggle('active', tab === 'upload');
+      document.getElementById('panel-url').classList.toggle('active', tab === 'url');
+    }
+
+    function dzDragOver(e) { e.preventDefault(); document.getElementById('dropzone').classList.add('drag-active'); }
+    function dzDragLeave(e) { document.getElementById('dropzone').classList.remove('drag-active'); }
+    function dzDrop(e) {
+      e.preventDefault();
+      document.getElementById('dropzone').classList.remove('drag-active');
+      const files = Array.from(e.dataTransfer.files).filter(f =>
+        f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+      if (!files.length) { toast('Only PDF files are accepted', 'warn'); return; }
+      if (files.length > 1) toast('Only the first PDF will be used (one at a time)', 'warn');
+      setSelectedFile(files[0]);
+    }
+
+    function handleFileSelect(fileList) {
+      const files = Array.from(fileList).filter(f =>
+        f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+      if (!files.length) { toast('Only PDF files are accepted', 'warn'); return; }
+      setSelectedFile(files[0]);
+      document.getElementById('pdf-file-input').value = '';
+    }
+
+    function setSelectedFile(file) {
+      pendingUploadFile = file;
+      // Auto-fill office name from filename if the field is empty.
+      const nameInput = document.getElementById('new-name');
+      if (!nameInput.value.trim())
+        nameInput.value = file.name.replace(/\.pdf$/i, '');
+      renderFileQueue();
+    }
+
+    function clearFileQueue() {
+      pendingUploadFile = null;
+      renderFileQueue();
+    }
+
+    function renderFileQueue() {
+      const container = document.getElementById('file-queue');
+      const actions = document.getElementById('upload-actions');
+      const countEl = document.getElementById('upload-count');
+      if (!pendingUploadFile) {
+        container.innerHTML = '';
+        actions.style.display = 'none';
+        return;
+      }
+      actions.style.display = 'flex';
+      const sizeMB = (pendingUploadFile.size / (1024 * 1024)).toFixed(1);
+      countEl.textContent = '1 file selected · ' + sizeMB + ' MB';
+      container.innerHTML = `<div class="file-item">
+        <div class="file-item-icon">📄</div>
+        <div class="file-item-info">
+          <div class="file-item-name">${escHtml(pendingUploadFile.name)}</div>
+          <div class="file-item-meta">${sizeMB} MB · PDF · ready to upload</div>
+        </div>
+        <button class="file-item-remove" onclick="clearFileQueue()" title="Remove">✕</button>
+      </div>`;
+    }
+
+    async function uploadPDFs() {
+      if (!pendingUploadFile) { toast('Select a PDF file first', 'warn'); return; }
+
+      const name = (document.getElementById('new-name').value || '').trim();
+      const district = (document.getElementById('new-district').value || '').trim();
+      const orderRaw = (document.getElementById('new-order').value || '').trim();
+
+      if (!name) {
+        toast('Enter the office name in Source Details below', 'warn');
+        document.getElementById('new-name').focus();
+        return;
+      }
+      if (sourceState[name]) {
+        toast('A source named "' + name + '" already exists — remove it first', 'err');
+        return;
+      }
+      if (orderRaw !== '') {
+        const n = parseInt(orderRaw, 10);
+        if (!Number.isFinite(n) || n < 1) { toast('Order must be a positive number', 'warn'); return; }
+      }
+
+      const btn = document.getElementById('upload-submit-btn');
+      const origLabel = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<svg class="spinning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg> Uploading & parsing…';
+
+      try {
+        const fd = new FormData();
+        fd.append('file', pendingUploadFile);
+        fd.append('name', name);
+        fd.append('district', district);
+        if (orderRaw !== '') fd.append('order', orderRaw);
+
+        const resp = await fetch(`/${AP}/api/upload-pdf`, { method: 'POST', body: fd });
+        let result = {};
+        try { result = await resp.json(); } catch (_) { }
+
+        if (resp.ok && result.ok) {
+          const recMsg = result.records != null ? ` · ${result.records.toLocaleString()} records parsed` : '';
+          toast('✓ ' + name + ' uploaded' + recMsg);
+          addActivity('PDF uploaded: ' + name + (district ? ' · ' + district : '') + recMsg, 'green', '📄');
+          clearSourceForm();
+          await loadSources(); loadStats(); loadBreakdown();
+        } else {
+          const errMsg = result.error || `HTTP ${resp.status}`;
+          toast('Upload failed: ' + errMsg, 'err');
+          addActivity('Upload failed: ' + name, 'red', '❌');
+        }
+      } catch (err) {
+        toast('Network error: ' + (err && err.message ? err.message : 'unknown'), 'err');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origLabel;
+      }
+    }
+
+    // ── SEARCH ─────────────────────────────────────────────────────────
     let sTimer;
     function debounceSearch() { clearTimeout(sTimer); sTimer = setTimeout(doSearch, 380); }
+
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('rec-q').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
     });
@@ -2820,7 +3129,6 @@
       const tbody = document.getElementById('rec-tbody');
       tbody.innerHTML = '<tr><td colspan="6" class="td-empty">🔍 Searching…</td></tr>';
       try {
-        // FIX: use `/${AP}/api/search`
         const d = await (await fetch(`/${AP}/api/search?q=` + encodeURIComponent(q))).json();
         const results = d.results || [];
         document.getElementById('rec-count').textContent = results.length + ' result(s) for "' + q + '"';
@@ -2842,7 +3150,7 @@
       }
     }
 
-    // ── USER SEARCH LOG ───────────────────────────────────────────────────────────
+    // ── SEARCH LOG ─────────────────────────────────────────────────────
     let slTimer;
     function debounceSearchLog() { clearTimeout(slTimer); slTimer = setTimeout(loadSearchLog, 380); }
 
@@ -2857,14 +3165,11 @@
         const d = await (await fetch(url)).json();
         const rows = d.rows || [];
         const total = d.total || 0;
-        if (countEl) {
-          countEl.textContent = q
-            ? rows.length + ' of ' + total.toLocaleString() + ' match'
-            : total.toLocaleString() + ' searches logged';
-        }
+        if (countEl)
+          countEl.textContent = q ? rows.length + ' of ' + total.toLocaleString() + ' match' : total.toLocaleString() + ' searches logged';
         if (!rows.length) {
           tbody.innerHTML = '<tr><td colspan="5" class="td-empty">'
-            + (q ? 'No matches for "' + escHtml(q) + '"' : 'No searches yet — share the public page to start collecting data')
+            + (q ? 'No matches for "' + escHtml(q) + '"' : 'No searches yet')
             + '</td></tr>';
           return;
         }
@@ -2895,23 +3200,27 @@
           toast('Cleared ' + (r.deleted || 0).toLocaleString() + ' search entries');
           addActivity('Cleared user search log (' + (r.deleted || 0) + ' entries)', 'amber', '🗑️');
           loadSearchLog();
-        } else {
-          toast(r.error || 'Failed to clear log', 'err');
-        }
-      } catch (_) {
-        toast('Network error', 'err');
-      }
+        } else { toast(r.error || 'Failed to clear log', 'err'); }
+      } catch (_) { toast('Network error', 'err'); }
     }
 
-    // ── SYNC FLOW ─────────────────────────────────────────────────────────────────
+    // ── SYNC ───────────────────────────────────────────────────────────
     function askSync() {
       const srcNames = Object.keys(sourceState);
-      const cachedCount = srcNames.filter(n => sourceState[n].cached).length;
+      const uploadCount = srcNames.filter(n => sourceState[n].source_type === 'upload').length;
+      const urlSrcs = srcNames.filter(n => sourceState[n].source_type !== 'upload');
+      const toDownload = urlSrcs.filter(n => {
+        const s = sourceState[n];
+        return !s.cached && !s.records;
+      });
       document.getElementById('sm-sources').textContent = srcNames.length + ' office' + (srcNames.length !== 1 ? 's' : '');
       document.getElementById('sm-records').textContent = (document.getElementById('kpi-total').textContent || '—') + ' existing';
-      document.getElementById('sm-cached').textContent = cachedCount + ' cached (will skip), ' + (srcNames.length - cachedCount) + ' to download';
+      document.getElementById('sm-todownload').textContent = toDownload.length + ' to download';
+      const reparseEl = document.getElementById('sm-toreparse');
+      if (reparseEl) reparseEl.textContent = uploadCount + ' uploaded PDF' + (uploadCount !== 1 ? 's' : '');
       document.getElementById('sync-modal').classList.add('show');
     }
+
     function closeSyncModal() { document.getElementById('sync-modal').classList.remove('show'); }
 
     async function confirmSync() {
@@ -2925,42 +3234,16 @@
       function log(msg, type = 'info') {
         const cls = type === 'ok' ? 'log-ok' : type === 'err' ? 'log-err' : type === 'warn' ? 'log-warn' : 'log-info';
         ['dash-log', 'sync-log'].forEach(id => {
-          const el = document.getElementById(id);
-          if (!el) return;
+          const el = document.getElementById(id); if (!el) return;
           const ts = new Date().toLocaleTimeString();
           el.innerHTML += `<div class="${cls}">[${ts}] ${escHtml(msg)}</div>`;
           el.scrollTop = el.scrollHeight;
         });
       }
 
-      log('> Initializing DOTM smart sync engine…');
-      const srcNames = Object.keys(sourceState);
-      const toDownload = srcNames.filter(n => !sourceState[n].cached);
-      const cached = srcNames.filter(n => sourceState[n].cached);
-
-      log('> Checking ' + srcNames.length + ' source(s)…');
-      cached.forEach(n => log('> [SKIP] ' + n + ' — PDF already cached', 'warn'));
-      toDownload.forEach(n => {
-        const dist = sourceState[n].district ? ' [' + sourceState[n].district + ']' : '';
-        log('> [QUEUE] ' + n + dist + ' — new download needed');
-      });
-
-      if (toDownload.length === 0) {
-        log('> All PDFs are cached. Nothing new to download.', 'warn');
-        log('> Use "Force Re-download" on a source to re-fetch it.');
-        ico.classList.remove('spinning');
-        if (badge) badge.textContent = 'DONE';
-        toast('All PDFs already cached — nothing new to download', 'warn');
-        addActivity('Sync skipped — all PDFs cached', 'amber', '⚡');
-        updateSyncStatusTable();
-        return;
-      }
-
       try {
         const r = await fetch(`/${AP}/api/sync`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ skip_cached: cached, download: toDownload })
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({})
         });
         const start = await r.json();
 
@@ -2972,12 +3255,9 @@
           return;
         }
 
-        log('> Background sync started (job ' + start.job_id + ')', 'ok');
+        log('> Sync started (job ' + start.job_id + ') — ' + start.office_total + ' sources', 'ok');
         log('> Polling for progress…');
 
-        // Poll /api/sync/status until the job finishes. Server-side parsing
-        // is page-batched, so a 600-page PDF no longer holds the worker
-        // hostage — the request that started this sync already returned.
         let lastLogLen = 0;
         const poll = async () => {
           let job;
@@ -2987,8 +3267,7 @@
             job = sd.job || {};
           } catch (e) {
             log('> Status poll failed: ' + e.message, 'warn');
-            setTimeout(poll, 2500);
-            return;
+            setTimeout(poll, 2500); return;
           }
 
           const logs = job.log || [];
@@ -2999,54 +3278,42 @@
           lastLogLen = logs.length;
 
           if (job.status === 'running') {
-            const pct = job.total_pages
-              ? Math.round(100 * (job.current_page || 0) / job.total_pages)
-              : 0;
+            const pct = job.total_pages ? Math.round(100 * (job.current_page || 0) / job.total_pages) : 0;
             const phase = (job.current_phase || '').toUpperCase();
             const office = job.current_office || '';
-            const where = job.office_total
-              ? ` ${job.office_index || 0}/${job.office_total}`
-              : '';
-            const pageInfo = (job.current_phase === 'parsing' && job.total_pages)
-              ? ` p${job.current_page}/${job.total_pages} (${pct}%)`
-              : '';
-            if (badge) badge.textContent = `${phase || 'RUNNING'}${where} ${office}${pageInfo}`.trim();
-            setTimeout(poll, 1500);
-            return;
+            const where = job.office_total ? ` ${job.office_index || 0}/${job.office_total}` : '';
+            const pg = (job.current_phase === 'parsing' && job.total_pages) ? ` p${job.current_page}/${job.total_pages} (${pct}%)` : '';
+            if (badge) badge.textContent = `${phase || 'RUNNING'}${where} ${office}${pg}`.trim();
+            setTimeout(poll, 1500); return;
           }
 
           ico.classList.remove('spinning');
 
           if (job.status === 'done') {
             if (badge) badge.textContent = 'DONE';
-            toDownload.forEach(n => { if (sourceState[n]) sourceState[n].cached = true; });
-            log('> PDFs downloaded: ' + (job.pdfs_downloaded || 0), 'ok');
-            log('> PDFs skipped (cached): ' + (job.pdfs_skipped || cached.length), 'warn');
-            log('> Records imported: ' + (job.records_imported || 0).toLocaleString(), 'ok');
-            log('> Sync completed successfully', 'ok');
+            log(`> PDFs downloaded : ${job.pdfs_downloaded || 0}`, 'ok');
+            log(`> PDFs skipped    : ${job.pdfs_skipped || 0}`, 'warn');
+            log(`> Records imported: ${(job.records_imported || 0).toLocaleString()}`, 'ok');
+            log('> Sync completed ✓', 'ok');
             toast('Synced ' + (job.records_imported || 0).toLocaleString() + ' records');
-            addActivity('Sync done — ' + (job.records_imported || 0).toLocaleString() + ' records imported, ' + (job.pdfs_skipped || 0) + ' PDFs cached', 'green', '✅');
-            loadStats();
-            loadBreakdown();
-            renderSources();
+            addActivity('Sync done — ' + (job.records_imported || 0).toLocaleString() + ' records imported', 'green', '✅');
+            loadStats(); loadBreakdown(); loadSources(); updateSyncStatusTable();
           } else {
             if (badge) badge.textContent = 'ERROR';
             log('> Error: ' + (job.error || 'Sync failed'), 'err');
             toast(job.error || 'Sync failed', 'err');
           }
         };
-
-        setTimeout(poll, 800);
+        setTimeout(poll, 1000);
       } catch (e) {
         ico.classList.remove('spinning');
         if (badge) badge.textContent = 'ERROR';
         log('> Network error — could not reach sync endpoint.', 'err');
-        log('> Error: ' + e.message, 'err');
+        log('> ' + e.message, 'err');
         toast('Sync failed — check server connection', 'err');
       }
     }
 
-    // ── SYNC STATUS TABLE ─────────────────────────────────────────────────────────
     function updateSyncStatusTable() {
       const tbl = document.getElementById('sync-status-tbl');
       if (!tbl) return;
@@ -3057,9 +3324,12 @@
       }
       tbl.innerHTML = keys.map(name => {
         const s = sourceState[name];
-        const pill = s.cached
-          ? '<span class="pill pill-cached">● Cached</span>'
-          : '<span class="pill pill-new">↓ Pending</span>';
+        const isUpload = s.source_type === 'upload';
+        const pill = isUpload
+          ? '<span class="pill pill-upload">📂 Re-parse on sync</span>'
+          : s.cached
+            ? '<span class="pill pill-cached">● Cached</span>'
+            : '<span class="pill pill-new">↓ Pending</span>';
         const rec = s.records > 0 ? s.records.toLocaleString() : '—';
         const dist = s.district ? `<span style="font-size:10px;color:var(--muted)"> · ${escHtml(s.district)}</span>` : '';
         return `<tr>
@@ -3070,92 +3340,40 @@
       }).join('');
     }
 
-    // ── EXPORT ────────────────────────────────────────────────────────────────────
+    // ── EXPORT ─────────────────────────────────────────────────────────
     function exportCSV() {
       toast('📥 Preparing CSV export…');
       addActivity('CSV export downloaded', 'blue', '📥');
-      // FIX: use `/${AP}/api/export`
       window.location.href = '/' + AP + '/api/export';
     }
 
-    // ── CLEAR DB ──────────────────────────────────────────────────────────────────
     function askClear() {
       document.getElementById('clear-count').textContent = document.getElementById('kpi-total').textContent;
       document.getElementById('clear-modal').classList.add('show');
     }
+
     function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
     async function clearDB() {
       closeModal('clear-modal');
       try {
-        // FIX: use `/${AP}/api/clear`
         const r = await (await fetch(`/${AP}/api/clear`, { method: 'POST' })).json();
         if (r.ok) {
-          Object.keys(sourceState).forEach(k => {
-            sourceState[k].records = 0;
-            sourceState[k].cached = false;
-          });
+          Object.keys(sourceState).forEach(k => { sourceState[k].records = 0; sourceState[k].cached = false; });
           loadStats(); loadBreakdown(); renderSources(); updateSyncStatusTable();
           const pdfsMsg = r.cached_pdfs_deleted > 0 ? ' + ' + r.cached_pdfs_deleted + ' PDF files' : '';
           toast('✓ Database cleared' + pdfsMsg);
           addActivity('Database + ' + (r.cached_pdfs_deleted || 0) + ' cached PDFs cleared', 'red', '🗑️');
-        } else toast(r.error || 'Failed', 'err');
+        } else { toast(r.error || 'Failed to clear database', 'err'); }
       } catch (_) {
         Object.keys(sourceState).forEach(k => { sourceState[k].records = 0; sourceState[k].cached = false; });
         renderSources(); updateSyncStatusTable();
-        toast('✓ Database cleared (demo)');
+        toast('✓ Database cleared');
         addActivity('Database cleared', 'red', '🗑️');
       }
     }
 
-    // ── GITHUB ────────────────────────────────────────────────────────────────────
-    function saveGHConfig() {
-      const cfg = {
-        user: document.getElementById('gh-user').value.trim(),
-        repo: document.getElementById('gh-repo').value.trim(),
-        token: document.getElementById('gh-token').value.trim(),
-        msg: document.getElementById('gh-msg').value.trim(),
-      };
-      if (!cfg.user || !cfg.repo || !cfg.token) { toast('Fill in all GitHub fields', 'err'); return; }
-      localStorage.setItem('gh_config', JSON.stringify(cfg));
-      toast('✓ GitHub config saved locally');
-      showGHStatus('✓ Configuration saved — ready to push.', 'ok');
-      addActivity('GitHub config saved for: ' + cfg.user + '/' + cfg.repo, 'blue', '⚙️');
-    }
-    function loadGHConfig() {
-      try {
-        const c = JSON.parse(localStorage.getItem('gh_config') || '{}');
-        if (c.user) document.getElementById('gh-user').value = c.user;
-        if (c.repo) document.getElementById('gh-repo').value = c.repo;
-        if (c.token) document.getElementById('gh-token').value = c.token;
-        if (c.msg) document.getElementById('gh-msg').value = c.msg;
-      } catch (_) { }
-    }
-    function showGHStatus(msg, type) {
-      const el = document.getElementById('gh-status');
-      el.textContent = msg; el.className = 'gh-status show ' + type;
-    }
-    async function pushToGitHub() {
-      const cfg = JSON.parse(localStorage.getItem('gh_config') || '{}');
-      if (!cfg.user || !cfg.repo || !cfg.token) { toast('Save GitHub config first', 'err'); return; }
-      toast('Pushing to GitHub…');
-      try {
-        // FIX: use `/${AP}/api/github-push`
-        const r = await (await fetch(`/${AP}/api/github-push`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cfg)
-        })).json();
-        if (r.ok) {
-          showGHStatus('✓ Pushed to github.com/' + cfg.user + '/' + cfg.repo, 'ok');
-          toast('✓ Pushed to GitHub!');
-          addActivity('Pushed to GitHub: ' + cfg.user + '/' + cfg.repo, 'green', '🚀');
-        } else {
-          showGHStatus('✗ ' + r.error, 'err');
-          toast(r.error || 'Push failed', 'err');
-        }
-      } catch (e) { toast('Push to GitHub failed', 'err'); }
-    }
-
-    // ── ACTIVITY FEED ─────────────────────────────────────────────────────────────
+    // ── ACTIVITY ───────────────────────────────────────────────────────
     function addActivity(msg, color, icon) {
       const list = document.getElementById('activity-list');
       const colorMap = { green: 'ai-green', blue: 'ai-blue', amber: 'ai-amber', red: 'ai-red' };
@@ -3172,23 +3390,21 @@
       if (list.children.length > 8) list.removeChild(list.lastChild);
     }
 
-    // ── UTILS ─────────────────────────────────────────────────────────────────────
     function escHtml(s) {
-      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      return String(s || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    // ── TOAST ─────────────────────────────────────────────────────────────────────
     function toast(msg, type = 'ok') {
       const t = document.getElementById('toast');
       t.textContent = msg; t.className = 'show ' + type;
       clearTimeout(t._t);
-      t._t = setTimeout(() => { t.classList.remove('show'); }, 3500);
+      t._t = setTimeout(() => { t.classList.remove('show'); }, 3800);
     }
 
-    // ── INIT ──────────────────────────────────────────────────────────────────────
+    // ── INIT ───────────────────────────────────────────────────────────
     loadStats();
     loadBreakdown();
-    loadGHConfig();
   </script>
 </body>
 

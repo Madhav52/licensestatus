@@ -1,18 +1,16 @@
 """
-main.py – DOTM Nepal License Status Checker (single-file edition)
+main.py – DOTM Nepal License Status Checker
 ─────────────────────────────────────────────────────────────────
 All app logic lives here:
   • Flask routes (public + admin)
   • SQLite database layer
   • PDF parser
   • PDF source manager (downloads via admin-supplied URLs)
+  • PDF upload endpoint (admin can POST a PDF file directly)
   • Keepalive (prevents Render free tier from sleeping)
 
-Records originate exclusively from PDF URLs added by the admin —
-no sample data is ever loaded.
-
-PDFs are downloaded temporarily and deleted immediately after
-records are stored in the database — no local PDF files are kept.
+Records originate from PDF URLs OR direct uploads added by the admin.
+PDFs are processed and deleted immediately after records are stored.
 """
 
 import os
@@ -55,21 +53,21 @@ log = logging.getLogger(__name__)
 # ══════════════════════════════════════════════════════════════════
 #   CONFIG
 # ══════════════════════════════════════════════════════════════════
-BASE_DIR = Path(__file__).parent
-DB_PATH = BASE_DIR / "licenses.db"
-PDF_SOURCES_FILE = BASE_DIR / "pdf_sources.json"
-TEMP_DIR = BASE_DIR / ".pdf_tmp"
+BASE_DIR          = Path(__file__).parent
+DB_PATH           = BASE_DIR / "licenses.db"
+PDF_SOURCES_FILE  = BASE_DIR / "pdf_sources.json"
+TEMP_DIR          = BASE_DIR / ".pdf_tmp"
+UPLOADS_DIR       = BASE_DIR / "uploaded_pdfs"
 
-ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "shushantgiri@admin.com")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "License@123!@#")
-SECRET_KEY = os.environ.get("SECRET_KEY",     "dotm-secret-change-me-2081")
+# Max upload size: 100 MB (adjust as needed)
+MAX_UPLOAD_BYTES  = 100 * 1024 * 1024
 
-# reCAPTCHA v3 — bot mitigation for /api/check.
-# When RECAPTCHA_SECRET_KEY is unset the gate is disabled (dev-friendly).
-RECAPTCHA_SITE_KEY = os.environ.get(
-    "RECAPTCHA_SITE_KEY", "6LfWaNAsAAAAADBb_hWUct9kkawR95qaRxUSbwt6").strip()
-RECAPTCHA_SECRET_KEY = os.environ.get(
-    "RECAPTCHA_SECRET_KEY", "6LfWaNAsAAAAANP1XXVqSCbk7WPu1mUz3_CPWYAJ").strip()
+ADMIN_USERNAME    = os.environ.get("ADMIN_USERNAME", "shushantgiri@admin.com")
+ADMIN_PASSWORD    = os.environ.get("ADMIN_PASSWORD", "License@123!@#")
+SECRET_KEY        = os.environ.get("SECRET_KEY",     "dotm-secret-change-me-2081")
+
+RECAPTCHA_SITE_KEY   = os.environ.get("RECAPTCHA_SITE_KEY",   "6LcLl9UsAAAAAAD1jK31dpGJSW8a5_9cyKAwiLOy").strip()
+RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "6LcLl9UsAAAAAJpf_tQzGmeJRo8loEl10ScgCrFw").strip()
 try:
     RECAPTCHA_MIN_SCORE = float(os.environ.get("RECAPTCHA_MIN_SCORE", "0.5"))
 except ValueError:
@@ -77,10 +75,9 @@ except ValueError:
 
 
 # ══════════════════════════════════════════════════════════════════
-#   KEEPALIVE  (prevents Render free tier from sleeping)
+#   KEEPALIVE
 # ══════════════════════════════════════════════════════════════════
 def _keepalive_loop():
-    """Ping own /healthz every 10 min so Render never spins down."""
     time.sleep(90)
     url = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
     if not url:
@@ -98,7 +95,6 @@ def _keepalive_loop():
 
 
 def start_keepalive():
-    """Start the background keepalive thread (only on Render)."""
     if not os.environ.get("RENDER"):
         return
     t = threading.Thread(target=_keepalive_loop, daemon=True)
@@ -179,7 +175,7 @@ def find_license(license_no: str):
     return dict(row) if row else None
 
 
-def upsert_licenses(records: list[dict]) -> int:
+def upsert_licenses(records: list) -> int:
     if not records:
         return 0
 
@@ -216,7 +212,7 @@ def upsert_licenses(records: list[dict]) -> int:
 def get_stats() -> dict:
     with get_conn() as conn:
         total = conn.execute("SELECT COUNT(*) FROM licenses").fetchone()[0]
-        meta = conn.execute(
+        meta  = conn.execute(
             "SELECT value FROM meta WHERE key='last_updated'"
         ).fetchone()
     return {
@@ -225,7 +221,7 @@ def get_stats() -> dict:
     }
 
 
-def get_office_breakdown() -> list[dict]:
+def get_office_breakdown() -> list:
     with get_conn() as conn:
         rows = conn.execute("""
             SELECT office,
@@ -237,7 +233,7 @@ def get_office_breakdown() -> list[dict]:
         """).fetchall()
     rows = [dict(r) for r in rows]
     order_map = get_office_order_map()
-    UNRANKED = 10**6
+    UNRANKED  = 10**6
     rows.sort(key=lambda r: (
         order_map.get(r["office"], UNRANKED),
         -r["count"],
@@ -257,21 +253,35 @@ def set_meta(key: str, value: str):
 
 def get_office_order_map() -> dict:
     with get_conn() as conn:
-        rows = conn.execute("SELECT office, order_index FROM office_order").fetchall()
+        rows = conn.execute(
+            "SELECT office, order_index FROM office_order"
+        ).fetchall()
     return {r["office"]: r["order_index"] for r in rows}
 
 
 # ══════════════════════════════════════════════════════════════════
 #   PDF PARSER
+#
+# Two-strategy parser:
+#   1. Table extraction via pdfplumber, using detected column headers
+#      (sn, license holder name, license number, category, office,
+#       license printed date — and common synonyms).
+#   2. Line-based regex fallback for PDFs without detectable tables.
 # ══════════════════════════════════════════════════════════════════
-LICENSE_RE = re.compile(r'\b(\d{1,2}-\d{2,3}-\d{5,10})\b')
+
+# Permissive license-number pattern used by the line-based fallback.
+LICENSE_RE = re.compile(r'\b(\d{1,3}-\d{1,4}-\d{4,15})\b')
+
+# Used to validate the license_no column from a parsed table row
+# (must contain at least one digit).
+LICENSE_CELL_RE = re.compile(r'\d')
 
 DATE_RE = re.compile(
     r'\b(\d{4}[-/](?:\d{1,2}|JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[-/]\d{1,2})\b',
     re.IGNORECASE
 )
 
-CAT_RE = re.compile(r'\b([A-GKa-gk](?:\s*[,/]\s*[A-GKa-gk])*)\b')
+CAT_RE = re.compile(r'\b([A-Z](?:\s*[,/]\s*[A-Z])*)\b', re.IGNORECASE)
 
 MONTH_MAP = {
     'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04',
@@ -279,24 +289,161 @@ MONTH_MAP = {
     'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12',
 }
 
+# Column header aliases — headers are normalised (lowercased, non-letters
+# stripped) and matched by substring against these. ORDER MATTERS: keys
+# whose aliases overlap with another key (e.g. "licenseholdername" contains
+# "license") must come BEFORE the broader key, so the more specific match
+# wins. Iterated as a dict in Python 3.7+ preserves this order.
+HEADER_ALIASES = {
+    "name":     ["licenseholdername", "holdername", "fullname",
+                 "drivername", "applicantname", "name"],
+    "date":     ["licenseprinteddate", "printeddate", "printdate",
+                 "issueddate", "issuedate", "date"],
+    "license":  ["licensenumber", "licenseno", "licno",
+                 "licencenumber", "licenceno", "license", "licence"],
+    "category": ["vehiclecategory", "category", "class", "cat"],
+    "office":   ["issuingoffice", "transportoffice", "office"],
+    "sn":       ["serialnumber", "serialno", "slno", "srno", "sno", "sn"],
+}
+
 
 def _normalize_date(raw: str) -> str:
-    raw = raw.strip()
+    raw = (raw or "").strip()
+    if not raw:
+        return ""
+    upper = raw.upper()
     for mon, num in MONTH_MAP.items():
-        raw = raw.upper().replace(
-            f'-{mon}-', f'-{num}-').replace(f'/{mon}/', f'/{num}/')
-    return raw.replace('/', '-')
+        upper = upper.replace(f'-{mon}-', f'-{num}-') \
+                     .replace(f'/{mon}/', f'/{num}/')
+    return upper.replace('/', '-')
+
+
+def _normalize_header(s: str) -> str:
+    return re.sub(r'[^a-z]', '', (s or '').lower())
+
+
+def _classify_header_cell(text: str):
+    n = _normalize_header(text)
+    if not n:
+        return None
+    for key, aliases in HEADER_ALIASES.items():
+        for alias in aliases:
+            if alias in n:
+                return key
+    return None
+
+
+def _build_cols_map(header_row) -> dict:
+    """Map column-key → column-index for a row that looks like a header."""
+    cols = {}
+    for i, cell in enumerate(header_row or []):
+        key = _classify_header_cell(cell)
+        if key and key not in cols:
+            cols[key] = i
+    return cols
+
+
+def _find_header_row(table, max_check: int = 4):
+    """Scan first few rows for a header. Returns (cols_map, data_start_index)
+    or (None, 0) if no header detected. Requires at minimum the
+    'license' and 'name' columns to be present."""
+    for r_idx in range(min(max_check, len(table))):
+        cols = _build_cols_map(table[r_idx])
+        if "license" in cols and "name" in cols:
+            return cols, r_idx + 1
+    return None, 0
+
+
+def _parse_table_row(row, cols: dict):
+    """Convert one table row → license record dict, or None if invalid."""
+    def get(key: str) -> str:
+        i = cols.get(key)
+        if i is None or i >= len(row):
+            return ""
+        return (row[i] or "").strip()
+
+    license_no = re.sub(r'\s+', '', get("license"))
+    if not license_no or not LICENSE_CELL_RE.search(license_no):
+        return None
+
+    name = re.sub(r'\s+', ' ', get("name")).upper().strip()
+    if len(name) < 2:
+        return None
+
+    return {
+        "license_no": license_no,
+        "name":       name,
+        "category":   re.sub(r'\s+', '', get("category")).upper(),
+        "office":     re.sub(r'\s+', ' ', get("office")).strip(),
+        "print_date": _normalize_date(get("date")),
+    }
+
+
+def _parse_pdf_via_tables(pdf_path, on_progress=None):
+    """Primary strategy: use pdfplumber to extract tables and parse via
+    detected column headers. Returns a list of record dicts (may be empty)."""
+    try:
+        import pdfplumber
+    except ImportError:
+        log.warning("pdfplumber not installed — skipping table extraction")
+        return []
+
+    records = []
+    cols_map: dict = {}
+
+    try:
+        with pdfplumber.open(str(pdf_path)) as pdf:
+            total = len(pdf.pages)
+            for i, page in enumerate(pdf.pages):
+                try:
+                    tables = page.extract_tables() or []
+                except Exception as e:
+                    log.debug("extract_tables failed on page %d: %s", i, e)
+                    tables = []
+
+                for tbl in tables:
+                    if not tbl:
+                        continue
+
+                    # Try to detect a header in the first few rows of this table.
+                    detected, data_start = _find_header_row(tbl)
+                    if detected:
+                        cols_map = detected
+                        data_rows = tbl[data_start:]
+                    elif cols_map:
+                        # Reuse header from earlier page/table.
+                        data_rows = tbl
+                    else:
+                        # No header yet — skip and try the next table.
+                        continue
+
+                    for row in data_rows:
+                        if not any((c or "").strip() for c in row):
+                            continue
+                        rec = _parse_table_row(row, cols_map)
+                        if rec:
+                            records.append(rec)
+
+                if on_progress and (i % 5 == 0 or i == total - 1):
+                    on_progress(phase="parsing", current_page=i + 1,
+                                total_pages=total,
+                                imported_so_far=len(records))
+    except Exception as e:
+        log.warning("pdfplumber parse failed: %s", e)
+        return []
+
+    return records
 
 
 def _parse_line(line: str):
-    today = date.today().strftime("%Y-%m-%d")
+    """Fallback line parser — used when no table headers can be detected."""
     m = LICENSE_RE.search(line)
     if not m:
         return None
 
     license_no = m.group(1)
-    before = line[:m.start()].strip()
-    after = line[m.end():].strip()
+    before     = line[:m.start()].strip()
+    after      = line[m.end():].strip()
 
     name = re.sub(r'^\d+[\.\)\-\s]+', '', before).strip()
     name = re.sub(r'\s+', ' ', name).upper()
@@ -304,16 +451,16 @@ def _parse_line(line: str):
         return None
 
     category = ""
-    cat_m = CAT_RE.match(after)
+    cat_m    = CAT_RE.match(after)
     if cat_m:
         category = cat_m.group(0).upper().replace(' ', '')
-        after = after[cat_m.end():].strip()
+        after    = after[cat_m.end():].strip()
 
     print_date = ""
-    date_m = DATE_RE.search(after)
+    date_m     = DATE_RE.search(after)
     if date_m:
         print_date = _normalize_date(date_m.group(1))
-        after = after[:date_m.start()].strip()
+        after      = after[:date_m.start()].strip()
 
     office = re.sub(r'\s+', ' ', after).strip()
     office = re.sub(r'^[\d\.\)\-]+', '', office).strip()
@@ -324,11 +471,10 @@ def _parse_line(line: str):
         "category":   category,
         "office":     office,
         "print_date": print_date,
-        "last_updated": today,
     }
 
 
-def _parse_page_text(text: str) -> list[dict]:
+def _parse_page_text(text: str) -> list:
     records = []
     for line in text.splitlines():
         line = line.strip()
@@ -340,14 +486,35 @@ def _parse_page_text(text: str) -> list[dict]:
     return records
 
 
+def _parse_pdf_via_text(pdf_path, on_progress=None):
+    """Fallback strategy: page-by-page text + line regex."""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        from PyPDF2 import PdfReader
+
+    reader = PdfReader(str(pdf_path))
+    total  = len(reader.pages)
+    records = []
+    for i, page in enumerate(reader.pages):
+        try:
+            text = page.extract_text() or ""
+            records.extend(_parse_page_text(text))
+        except Exception as e:
+            log.warning("Page %d failed: %s", i, e)
+        if on_progress and (i % 5 == 0 or i == total - 1):
+            on_progress(phase="parsing", current_page=i + 1,
+                        total_pages=total, imported_so_far=len(records))
+    return records
+
+
 def parse_and_store(pdf_path, district: str = "", office_override: str = "",
                     batch_size: int = 500, on_progress=None) -> int:
-    """Parse a PDF page-by-page and upsert in batches.
+    """Parse a PDF and upsert records in batches.
 
-    Memory stays flat regardless of PDF size: we never accumulate the whole
-    record set in RAM. Within a batch, duplicate license_no entries collapse
-    to the latest row; duplicates that span batches are resolved by SQLite's
-    ON CONFLICT...DO UPDATE.
+    Tries header-driven table extraction first (works regardless of
+    layout, as long as the columns are labelled). Falls back to the
+    line-based regex parser for PDFs without recognisable tables.
     """
     init_db()
     pdf = Path(pdf_path)
@@ -356,62 +523,45 @@ def parse_and_store(pdf_path, district: str = "", office_override: str = "",
 
     log.info("Parsing PDF: %s", pdf)
     t_start = time.time()
+    today   = date.today().strftime("%Y-%m-%d")
 
-    try:
-        from pypdf import PdfReader
-    except ImportError:
-        from PyPDF2 import PdfReader
+    raw = _parse_pdf_via_tables(pdf, on_progress=on_progress)
+    strategy = "tables"
+    if not raw:
+        log.info("Table parse yielded 0 records — falling back to text/regex")
+        raw = _parse_pdf_via_text(pdf, on_progress=on_progress)
+        strategy = "text"
 
-    reader = PdfReader(str(pdf))
-    total_pages = len(reader.pages)
-    log.info("Total pages: %d", total_pages)
-    if on_progress:
-        on_progress(phase="parsing", current_page=0, total_pages=total_pages)
+    log.info("Parser strategy: %s · raw rows: %d", strategy, len(raw))
 
-    batch: dict[str, dict] = {}
+    # Dedupe by license_no, apply overrides, set defaults.
+    deduped: dict = {}
+    for r in raw:
+        key = (r.get("license_no") or "").upper()
+        if not key:
+            continue
+        r["last_updated"] = today
+        if office_override:
+            r["office"] = office_override
+        if district:
+            r["district"] = district
+        else:
+            r.setdefault("district", "")
+        deduped[key] = r
+
+    # Upsert in batches.
+    items = list(deduped.values())
     total_imported = 0
-
-    def flush():
-        nonlocal total_imported
-        if not batch:
-            return
-        for r in batch.values():
-            if office_override:
-                r["office"] = office_override
-            if district:
-                r["district"] = district
-        n = upsert_licenses(list(batch.values()))
-        total_imported += n
-        batch.clear()
-
-    for i, page in enumerate(reader.pages):
-        try:
-            text = page.extract_text() or ""
-            for r in _parse_page_text(text):
-                key = r.get("license_no", "").upper()
-                if not key:
-                    continue
-                batch[key] = r
-        except Exception as e:
-            log.warning("Page %d failed: %s", i, e)
-
-        if len(batch) >= batch_size:
-            flush()
-
-        if on_progress and (i % 5 == 0 or i == total_pages - 1):
-            on_progress(phase="parsing", current_page=i + 1,
-                        total_pages=total_pages,
-                        imported_so_far=total_imported + len(batch))
-
-    flush()
+    for i in range(0, len(items), batch_size):
+        total_imported += upsert_licenses(items[i:i + batch_size])
 
     if total_imported == 0:
         log.warning("No records extracted — check PDF format!")
         return 0
 
-    set_meta("last_updated", date.today().strftime("%Y-%m-%d"))
-    log.info("Done in %.1fs — %d records imported",
-             time.time() - t_start, total_imported)
+    set_meta("last_updated", today)
+    log.info("Done in %.1fs — %d records imported (strategy: %s)",
+             time.time() - t_start, total_imported, strategy)
     return total_imported
 
 
@@ -419,23 +569,18 @@ def parse_and_store(pdf_path, district: str = "", office_override: str = "",
 #   PDF SOURCES
 # ══════════════════════════════════════════════════════════════════
 def load_pdf_sources() -> dict:
-    """Load PDF sources sorted by their `order` field.
-
-    Backwards-compatible: legacy entries without `order` get one assigned
-    from their position in the file, and string-only entries (oldest format)
-    are normalised to {url, district, order}.
-    """
     if PDF_SOURCES_FILE.exists():
         try:
-            raw = json.loads(PDF_SOURCES_FILE.read_text(encoding="utf-8"))
+            raw        = json.loads(PDF_SOURCES_FILE.read_text(encoding="utf-8"))
             normalised = {}
             for idx, (name, val) in enumerate(raw.items()):
                 if isinstance(val, str):
-                    entry = {"url": val, "district": "", "order": idx}
+                    entry = {"url": val, "district": "", "order": idx, "source_type": "url"}
                 else:
                     entry = dict(val)
-                    entry.setdefault("district", "")
-                    entry.setdefault("order", idx)
+                    entry.setdefault("district",    "")
+                    entry.setdefault("order",       idx)
+                    entry.setdefault("source_type", "url")
                 normalised[name] = entry
             return dict(sorted(
                 normalised.items(),
@@ -454,12 +599,6 @@ def save_pdf_sources(sources: dict):
 
 
 def sync_office_order_from_sources(sources: dict):
-    """Mirror the `order` field of every source into the office_order table.
-
-    Called whenever pdf_sources.json's ordering changes (add / reorder / rename /
-    delete). The dashboard's office breakdown sorts by office_order.order_index,
-    so without this sync the breakdown drifts out of step with the sources list.
-    """
     with get_conn() as conn:
         conn.execute("DELETE FROM office_order")
         for name, entry in sources.items():
@@ -469,10 +608,20 @@ def sync_office_order_from_sources(sources: dict):
             )
 
 
+def _safe_office_slug(office: str) -> str:
+    return re.sub(r'[^\w]', '_', (office or "").lower())
+
+
 def _temp_pdf_path(office: str) -> Path:
     TEMP_DIR.mkdir(exist_ok=True)
-    safe = re.sub(r'[^\w]', '_', office.lower())
-    return TEMP_DIR / f"{safe}.pdf"
+    return TEMP_DIR / f"{_safe_office_slug(office)}.pdf"
+
+
+def _uploaded_pdf_path(office: str) -> Path:
+    """Permanent storage path for a PDF that the admin uploaded directly.
+    Kept on disk so it can be re-parsed during a future sync."""
+    UPLOADS_DIR.mkdir(exist_ok=True)
+    return UPLOADS_DIR / f"{_safe_office_slug(office)}.pdf"
 
 
 def _delete_temp_pdf(path: Path):
@@ -484,14 +633,19 @@ def _delete_temp_pdf(path: Path):
         log.warning("Could not delete temp PDF %s: %s", path.name, e)
 
 
-def _download_pdf_to_file(url: str, dest: Path, headers: dict,
-                          chunk_size: int = 65536) -> tuple[bool, int, str]:
-    """Stream a PDF to disk in chunks. Returns (ok, bytes_written, error_msg).
+def _delete_uploaded_pdf(office: str):
+    path = _uploaded_pdf_path(office)
+    try:
+        if path.exists():
+            path.unlink()
+            log.info("Deleted uploaded PDF: %s", path.name)
+    except OSError as e:
+        log.warning("Could not delete uploaded PDF %s: %s", path.name, e)
 
-    Validates the %PDF header before writing the body, writes to a .part
-    file and atomically renames on success so a partial download never
-    becomes a "valid" cached PDF.
-    """
+
+def _download_pdf_to_file(url: str, dest: Path, headers: dict,
+                          chunk_size: int = 65536):
+    """Stream a PDF to disk in chunks. Returns (ok, bytes_written, error_msg)."""
     part = dest.with_suffix(dest.suffix + ".part")
     try:
         req = Request(url, headers=headers)
@@ -529,12 +683,7 @@ def _download_pdf_to_file(url: str, dest: Path, headers: dict,
 # ══════════════════════════════════════════════════════════════════
 #   reCAPTCHA v3
 # ══════════════════════════════════════════════════════════════════
-def verify_recaptcha(token: str, remote_ip: str = "") -> tuple[bool, float, str]:
-    """Verify a reCAPTCHA v3 token with Google.
-
-    Returns (ok, score, error_code). When RECAPTCHA_SECRET_KEY is unset,
-    the gate is disabled — we always return ok=True, score=1.0.
-    """
+def verify_recaptcha(token: str, remote_ip: str = ""):
     if not RECAPTCHA_SECRET_KEY:
         return True, 1.0, "disabled"
     if not token:
@@ -585,14 +734,12 @@ def admin_required(f):
 app = Flask(
     __name__,
     template_folder=BASE_DIR / "templates",
-    static_folder=BASE_DIR / "static",
+    static_folder=BASE_DIR   / "static",
     static_url_path="/static",
 )
-app.secret_key = SECRET_KEY
-# Flask 3 alphabetises dict keys in jsonify by default. We rely on dict
-# insertion order in /dotm-admin/api/urls to communicate the configured
-# source ordering — sorting would silently revert reorders to A→Z.
-app.json.sort_keys = False
+app.secret_key              = SECRET_KEY
+app.json.sort_keys          = False
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES
 CORS(app)
 
 
@@ -602,17 +749,13 @@ def _ensure_db():
 
 
 # ══════════════════════════════════════════════════════════════════
-#   PWA — Service Worker & Manifest
-#   These MUST be served from root (/) — not /static/ — for PWA
-#   to work correctly in all browsers.
+#   PWA
 # ══════════════════════════════════════════════════════════════════
 @app.route("/sw.js")
 def service_worker():
-    """Serve the service worker from root with no-cache headers."""
     response = app.send_static_file("sw.js")
-    response.headers["Content-Type"] = "application/javascript"
-    # SW must never be cached — browser needs the latest version always
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Content-Type"]        = "application/javascript"
+    response.headers["Cache-Control"]       = "no-cache, no-store, must-revalidate"
     response.headers["Service-Worker-Allowed"] = "/"
     return response
 
@@ -625,17 +768,14 @@ def manifest():
         "manifest.json",
         mimetype="application/json"
     )
+
+
 # ══════════════════════════════════════════════════════════════════
 #   PUBLIC ROUTES
 # ══════════════════════════════════════════════════════════════════
-
-
 @app.route("/")
 def index():
-    return render_template(
-        "index.html",
-        recaptcha_site_key=RECAPTCHA_SITE_KEY,
-    )
+    return render_template("index.html", recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
 
 @app.route("/api/check")
@@ -644,15 +784,13 @@ def api_check():
     if not raw:
         return jsonify({"error": "License number required"}), 400
 
-    # CAPTCHA gate (no-op when RECAPTCHA_SECRET_KEY is unset).
     token = (
         request.headers.get("X-Captcha-Token", "").strip()
         or request.args.get("captcha", "").strip()
     )
     remote_ip = (
         request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
-        or request.remote_addr
-        or ""
+        or request.remote_addr or ""
     )
     ok, score, err = verify_recaptcha(token, remote_ip=remote_ip)
     if not ok:
@@ -660,40 +798,27 @@ def api_check():
             with get_conn() as conn:
                 conn.execute(
                     "INSERT INTO search_log "
-                    "(query, found, license_no, name, created_at) "
-                    "VALUES (?, ?, ?, ?, ?)",
-                    (
-                        raw[:128], 0, "[blocked]",
-                        f"captcha:{err}:{score:.2f}"[:128],
-                        datetime.utcnow().isoformat() + "Z",
-                    ),
+                    "(query, found, license_no, name, created_at) VALUES (?,?,?,?,?)",
+                    (raw[:128], 0, "[blocked]",
+                     f"captcha:{err}:{score:.2f}"[:128],
+                     datetime.utcnow().isoformat() + "Z"),
                 )
         except Exception:
             pass
-        return jsonify({
-            "found": False,
-            "error": "Verification failed. Please refresh and try again.",
-            "code":  "captcha",
-        }), 403
+        return jsonify({"found": False, "error": "Verification failed.", "code": "captcha"}), 403
 
     license_no = raw.upper().replace(" ", "")
-    record = find_license(license_no)
+    record     = find_license(license_no)
 
-    # Log the public search so admins can see what users are looking up.
-    # Wrapped in try/except: a logging failure must never break /api/check.
     try:
         with get_conn() as conn:
             conn.execute(
                 "INSERT INTO search_log "
-                "(query, found, license_no, name, created_at) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (
-                    raw[:128],
-                    1 if record else 0,
-                    (record.get("license_no") if record else license_no)[:64],
-                    (record.get("name") if record else "")[:128],
-                    datetime.utcnow().isoformat() + "Z",
-                ),
+                "(query, found, license_no, name, created_at) VALUES (?,?,?,?,?)",
+                (raw[:128], 1 if record else 0,
+                 (record.get("license_no") if record else license_no)[:64],
+                 (record.get("name")       if record else "")[:128],
+                 datetime.utcnow().isoformat() + "Z"),
             )
     except Exception as e:
         log.warning("search_log insert failed: %s", e)
@@ -719,19 +844,67 @@ def api_stats():
 
 @app.route("/api/offices")
 def api_offices():
-    rows = get_office_breakdown()
+    rows  = get_office_breakdown()
     total = sum(r["count"] for r in rows)
     return jsonify({"offices": rows, "total": total})
 
+# Add Bulk Sync API
+@app.route("/api/licenses")
+def api_all_licenses():
+    """
+    Returns all licenses (or paginated) for offline sync.
+    WARNING: Use limit in production if DB is huge.
+    """
+    try:
+        limit = int(request.args.get("limit", 5000))
+        offset = int(request.args.get("offset", 0))
+
+        with get_conn() as conn:
+            rows = conn.execute("""
+                SELECT license_no, name, category, office, print_date, district, last_updated
+                FROM licenses
+                ORDER BY license_no
+                LIMIT ? OFFSET ?
+            """, (limit, offset)).fetchall()
+
+        response = jsonify({
+            "data": [dict(r) for r in rows],
+            "limit": limit,
+            "offset": offset,
+            "count": len(rows)
+        })
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        return response
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# This avoids downloading everything every time.
+@app.route("/api/last-updated")
+def api_last_updated():
+    stats = get_stats()
+    return jsonify({
+        "last_updated": stats.get("last_updated")
+    })
+# Add Search API Without Captcha for internal use (e.g. admin dashboard) — rate-limited    
+@app.route("/api/search-lite")
+def api_search_lite():
+    license_no = request.args.get("license", "").strip().upper()
+
+    if not license_no:
+        return jsonify({"found": False})
+
+    record = find_license(license_no)
+
+    if record:
+        return jsonify({"found": True, "data": record})
+
+    return jsonify({"found": False})
 
 @app.route("/healthz")
 def health():
     return jsonify({"status": "ok", "ts": datetime.utcnow().isoformat() + "Z"})
 
 
-# ══════════════════════════════════════════════════════════════════
-#   DECOY — /admin always 404 so public never finds real panel
-# ══════════════════════════════════════════════════════════════════
 @app.route("/admin", defaults={"subpath": ""})
 @app.route("/admin/<path:subpath>")
 def admin_decoy(subpath):
@@ -754,7 +927,7 @@ def admin_login_post():
     password = request.form.get("password", "").strip()
     if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
         session["admin_logged_in"] = True
-        session.permanent = True
+        session.permanent          = True
         log.info("Admin login: %s", username)
         return redirect("/dotm-admin")
     log.warning("Failed admin login: %s", username)
@@ -777,7 +950,7 @@ def admin_dashboard():
 
 
 # ══════════════════════════════════════════════════════════════════
-#   ADMIN API — PDF SOURCES
+#   ADMIN API — PDF SOURCES (URL-based)
 # ══════════════════════════════════════════════════════════════════
 @app.route("/dotm-admin/api/urls", methods=["GET"])
 @admin_required
@@ -788,11 +961,12 @@ def admin_get_urls():
 @app.route("/dotm-admin/api/urls", methods=["POST"])
 @admin_required
 def admin_add_url():
-    data = request.get_json() or {}
-    name = data.get("name",     "").strip()
-    url = data.get("url",      "").strip()
+    data     = request.get_json() or {}
+    name     = data.get("name",     "").strip()
+    url      = data.get("url",      "").strip()
     district = data.get("district", "").strip()
     raw_order = data.get("order")
+
     if not name or not url:
         return jsonify({"ok": False, "error": "Name and URL required"}), 400
     if not url.startswith("http"):
@@ -800,9 +974,7 @@ def admin_add_url():
 
     sources = load_pdf_sources()
 
-    # Resolve target slot. Blank/missing → append at end.
-    # Input is 1-based; internal order is 0-based.
-    desired_slot: int | None = None
+    desired_slot = None
     if raw_order not in (None, ""):
         try:
             n = int(raw_order)
@@ -815,14 +987,18 @@ def admin_add_url():
         new_order = max(
             (int(s.get("order", 0)) for s in sources.values()), default=-1) + 1
     else:
-        # Shift everyone at or after the requested slot down by 1 to make room.
         for s in sources.values():
             cur = int(s.get("order", 0))
             if cur >= desired_slot:
                 s["order"] = cur + 1
         new_order = desired_slot
 
-    sources[name] = {"url": url, "district": district, "order": new_order}
+    sources[name] = {
+        "url":         url,
+        "district":    district,
+        "order":       new_order,
+        "source_type": "url",
+    }
     save_pdf_sources(sources)
     sync_office_order_from_sources(sources)
     log.info("Added source: %s → %s (district: %s, order: %d)",
@@ -830,24 +1006,142 @@ def admin_add_url():
     return jsonify({"ok": True, "order": new_order + 1})
 
 
+# ══════════════════════════════════════════════════════════════════
+#   ADMIN API — PDF UPLOAD (file-based source)
+# ══════════════════════════════════════════════════════════════════
+@app.route("/dotm-admin/api/upload-pdf", methods=["POST"])
+@admin_required
+def admin_upload_pdf():
+    """
+    Combined upload + register-source endpoint.
+
+    Accepts a multipart/form-data POST with:
+      - file     : the PDF file (single)
+      - name     : office name (required)
+      - district : district name (optional)
+      - order    : 1-based desired position (optional)
+
+    Saves the PDF to UPLOADS_DIR (kept on disk so future syncs can
+    re-parse it), parses it into the DB, then registers the office in
+    pdf_sources.json with source_type='upload'.
+    """
+    name     = request.form.get("name",     "").strip()
+    district = request.form.get("district", "").strip()
+    raw_order = request.form.get("order")
+
+    if not name:
+        return jsonify({"ok": False, "error": "Office name is required"}), 400
+
+    if "file" not in request.files:
+        return jsonify({"ok": False, "error": "No file provided"}), 400
+
+    f = request.files["file"]
+    if not f.filename:
+        return jsonify({"ok": False, "error": "Empty filename"}), 400
+
+    # Validate it's a PDF by magic bytes.
+    header = f.read(8)
+    if not header.startswith(b"%PDF"):
+        return jsonify({"ok": False, "error": "Uploaded file is not a valid PDF"}), 400
+    f.seek(0)
+
+    sources = load_pdf_sources()
+    if name in sources:
+        return jsonify({
+            "ok":    False,
+            "error": f'A source named "{name}" already exists. '
+                     f'Remove it first if you want to re-upload.',
+        }), 409
+
+    dest = _uploaded_pdf_path(name)
+
+    try:
+        f.save(str(dest))
+        file_size = dest.stat().st_size
+        log.info("Upload received: %s — %.1f KB", name, file_size / 1024)
+
+        if file_size < 512:
+            _delete_uploaded_pdf(name)
+            return jsonify({"ok": False, "error": "PDF too small (likely empty)"}), 400
+
+        # Parse and store records into the DB.
+        n = parse_and_store(dest, district=district, office_override=name)
+
+        if n == 0:
+            _delete_uploaded_pdf(name)
+            return jsonify({
+                "ok":      False,
+                "error":   ("No license records could be extracted from this PDF. "
+                            "Make sure it includes columns labelled with the license "
+                            "number and license holder name (Category / Office / "
+                            "Printed Date are also recommended)."),
+                "records": 0,
+            }), 422
+
+        # Decide ordering slot (same logic as URL add).
+        desired_slot = None
+        if raw_order not in (None, ""):
+            try:
+                n_ord = int(raw_order)
+                if n_ord >= 1:
+                    desired_slot = min(n_ord - 1, len(sources))
+            except (TypeError, ValueError):
+                pass
+
+        if desired_slot is None:
+            new_order = max(
+                (int(s.get("order", 0)) for s in sources.values()), default=-1) + 1
+        else:
+            for s in sources.values():
+                cur = int(s.get("order", 0))
+                if cur >= desired_slot:
+                    s["order"] = cur + 1
+            new_order = desired_slot
+
+        sources[name] = {
+            "url":         "",
+            "district":    district,
+            "order":       new_order,
+            "source_type": "upload",
+        }
+        save_pdf_sources(sources)
+        sync_office_order_from_sources(sources)
+
+        log.info("Upload import done: %s — %d records", name, n)
+        return jsonify({
+            "ok":       True,
+            "records":  n,
+            "office":   name,
+            "district": district,
+            "order":    new_order + 1,
+        })
+
+    except Exception as e:
+        log.exception("Upload parse failed [%s]", name)
+        # Clean up the half-imported file so the office isn't half-registered.
+        _delete_uploaded_pdf(name)
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+# ══════════════════════════════════════════════════════════════════
+#   ADMIN API — REORDER / RENAME / DELETE sources
+# ══════════════════════════════════════════════════════════════════
 @app.route("/dotm-admin/api/urls/reorder", methods=["POST"])
 @admin_required
 def admin_reorder_urls():
-    data = request.get_json() or {}
+    data  = request.get_json() or {}
     names = data.get("names")
     if not isinstance(names, list):
         return jsonify({"ok": False, "error": "names must be a list"}), 400
 
-    sources = load_pdf_sources()
-    seen = set()
+    sources    = load_pdf_sources()
+    seen       = set()
     next_order = 0
     for name in names:
         if name in sources and name not in seen:
             sources[name]["order"] = next_order
             seen.add(name)
             next_order += 1
-    # Append any sources the client didn't list (e.g. stale tab) at the end,
-    # preserving their relative order.
     for name in sources:
         if name not in seen:
             sources[name]["order"] = next_order
@@ -860,21 +1154,24 @@ def admin_reorder_urls():
 @app.route("/dotm-admin/api/offices/reorder", methods=["POST"])
 @admin_required
 def admin_reorder_offices():
-    data = request.get_json() or {}
+    data    = request.get_json() or {}
     offices = data.get("offices")
     if not isinstance(offices, list):
         return jsonify({"ok": False, "error": "offices must be a list"}), 400
 
     with get_conn() as conn:
         for idx, office in enumerate(offices):
-            conn.execute("INSERT OR REPLACE INTO office_order (office, order_index) VALUES (?, ?)", (office, idx))
+            conn.execute(
+                "INSERT OR REPLACE INTO office_order (office, order_index) VALUES (?, ?)",
+                (office, idx)
+            )
     return jsonify({"ok": True})
 
 
 @app.route("/dotm-admin/api/urls/<name>", methods=["PUT"])
 @admin_required
 def admin_rename_url(name=None):
-    data = request.get_json() or {}
+    data     = request.get_json() or {}
     new_name = data.get("new_name", "").strip()
     if not new_name:
         return jsonify({"ok": False, "error": "New name required"}), 400
@@ -887,7 +1184,6 @@ def admin_rename_url(name=None):
     if new_name in sources:
         return jsonify({"ok": False, "error": "An office with that name already exists"}), 409
 
-    # Rebuild the dict preserving insertion order, replacing the renamed key.
     renamed = {}
     for k, v in sources.items():
         renamed[new_name if k == name else k] = v
@@ -896,24 +1192,17 @@ def admin_rename_url(name=None):
     try:
         with get_conn() as conn:
             cur = conn.execute(
-                "UPDATE licenses SET office = ? WHERE office = ?",
-                (new_name, name),
-            )
+                "UPDATE licenses SET office = ? WHERE office = ?", (new_name, name))
             updated_records = cur.rowcount
-            # office_order has office as PK — clear any stale row at the
-            # destination key before moving the source row over.
             conn.execute("DELETE FROM office_order WHERE office = ?", (new_name,))
             conn.execute(
-                "UPDATE office_order SET office = ? WHERE office = ?",
-                (new_name, name),
-            )
+                "UPDATE office_order SET office = ? WHERE office = ?", (new_name, name))
     except Exception as e:
         log.error("Failed to rename office '%s' → '%s': %s", name, new_name, e)
         return jsonify({"ok": False, "error": str(e)}), 500
 
     save_pdf_sources(renamed)
 
-    # Move the cached PDF, if any, so a re-sync still finds it under the new name.
     old_pdf = _temp_pdf_path(name)
     new_pdf = _temp_pdf_path(new_name)
     try:
@@ -922,6 +1211,15 @@ def admin_rename_url(name=None):
     except OSError as e:
         log.warning("Could not rename cached PDF %s → %s: %s",
                     old_pdf.name, new_pdf.name, e)
+
+    old_upload = _uploaded_pdf_path(name)
+    new_upload = _uploaded_pdf_path(new_name)
+    try:
+        if old_upload.exists():
+            old_upload.replace(new_upload)
+    except OSError as e:
+        log.warning("Could not rename uploaded PDF %s → %s: %s",
+                    old_upload.name, new_upload.name, e)
 
     log.info("Renamed source: '%s' → '%s' (%d records updated)",
              name, new_name, updated_records)
@@ -935,11 +1233,11 @@ def admin_del_url(name=None):
     if name not in sources:
         return jsonify({"ok": False, "error": "Not found"}), 404
     _delete_temp_pdf(_temp_pdf_path(name))
+    _delete_uploaded_pdf(name)
     deleted_records = 0
     try:
         with get_conn() as conn:
-            cur = conn.execute(
-                "DELETE FROM licenses WHERE office = ?", (name,))
+            cur = conn.execute("DELETE FROM licenses WHERE office = ?", (name,))
             deleted_records = cur.rowcount
     except Exception as e:
         log.error("Failed to delete DB records for %s: %s", name, e)
@@ -952,13 +1250,9 @@ def admin_del_url(name=None):
 
 
 # ══════════════════════════════════════════════════════════════════
-#   ADMIN API — SYNC (background job)
+#   ADMIN API — SYNC (background job — URL sources only)
 # ══════════════════════════════════════════════════════════════════
-# A single sync job runs at a time in a daemon thread; the HTTP request
-# returns immediately so the proxy never times out and the worker never
-# OOMs holding a 600-page PDF in memory. The admin UI polls
-# /dotm-admin/api/sync/status for progress and log lines.
-SYNC_LOCK = threading.Lock()
+SYNC_LOCK  = threading.Lock()
 SYNC_STATE: dict = {"status": "idle", "id": None}
 
 
@@ -1007,20 +1301,80 @@ def _run_sync_job(sources: dict):
     TEMP_DIR.mkdir(exist_ok=True)
     try:
         for idx, (office, entry) in enumerate(sources.items(), 1):
-            url = entry["url"] if isinstance(entry, dict) else entry
-            district = entry.get("district", "") if isinstance(
-                entry, dict) else ""
-            tmp_pdf = _temp_pdf_path(office)
+            source_type = entry.get("source_type", "url") if isinstance(entry, dict) else "url"
+            url         = entry.get("url", "")            if isinstance(entry, dict) else entry
+            district    = entry.get("district", "")       if isinstance(entry, dict) else ""
 
             _job_set(current_office=office, office_index=idx,
                      current_phase="checking",
                      current_page=0, total_pages=0)
 
+            # Uploaded offices: re-parse from the stored PDF on disk.
+            if source_type == "upload":
+                stored = _uploaded_pdf_path(office)
+                if not stored.exists():
+                    try:
+                        with get_conn() as conn:
+                            existing = conn.execute(
+                                "SELECT COUNT(*) FROM licenses WHERE office = ?", (office,)
+                            ).fetchone()[0]
+                    except Exception:
+                        existing = 0
+                    _job_log(
+                        f"[SKIP] {office} — uploaded PDF missing on disk "
+                        f"({existing} existing records)", "warn")
+                    with SYNC_LOCK:
+                        SYNC_STATE["pdfs_skipped"] += 1
+                        SYNC_STATE["results"].append({
+                            "office":  office, "status": "skipped",
+                            "records": existing,
+                            "message": f"Uploaded file missing — {existing} records already in DB",
+                        })
+                    continue
+
+                _job_log(f"[REPARSE] {office} — re-parsing uploaded PDF")
+                _job_set(current_phase="parsing")
+                try:
+                    n = parse_and_store(
+                        stored, district=district, office_override=office,
+                        on_progress=lambda **kw: _job_set(**kw),
+                    )
+                    with SYNC_LOCK:
+                        SYNC_STATE["pdfs_downloaded"] += 1
+                        SYNC_STATE["records_imported"] += n
+                        SYNC_STATE["results"].append({
+                            "office":  office, "status": "imported",
+                            "records": n,
+                            "message": f"{n} records re-imported from uploaded PDF",
+                        })
+                    _job_log(f"[OK] {office} — re-imported {n} records", "ok")
+                except Exception as e:
+                    log.exception("Re-parse failed [%s]", office)
+                    with SYNC_LOCK:
+                        SYNC_STATE["pdfs_failed"] += 1
+                        SYNC_STATE["results"].append({
+                            "office":  office, "status": "parse_failed",
+                            "records": 0, "message": str(e),
+                        })
+                    _job_log(f"[FAIL] {office} — re-parse error: {e}", "err")
+                continue
+
+            if not url:
+                _job_log(f"[SKIP] {office} — no URL configured", "warn")
+                with SYNC_LOCK:
+                    SYNC_STATE["pdfs_skipped"] += 1
+                    SYNC_STATE["results"].append({
+                        "office": office, "status": "skipped",
+                        "records": 0, "message": "No URL configured",
+                    })
+                continue
+
+            tmp_pdf = _temp_pdf_path(office)
+
             try:
                 with get_conn() as conn:
                     existing = conn.execute(
-                        "SELECT COUNT(*) FROM licenses WHERE office = ?",
-                        (office,)
+                        "SELECT COUNT(*) FROM licenses WHERE office = ?", (office,)
                     ).fetchone()[0]
             except Exception:
                 existing = 0
@@ -1121,8 +1475,8 @@ def admin_sync():
 @admin_required
 def admin_sync_status():
     with SYNC_LOCK:
-        snap = dict(SYNC_STATE)
-        snap["log"] = list(snap.get("log") or [])
+        snap          = dict(SYNC_STATE)
+        snap["log"]     = list(snap.get("log") or [])
         snap["results"] = list(snap.get("results") or [])
     return jsonify({"ok": True, "job": snap})
 
@@ -1153,15 +1507,15 @@ def admin_search():
 
 
 # ══════════════════════════════════════════════════════════════════
-#   ADMIN API — USER SEARCH LOG
+#   ADMIN API — SEARCH LOG
 # ══════════════════════════════════════════════════════════════════
 @app.route("/dotm-admin/api/search-log")
 @admin_required
 def admin_search_log():
     try:
-        limit = max(1, min(int(request.args.get("limit", 200) or 200), 1000))
+        limit  = max(1, min(int(request.args.get("limit",  200) or 200), 1000))
     except ValueError:
-        limit = 200
+        limit  = 200
     try:
         offset = max(0, int(request.args.get("offset", 0) or 0))
     except ValueError:
@@ -1171,7 +1525,7 @@ def admin_search_log():
     with get_conn() as conn:
         if q:
             pattern = f"%{q}%"
-            rows = conn.execute("""
+            rows  = conn.execute("""
                 SELECT id, query, found, license_no, name, created_at
                 FROM search_log
                 WHERE query LIKE ? OR license_no LIKE ? OR name LIKE ?
@@ -1183,14 +1537,13 @@ def admin_search_log():
                 WHERE query LIKE ? OR license_no LIKE ? OR name LIKE ?
             """, (pattern, pattern, pattern)).fetchone()[0]
         else:
-            rows = conn.execute("""
+            rows  = conn.execute("""
                 SELECT id, query, found, license_no, name, created_at
                 FROM search_log
                 ORDER BY created_at DESC, id DESC
                 LIMIT ? OFFSET ?
             """, (limit, offset)).fetchall()
-            total = conn.execute(
-                "SELECT COUNT(*) FROM search_log").fetchone()[0]
+            total = conn.execute("SELECT COUNT(*) FROM search_log").fetchone()[0]
     return jsonify({"rows": [dict(r) for r in rows], "total": total})
 
 
@@ -1199,7 +1552,7 @@ def admin_search_log():
 def admin_clear_search_log():
     try:
         with get_conn() as conn:
-            cur = conn.execute("DELETE FROM search_log")
+            cur     = conn.execute("DELETE FROM search_log")
             deleted = cur.rowcount
         log.info("Search log cleared (%d rows)", deleted)
         return jsonify({"ok": True, "deleted": deleted})
@@ -1231,8 +1584,7 @@ def admin_export():
         writer.writerow(["license_no", "name", "category",
                          "office", "print_date", "district", "last_updated"])
         yield output.getvalue()
-        output.truncate(0)
-        output.seek(0)
+        output.truncate(0); output.seek(0)
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         try:
@@ -1246,8 +1598,7 @@ def admin_export():
                     row["last_updated"]
                 ])
                 yield output.getvalue()
-                output.truncate(0)
-                output.seek(0)
+                output.truncate(0); output.seek(0)
         finally:
             conn.close()
 
@@ -1289,6 +1640,14 @@ def not_found(e):
     return jsonify({"error": "Not found"}), 404
 
 
+@app.errorhandler(413)
+def too_large(e):
+    return jsonify({
+        "ok":    False,
+        "error": f"File too large. Maximum allowed size is {MAX_UPLOAD_BYTES // (1024*1024)} MB.",
+    }), 413
+
+
 @app.errorhandler(500)
 def server_error(e):
     return jsonify({"error": "Server error"}), 500
@@ -1298,9 +1657,6 @@ def server_error(e):
 #   ENTRY POINT
 # ══════════════════════════════════════════════════════════════════
 def migrate_office_order():
-    # pdf_sources.json is the source of truth for ordering. Mirror it into the
-    # office_order table on every startup so any drift from earlier sessions
-    # (e.g. reorders that didn't sync) gets corrected.
     sync_office_order_from_sources(load_pdf_sources())
 
 
@@ -1309,7 +1665,7 @@ if __name__ == "__main__":
     migrate_office_order()
     start_keepalive()
 
-    port = int(os.environ.get("PORT",  5000))
+    port  = int(os.environ.get("PORT",  5000))
     debug = os.environ.get("DEBUG", "0") == "1"
 
     log.info("Server  →  http://0.0.0.0:%d", port)
