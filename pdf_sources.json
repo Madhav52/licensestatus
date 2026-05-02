@@ -136,11 +136,5 @@
     "district": "Palpa",
     "order": 23,
     "source_type": "url"
-  },
-  "Bharatpur": {
-    "url": "",
-    "district": "Chitwan",
-    "order": 24,
-    "source_type": "upload"
   }
 }
