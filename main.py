@@ -1080,9 +1080,10 @@ def admin_upload_pdf():
       - district : district name (optional)
       - order    : 1-based desired position (optional)
 
-    Saves the PDF to UPLOADS_DIR (kept on disk so future syncs can
-    re-parse it), parses it into the DB, then registers the office in
-    pdf_sources.json with source_type='upload'.
+    Saves the PDF to UPLOADS_DIR, parses it into the DB, registers the
+    office in pdf_sources.json with source_type='upload', and then
+    *deletes* the PDF — once every row has been upserted into SQLite the
+    file itself is no longer needed and only wastes disk on the host.
     """
     name     = request.form.get("name",     "").strip()
     district = request.form.get("district", "").strip()
@@ -1166,7 +1167,12 @@ def admin_upload_pdf():
         save_pdf_sources(sources)
         sync_office_order_from_sources(sources)
 
-        log.info("Upload import done: %s — %d records", name, n)
+        # Records are now in the DB — the PDF on disk is redundant. Drop it
+        # so the host doesn't accumulate large files. Future syncs of this
+        # office are no-ops (records already loaded).
+        _delete_uploaded_pdf(name)
+
+        log.info("Upload import done: %s — %d records (file removed)", name, n)
         return jsonify({
             "ok":       True,
             "records":  n,
@@ -1368,7 +1374,11 @@ def _run_sync_job(sources: dict):
                      current_phase="checking",
                      current_page=0, total_pages=0)
 
-            # Uploaded offices: re-parse from the stored PDF on disk.
+            # Upload-type sources: the PDF is deleted right after the
+            # initial import (records are already in the DB), so the
+            # steady state during sync is "no file on disk" — that's a
+            # successful no-op, not a warning. The re-parse branch only
+            # fires if a PDF was manually placed back into uploaded_pdfs/.
             if source_type == "upload":
                 stored = _uploaded_pdf_path(office)
                 if not stored.exists():
@@ -1380,14 +1390,14 @@ def _run_sync_job(sources: dict):
                     except Exception:
                         existing = 0
                     _job_log(
-                        f"[SKIP] {office} — uploaded PDF missing on disk "
-                        f"({existing} existing records)", "warn")
+                        f"[OK] {office} — already synced "
+                        f"({existing} records in DB, no file to re-parse)", "ok")
                     with SYNC_LOCK:
                         SYNC_STATE["pdfs_skipped"] += 1
                         SYNC_STATE["results"].append({
                             "office":  office, "status": "skipped",
                             "records": existing,
-                            "message": f"Uploaded file missing — {existing} records already in DB",
+                            "message": f"Already synced — {existing} records in DB",
                         })
                     continue
 
@@ -1416,6 +1426,11 @@ def _run_sync_job(sources: dict):
                             "records": 0, "message": str(e),
                         })
                     _job_log(f"[FAIL] {office} — re-parse error: {e}", "err")
+                finally:
+                    # Delete after re-parse too, regardless of outcome — the
+                    # records (or the failure) are recorded; keeping the
+                    # file would only mean re-doing the same work next run.
+                    _delete_uploaded_pdf(office)
                 continue
 
             if not url:
